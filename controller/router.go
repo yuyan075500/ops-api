@@ -11,5 +11,7 @@ type router struct{}
 func (r *router) InitApiRouter(router *gin.Engine) {
 	router.GET("/", func(c *gin.Context) {
 		c.String(200, "项目初始化")
-	})
+	}).
+		GET("/api/v1/users", User.GetUserList).
+		POST("/api/v1/user", User.AddUser)
 }
