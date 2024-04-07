@@ -1,37 +1,26 @@
 package model
 
 import (
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 	"time"
 )
 
-// AuthUser 用户表
+// AuthUser 用户信息表
 type AuthUser struct {
 	gorm.Model
-	Name        string
-	UserName    string `gorm:"unique"`
-	Password    string
-	PhoneNumber string
-	IsActive    int
-	Email       string
-	LastLoginAt *time.Time //允许为空
-	MFACode     *string    //允许为空
-	UserFrom    string
-	Group       []*AuthGroup `gorm:"many2many:auth_user_groups"`
+	Name        string      `json:"name"`
+	UserName    string      `json:"userName" gorm:"unique"`
+	Avatar      *string     `json:"avatar"`
+	Password    string      `json:"password"`
+	PhoneNumber string      `json:"phone_number"`
+	IsActive    int         `json:"is_active"`
+	Email       string      `json:"email"`
+	LastLoginAt *time.Time  `json:"last_login_at"` // 允许为空
+	MFACode     *string     `json:"mfa_code"`      // 允许为空
+	UserFrom    string      `json:"user_from"`
+	Groups      []AuthGroup `json:"groups" gorm:"many2many:auth_user_groups"`
 }
 
-// AuthGroup 用户分组表
-type AuthGroup struct {
-	gorm.Model
-	Name        string            `gorm:"unique"`
-	Users       []*AuthUser       `gorm:"many2many:auth_user_groups"`
-	Permissions []*AuthPermission `gorm:"many2many:auth_group_permissions"`
-}
-
-// AuthPermission 权限表
-type AuthPermission struct {
-	gorm.Model
-	Name     string       //权限中文名称
-	CodeName string       //权限代号，英文名称
-	Groups   []*AuthGroup `gorm:"many2many:auth_group_permissions"`
+func (*AuthUser) TableName() (name string) {
+	return "auth_user"
 }
