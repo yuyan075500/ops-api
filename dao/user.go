@@ -33,7 +33,6 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 		Count(&total).                      // 获取总数
 		Limit(limit).
 		Offset(startSet).
-		Order("id desc").
 		Find(&userList)
 	if tx.Error != nil {
 		logger.Error("获取用户列表失败：", tx.Error)

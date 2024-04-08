@@ -3,9 +3,9 @@ package db
 import (
 	"fmt"
 	"github.com/wonderivan/logger"
+	"gopkg.in/yaml.v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"ops-api/config"
 	"ops-api/model"
 )
 
@@ -15,19 +15,38 @@ var (
 	err    error
 )
 
-func Init() {
+type DatabaseConfig struct {
+	Host         string `yaml:"host"`
+	Port         string `yaml:"port"`
+	DB           string `yaml:"db"`
+	User         string `yaml:"user"`
+	Password     string `yaml:"password"`
+	MaxIdleConns int    `yaml:"maxIdleConns"`
+	MaxOpenConns int    `yaml:"maxOpenConns"`
+	MaxLifeTime  int    `yaml:"maxLifeTime"`
+}
+
+type Config struct {
+	Database DatabaseConfig `yaml:"mysql"`
+}
+
+func Init(config []byte) {
 	// 判断否已经初始化
 	if isInit {
 		return
 	}
 
+	// 读取配置
+	var conf Config
+	_ = yaml.Unmarshal(config, &conf)
+
 	// 组装数据库连接配置
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.DBUser,
-		config.DBPassword,
-		config.DBHost,
-		config.DBPort,
-		config.DBName,
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		conf.Database.User,
+		conf.Database.Password,
+		conf.Database.Host,
+		conf.Database.Port,
+		conf.Database.DB,
 	)
 
 	// 建议数据库连接，并生成*gorm.DB对象
@@ -46,10 +65,10 @@ func Init() {
 	)
 
 	// 数据库连接池设置
-	DB, _ := GORM.DB()
-	DB.SetMaxIdleConns(config.MaxIdleConns)
-	DB.SetMaxOpenConns(config.MaxOpenConns)
-	DB.SetConnMaxLifetime(config.MaxLifeTime)
+	//DB, _ := GORM.DB()
+	//DB.SetMaxIdleConns(conf.Database.MaxIdleConns)
+	//DB.SetMaxOpenConns(conf.Database.MaxOpenConns)
+	//DB.SetConnMaxLifetime(time.Duration(conf.Database.MaxLifeTime))
 
 	isInit = true
 	logger.Info("数据库初始化成功." + "\n")

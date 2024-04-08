@@ -10,7 +10,7 @@ import (
 type AuthUser struct {
 	gorm.Model
 	Name        string      `json:"name"`
-	UserName    string      `json:"userName" gorm:"unique"`
+	Username    string      `json:"username" gorm:"unique"`
 	Avatar      *string     `json:"avatar"`
 	Password    string      `json:"password"`
 	PhoneNumber string      `json:"phone_number"`

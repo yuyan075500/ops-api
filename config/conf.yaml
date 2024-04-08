@@ -1,0 +1,10 @@
+server: "0.0.0.0:8000"
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  db: "ops"
+  user: "root"
+  password: "p-0p-0p-0"
+  maxIdleConns: 10
+  maxOpenConns: 100
+  maxLifeTime: 30

@@ -12,7 +12,7 @@ type user struct{}
 // UserCreate 创建用户的结构体
 type UserCreate struct {
 	Name        string `json:"name"`
-	UserName    string `json:"userName" gorm:"unique"`
+	Username    string `json:"Username" gorm:"unique"`
 	Password    string `json:"password"`
 	PhoneNumber string `json:"phone_number"`
 	Email       string `json:"email"`
@@ -31,7 +31,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *dao.UserList, er
 func (u *user) AddUser(data *UserCreate) (err error) {
 	user := &model.AuthUser{
 		Name:        data.Name,
-		UserName:    data.UserName,
+		Username:    data.Username,
 		Password:    data.Password,
 		PhoneNumber: data.PhoneNumber,
 		Email:       data.Email,
