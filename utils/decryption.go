@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"fmt"
 )
 
 var privateKey []byte
@@ -15,19 +17,21 @@ func readPrivateKeyFile(file string) {
 }
 
 // Decrypt 字符串解密
-func Decrypt(cipherText []byte) ([]byte, error) {
+func Decrypt(cipherText string) (string, error) {
+	// 对Base64编码的字符串解码
+	str, err := base64.StdEncoding.DecodeString(cipherText)
+	fmt.Println(str)
+
 	readPrivateKeyFile("config/certs/private.key")
 	block, _ := pem.Decode(privateKey)
-	if block == nil {
-		return nil, errors.New("公钥错误")
-	}
 
 	// 解析私钥
-	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, err
+		return "", errors.New("私钥解析错误：")
 	}
 
-	// 解密密文
-	return rsa.DecryptPKCS1v15(rand.Reader, priv, cipherText)
+	// 解密
+	data, err := rsa.DecryptPKCS1v15(rand.Reader, privateKey, str)
+	return string(data), err
 }

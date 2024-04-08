@@ -2,6 +2,7 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"ops-api/utils"
 	"time"
 )
 
@@ -24,3 +25,23 @@ type AuthUser struct {
 func (*AuthUser) TableName() (name string) {
 	return "auth_user"
 }
+
+// BeforeSave 新用户创建前对密码字段加密
+func (u *AuthUser) BeforeSave(tx *gorm.DB) (err error) {
+	cipherText, err := utils.Encrypt(u.Password)
+	if err != nil {
+		return err
+	}
+	u.Password = cipherText
+	return nil
+}
+
+// AfterFind 返回数据前解密
+//func (u *AuthUser) AfterFind(tx *gorm.DB) (err error) {
+//	str, err := utils.Decrypt(u.Password)
+//	if err != nil {
+//		return err
+//	}
+//	u.Password = str
+//	return nil
+//}
