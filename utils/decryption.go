@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"fmt"
 )
 
 var privateKey []byte
@@ -20,7 +19,6 @@ func readPrivateKeyFile(file string) {
 func Decrypt(cipherText string) (string, error) {
 	// 对Base64编码的字符串解码
 	str, err := base64.StdEncoding.DecodeString(cipherText)
-	fmt.Println(str)
 
 	readPrivateKeyFile("config/certs/private.key")
 	block, _ := pem.Decode(privateKey)
