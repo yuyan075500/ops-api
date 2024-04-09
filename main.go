@@ -21,7 +21,7 @@ func main() {
 
 	// 初始化中间件
 	r.Use(middleware.LoginBuilder().
-		IgnorePaths("/user/login").
+		IgnorePaths("/login").
 		Build())
 
 	// 注册路由

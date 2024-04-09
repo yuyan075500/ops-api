@@ -28,7 +28,7 @@ type MySQL struct {
 
 type JWT struct {
 	Secret  string `yaml:"secret"`
-	Expires string `yaml:"expires"`
+	Expires int    `yaml:"expires"`
 }
 
 func Init() {

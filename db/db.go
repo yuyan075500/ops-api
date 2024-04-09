@@ -49,7 +49,7 @@ func Init() {
 	//DB, _ := GORM.DB()
 	//DB.SetMaxIdleConns(config.Conf.Database.MaxIdleConns)
 	//DB.SetMaxOpenConns(config.Conf.Database.MaxOpenConns)
-	//DB.SetConnMaxLifetime(time.Duration(config.Conf.Database.MaxLifeTime))
+	//DB.SetConnMaxLifetime(time.Duration(config.Conf.Database.MaxLifeTime) * time.Second)
 
 	isInit = true
 	logger.Info("数据库初始化成功." + "\n")

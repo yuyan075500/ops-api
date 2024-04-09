@@ -36,12 +36,19 @@ func (u *AuthUser) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-// AfterFind 返回数据前解密
-//func (u *AuthUser) AfterFind(tx *gorm.DB) (err error) {
-//	str, err := utils.Decrypt(u.Password)
-//	if err != nil {
-//		return err
-//	}
-//	u.Password = str
-//	return nil
-//}
+// CheckPassword 检查用户密码是否正确
+func (u *AuthUser) CheckPassword(password string) bool {
+
+	// 对数据库中的密码解密
+	str, err := utils.Decrypt(u.Password)
+	if err != nil {
+		return false
+	}
+
+	// 判断密码是否相等
+	if str != password {
+		return false
+	}
+
+	return true
+}
