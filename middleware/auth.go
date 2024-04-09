@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/wonderivan/logger"
@@ -121,7 +120,6 @@ func ParseToken(tokenString string) (*UserClaims, error) {
 
 	// 对token对象中的Claim进行类型断言， 校验Token
 	if token.Valid {
-		fmt.Println(mc)
 		return mc, nil
 	}
 
