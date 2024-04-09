@@ -53,7 +53,7 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := middleware.GenerateJWT(params.Username)
+	token, _ := middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,
 		"msg":   "认证成功",

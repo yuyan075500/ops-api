@@ -19,6 +19,8 @@ type Login struct {
 
 // UserClaims 保存需要保存到JWT中的信息结构体
 type UserClaims struct {
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
@@ -78,7 +80,9 @@ func (l *Login) Build() gin.HandlerFunc {
 			return
 		}
 
-		// 将当前请求的userID信息保存到请求的上下文c
+		// 将当前请求的用户信息保存到请求的上下文c
+		c.Set("id", mc.ID)
+		c.Set("name", mc.Name)
 		c.Set("username", mc.Username)
 		// 后续的处理函数可以用过c.Get("username")来获取当前请求的用户信息
 		c.Next()
@@ -86,8 +90,10 @@ func (l *Login) Build() gin.HandlerFunc {
 }
 
 // GenerateJWT 生成Token
-func GenerateJWT(username string) (string, error) {
+func GenerateJWT(id uint, name, username string) (string, error) {
 	claims := UserClaims{
+		id,
+		name,
 		username,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间24小时
