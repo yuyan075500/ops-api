@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	"net/http"
+	"ops-api/dao"
 	"ops-api/db"
 	"ops-api/middleware"
 	"ops-api/model"
@@ -79,6 +80,49 @@ func (u *user) Login(c *gin.Context) {
 		"code":  0,
 		"msg":   "认证成功",
 		"token": token,
+	})
+}
+
+// GetUser 获取用户信息
+func (u *user) GetUser(c *gin.Context) {
+	params := new(struct {
+		Token string `form:"token" binding:"required"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("无效的请求参数：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  "无效的请求参数",
+		})
+		return
+	}
+
+	// 从Token中获取用户ID
+	mc, err := middleware.ParseToken(params.Token)
+	if err != nil {
+		logger.Error("无效的Token：", err.Error())
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 90401,
+			"msg":  "无效的Token",
+		})
+		return
+	}
+
+	// 根据ID获取用户信息
+	data, err := dao.User.GetUser(mc.ID)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 90404,
+			"msg":  "获取用户信息失败",
+		})
+		return
+	}
+
+	// 返回用户信息
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "获取用户信息成功",
+		"data": data,
 	})
 }
 

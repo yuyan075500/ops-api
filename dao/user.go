@@ -19,6 +19,7 @@ type UserList struct {
 
 // UserInfo 返回的用户字段信息
 type UserInfo struct {
+	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Username    string `json:"username"`
 	PhoneNumber string `json:"phone_number"`
@@ -53,6 +54,19 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 		Items: userList,
 		Total: total,
 	}, nil
+}
+
+// GetUser 获取用户信息
+func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
+
+	var userInfo *UserInfo
+
+	tx := db.GORM.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo)
+	if tx.Error != nil {
+		logger.Error("获取用户信息失败：", tx.Error)
+		return nil, errors.New("获取用户信息失败：" + tx.Error.Error())
+	}
+	return userInfo, nil
 }
 
 // AddUser 新增用户

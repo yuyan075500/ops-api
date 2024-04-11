@@ -14,5 +14,6 @@ func (r *router) InitApiRouter(router *gin.Engine) {
 	}).
 		POST("/login", User.Login).
 		GET("/api/v1/users", User.GetUserList).
+		GET("/api/v1/user/info", User.GetUser).
 		POST("/api/v1/user", User.AddUser)
 }
