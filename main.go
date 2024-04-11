@@ -20,6 +20,7 @@ func main() {
 	r := gin.Default()
 
 	// 初始化中间件
+	r.Use(middleware.Cors())
 	r.Use(middleware.LoginBuilder().
 		IgnorePaths("/login").
 		Build())
