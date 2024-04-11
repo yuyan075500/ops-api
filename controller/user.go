@@ -8,6 +8,7 @@ import (
 	"ops-api/middleware"
 	"ops-api/model"
 	"ops-api/service"
+	"time"
 )
 
 var User user
@@ -44,6 +45,15 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
+	// 判断用户是否禁用
+	if user.IsActive == 0 {
+		c.JSON(http.StatusNotFound, gin.H{
+			"code": 4403,
+			"msg":  "用户未激活，请联系管理员",
+		})
+		return
+	}
+
 	// 检查密码
 	if user.CheckPassword(params.Password) == false {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -53,7 +63,18 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	token, err := middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  "生成Token错误",
+		})
+		return
+	}
+
+	// 记录用户最后登录时间（待完成）
+	db.GORM.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,
 		"msg":   "认证成功",

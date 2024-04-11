@@ -11,9 +11,19 @@ var User user
 
 type user struct{}
 
+// UserList 返回给前端的结构体
 type UserList struct {
-	Items []*model.AuthUser `json:"items"`
-	Total int64             `json:"total"`
+	Items []*UserInfo `json:"items"`
+	Total int64       `json:"total"`
+}
+
+// UserInfo 返回的用户字段信息
+type UserInfo struct {
+	Name        string `json:"name"`
+	Username    string `json:"username"`
+	PhoneNumber string `json:"phone_number"`
+	IsActive    int    `json:"is_active"`
+	Email       string `json:"email"`
 }
 
 // GetUserList 获取用户列表
@@ -23,7 +33,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 
 	// 定义返回的内容
 	var (
-		userList []*model.AuthUser
+		userList []*UserInfo
 		total    int64
 	)
 
@@ -54,3 +64,13 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 	}
 	return nil
 }
+
+// UpdateUser 更新用户信息
+//func (u *user) UpdateUser(data map[string]interface{}) (err error) {
+//	tx := db.GORM.Model(&model.AuthUser{}).Updates(data)
+//	if tx.Error != nil {
+//		logger.Error("更新用户信息失败：", tx.Error)
+//		return errors.New("更新用户信息失败：" + tx.Error.Error())
+//	}
+//	return nil
+//}
