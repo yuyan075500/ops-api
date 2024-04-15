@@ -7,6 +7,7 @@ import (
 	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/config"
+	"ops-api/db"
 	"strings"
 	"time"
 )
@@ -71,6 +72,27 @@ func (l *Login) Build() gin.HandlerFunc {
 		mc, err := ParseToken(parts[1])
 		if err != nil {
 			logger.Error("无效的Token：", err.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": 90401,
+				"msg":  "无效的Token",
+			})
+			c.Abort()
+			return
+		}
+
+		// 判断Token是否已注销
+		val, err := db.Redis.Exists(parts[1]).Result()
+		if err != nil {
+			logger.Error("未知错误：", err)
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": 90401,
+				"msg":  "未知错误",
+			})
+			c.Abort()
+			return
+		}
+		if val == 1 {
+			logger.Error("无效的Token：", err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 90401,
 				"msg":  "无效的Token",

@@ -6,17 +6,17 @@ import (
 	"ops-api/config"
 )
 
-var rdb *redis.Client
+var Redis *redis.Client
 
 // RedisInit Redis初始化
 func RedisInit() {
-	rdb = redis.NewClient(&redis.Options{
+	Redis = redis.NewClient(&redis.Options{
 		Addr:     config.Conf.Redis.Host,
 		Password: config.Conf.Redis.Password,
 		DB:       config.Conf.Redis.DB,
 	})
 
-	_, err = rdb.Ping().Result()
+	_, err = Redis.Ping().Result()
 	if err != nil {
 		logger.Info("Redis客户端初始化失败." + err.Error())
 		return

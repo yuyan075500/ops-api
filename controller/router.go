@@ -13,6 +13,7 @@ func (r *router) InitApiRouter(router *gin.Engine) {
 		c.String(200, "项目初始化")
 	}).
 		POST("/login", User.Login).
+		POST("/logout", User.Logout).
 		GET("/api/v1/users", User.GetUserList).
 		GET("/api/v1/user/info", User.GetUser).
 		POST("/api/v1/user", User.AddUser)

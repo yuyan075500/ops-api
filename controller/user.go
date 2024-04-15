@@ -4,11 +4,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	"net/http"
+	"ops-api/config"
 	"ops-api/dao"
 	"ops-api/db"
 	"ops-api/middleware"
 	"ops-api/model"
 	"ops-api/service"
+	"strings"
 	"time"
 )
 
@@ -84,11 +86,26 @@ func (u *user) Login(c *gin.Context) {
 }
 
 // Logout 用户注销
-//func (u *user) Logout(c *gin.Context) {
-//	// 获取Token
-//	token := c.Request.Header.Get("Authorization")
-//	parts := strings.SplitN(token, " ", 2)
-//}
+func (u *user) Logout(c *gin.Context) {
+	// 获取Token
+	token := c.Request.Header.Get("Authorization")
+	parts := strings.SplitN(token, " ", 2)
+
+	// 将Token存入Redis缓存
+	err := db.Redis.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  "用户注销失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "注销成功",
+	})
+}
 
 // GetUser 获取用户信息
 func (u *user) GetUser(c *gin.Context) {
