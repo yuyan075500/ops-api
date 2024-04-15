@@ -15,7 +15,7 @@ var (
 	err    error
 )
 
-func Init() {
+func MySQLInit() {
 	// 判断否已经初始化
 	if isInit {
 		return
@@ -34,6 +34,7 @@ func Init() {
 	GORM, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Println("数据库连接失败：" + err.Error())
+		return
 	}
 
 	// 表迁移
@@ -52,5 +53,5 @@ func Init() {
 	//DB.SetConnMaxLifetime(time.Duration(config.Conf.Database.MaxLifeTime) * time.Second)
 
 	isInit = true
-	logger.Info("数据库初始化成功." + "\n")
+	logger.Info("MySQL数据库初始化成功.")
 }

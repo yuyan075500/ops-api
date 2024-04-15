@@ -83,6 +83,13 @@ func (u *user) Login(c *gin.Context) {
 	})
 }
 
+// Logout 用户注销
+//func (u *user) Logout(c *gin.Context) {
+//	// 获取Token
+//	token := c.Request.Header.Get("Authorization")
+//	parts := strings.SplitN(token, " ", 2)
+//}
+
 // GetUser 获取用户信息
 func (u *user) GetUser(c *gin.Context) {
 	params := new(struct {

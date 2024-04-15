@@ -14,8 +14,11 @@ func main() {
 	// 配置初始化
 	config.Init()
 
-	// 初始化数据库
-	db.Init()
+	// 初始化MySQL
+	db.MySQLInit()
+
+	// 初始Redis
+	db.RedisInit()
 
 	r := gin.Default()
 

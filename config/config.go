@@ -13,6 +13,7 @@ type Config struct {
 	Server   string `yaml:"server"`
 	Database MySQL  `yaml:"mysql"`
 	JWT      JWT    `yaml:"jwt"`
+	Redis    Redis  `yaml:"redis"`
 }
 
 type MySQL struct {
@@ -24,6 +25,12 @@ type MySQL struct {
 	MaxIdleConns int    `yaml:"maxIdleConns"`
 	MaxOpenConns int    `yaml:"maxOpenConns"`
 	MaxLifeTime  int    `yaml:"maxLifeTime"`
+}
+
+type Redis struct {
+	Host     string `yaml:"host"`
+	DB       int    `yaml:"db"`
+	Password string `yaml:"password"`
 }
 
 type JWT struct {
