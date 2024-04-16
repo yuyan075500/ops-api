@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"ops-api/config"
 	"ops-api/dao"
-	"ops-api/db"
+	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/model"
 	"ops-api/service"
+	"ops-api/utils"
 	"strings"
 	"time"
 )
@@ -40,7 +41,7 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	// 根据用户名查询用户
-	if err := db.GORM.Where("username = ?", params.Username).First(&user).Error; err != nil {
+	if err := global.MySQLClient.Where("username = ?", params.Username).First(&user).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code": 4404,
 			"msg":  "用户不存在",
@@ -76,7 +77,7 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	// 记录用户最后登录时间（待完成）
-	db.GORM.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
+	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,
@@ -92,7 +93,7 @@ func (u *user) Logout(c *gin.Context) {
 	parts := strings.SplitN(token, " ", 2)
 
 	// 将Token存入Redis缓存
-	err := db.Redis.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
+	err := global.RedisClient.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
@@ -104,6 +105,45 @@ func (u *user) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "注销成功",
+	})
+}
+
+// UploadAvatar 用户头像上传
+func (u *user) UploadAvatar(c *gin.Context) {
+	// 获取上传的头像
+	avatar, err := c.FormFile("avatar")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 4000,
+			"msg":  "无效的请求参数",
+		})
+		return
+	}
+
+	// 打开上传头像
+	src, err := avatar.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 4000,
+			"msg":  "文件打开失败",
+		})
+		return
+	}
+
+	// 上传头像
+	err = utils.FileUpload(avatar.Filename, avatar.Header.Get("Content-Type"), src, avatar.Size)
+	if err != nil {
+		logger.Error("文件上传失败：" + err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 4000,
+			"msg":  "文件上传失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "文件上传成功",
 	})
 }
 

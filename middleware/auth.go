@@ -7,7 +7,7 @@ import (
 	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/config"
-	"ops-api/db"
+	"ops-api/global"
 	"strings"
 	"time"
 )
@@ -81,7 +81,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		}
 
 		// 判断Token是否已注销
-		val, err := db.Redis.Exists(parts[1]).Result()
+		val, err := global.RedisClient.Exists(parts[1]).Result()
 		if err != nil {
 			logger.Error("未知错误：", err)
 			c.JSON(http.StatusUnauthorized, gin.H{

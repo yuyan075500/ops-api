@@ -18,3 +18,10 @@ redis:
 jwt:
   secret: "swfqezjzoqssvjck"
   expires: 6
+
+oss:
+  endpoint: "d-minio.50yc.cn"
+  accessKey: "p4gZSoyn1oP9VAqX"
+  secretKey: "SblsJVWyePbuoIh1Wj5cHFmVVg31uPFA"
+  bucketName: "ops"
+  ssl: true

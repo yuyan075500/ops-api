@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/wonderivan/logger"
 	"gopkg.in/yaml.v3"
-	"ops-api/utils"
+	"os"
 )
 
 // Conf 全局变量
@@ -14,6 +14,7 @@ type Config struct {
 	Database MySQL  `yaml:"mysql"`
 	JWT      JWT    `yaml:"jwt"`
 	Redis    Redis  `yaml:"redis"`
+	OSS      OSS    `yaml:"oss"`
 }
 
 type MySQL struct {
@@ -33,6 +34,14 @@ type Redis struct {
 	Password string `yaml:"password"`
 }
 
+type OSS struct {
+	Endpoint   string `yaml:"endpoint"`
+	AccessKey  string `yaml:"accessKey"`
+	SecretKey  string `yaml:"secretKey"`
+	BucketName string `yaml:"bucketName"`
+	SSL        bool   `yaml:"ssl"`
+}
+
 type JWT struct {
 	Secret  string `yaml:"secret"`
 	Expires int    `yaml:"expires"`
@@ -40,7 +49,7 @@ type JWT struct {
 
 func Init() {
 	// 加载配置文件
-	data, err := utils.ReadFile("config/config.yaml")
+	data, err := os.ReadFile("config/config.yaml")
 	if err != nil {
 		logger.Error("读取配置文件失败：%v", err)
 		return

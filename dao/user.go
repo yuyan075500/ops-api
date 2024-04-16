@@ -3,7 +3,7 @@ package dao
 import (
 	"errors"
 	"github.com/wonderivan/logger"
-	"ops-api/db"
+	"ops-api/global"
 	"ops-api/model"
 )
 
@@ -39,7 +39,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 	)
 
 	// 获取用户列表
-	tx := db.GORM.Model(&model.AuthUser{}).
+	tx := global.MySQLClient.Model(&model.AuthUser{}).
 		Where("name like ?", "%"+name+"%"). // 实现过滤
 		Count(&total).                      // 获取总数
 		Limit(limit).
@@ -61,7 +61,7 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 
 	var userInfo *UserInfo
 
-	tx := db.GORM.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo)
+	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo)
 	if tx.Error != nil {
 		logger.Error("获取用户信息失败：", tx.Error)
 		return nil, errors.New("获取用户信息失败：" + tx.Error.Error())
@@ -71,7 +71,7 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 
 // AddUser 新增用户
 func (u *user) AddUser(data *model.AuthUser) (err error) {
-	tx := db.GORM.Create(&data)
+	tx := global.MySQLClient.Create(&data)
 	if tx.Error != nil {
 		logger.Error("新增用户失败：", tx.Error)
 		return errors.New("新增用户失败：" + tx.Error.Error())

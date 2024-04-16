@@ -20,6 +20,9 @@ func main() {
 	// 初始Redis
 	db.RedisInit()
 
+	// 初始化Minio
+	db.MinioInit()
+
 	r := gin.Default()
 
 	// 初始化中间件

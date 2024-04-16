@@ -6,12 +6,12 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"ops-api/config"
+	"ops-api/global"
 	"ops-api/model"
 )
 
 var (
 	isInit bool
-	GORM   *gorm.DB
 	err    error
 )
 
@@ -31,16 +31,16 @@ func MySQLInit() {
 	)
 
 	// 建议数据库连接，并生成*gorm.DB对象
-	GORM, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	global.MySQLClient, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		fmt.Println("数据库连接失败：" + err.Error())
 		return
 	}
 
 	// 表迁移
-	_ = GORM.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
-	_ = GORM.SetupJoinTable(&model.AuthGroup{}, "Permissions", &model.AuthGroupPermissions{})
-	_ = GORM.AutoMigrate(
+	_ = global.MySQLClient.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
+	_ = global.MySQLClient.SetupJoinTable(&model.AuthGroup{}, "Permissions", &model.AuthGroupPermissions{})
+	_ = global.MySQLClient.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},
 		&model.AuthPermission{},
