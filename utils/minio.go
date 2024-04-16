@@ -3,11 +3,15 @@ package utils
 import (
 	"context"
 	"github.com/minio/minio-go/v7"
+	"github.com/wonderivan/logger"
 	"io"
+	"net/url"
 	"ops-api/config"
 	"ops-api/global"
+	"time"
 )
 
+// FileUpload 上传对象
 func FileUpload(fileName, ContentType string, file io.Reader, fileSize int64) (err error) {
 	_, err = global.MinioClient.PutObject(context.Background(), config.Conf.OSS.BucketName, fileName, file, fileSize, minio.PutObjectOptions{
 		ContentType: ContentType,
@@ -17,4 +21,16 @@ func FileUpload(fileName, ContentType string, file io.Reader, fileSize int64) (e
 	}
 
 	return nil
+}
+
+// GetPresignedURL 获取临时访问链接
+func GetPresignedURL(fileName string, expiryTime time.Duration) (url *url.URL, err error) {
+
+	presignedURL, err := global.MinioClient.PresignedGetObject(context.Background(), config.Conf.OSS.BucketName, fileName, expiryTime, nil)
+	if err != nil {
+		logger.Error("获取对象失败：" + err.Error())
+		return nil, err
+	}
+
+	return presignedURL, nil
 }

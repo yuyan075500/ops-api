@@ -3,8 +3,11 @@ package dao
 import (
 	"errors"
 	"github.com/wonderivan/logger"
+	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
+	"ops-api/utils"
+	"time"
 )
 
 var User user
@@ -25,6 +28,7 @@ type UserInfo struct {
 	PhoneNumber string `json:"phone_number"`
 	IsActive    int    `json:"is_active"`
 	Email       string `json:"email"`
+	Avatar      string `json:"avatar"`
 }
 
 // GetUserList 获取用户列表
@@ -66,6 +70,16 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 		logger.Error("获取用户信息失败：", tx.Error)
 		return nil, errors.New("获取用户信息失败：" + tx.Error.Error())
 	}
+
+	// 从OSS中获取头像临时访问URL，临时URL的过期时间与用户Token过期时间保持一致
+	avatarURL, err := utils.GetPresignedURL(userInfo.Avatar, time.Duration(config.Conf.JWT.Expires)*time.Hour)
+	if err != nil {
+		logger.Error("获取用户头像失败：", err.Error())
+		userInfo.Avatar = ""
+		return userInfo, nil
+	}
+
+	userInfo.Avatar = avatarURL.String()
 	return userInfo, nil
 }
 

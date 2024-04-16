@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"ops-api/model"
 	"ops-api/service"
 	"ops-api/utils"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -76,7 +78,7 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	// 记录用户最后登录时间（待完成）
+	// 记录用户最后登录时间
 	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
 
 	c.JSON(http.StatusOK, gin.H{
@@ -131,7 +133,11 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	}
 
 	// 上传头像
-	err = utils.FileUpload(avatar.Filename, avatar.Header.Get("Content-Type"), src, avatar.Size)
+	// 获取当前登录用户的用户名
+	username, _ := c.Get("username")
+	// 拼接头像存储的路径和文件名：avatar/<用户名><文件后缀>
+	avatarName := fmt.Sprintf("avatar/%v%v", username, filepath.Ext(avatar.Filename))
+	err = utils.FileUpload(avatarName, avatar.Header.Get("Content-Type"), src, avatar.Size)
 	if err != nil {
 		logger.Error("文件上传失败：" + err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -140,6 +146,10 @@ func (u *user) UploadAvatar(c *gin.Context) {
 		})
 		return
 	}
+
+	// 将头像地址存储到数据库
+	var user model.AuthUser
+	global.MySQLClient.Model(&user).Where("username = ?", username).Update("avatar", avatarName)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
