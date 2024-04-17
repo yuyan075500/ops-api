@@ -153,7 +153,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
-		"msg":  "文件上传成功",
+		"msg":  "头像更新成功",
 	})
 }
 

@@ -7,3 +7,7 @@
 * db：数据库、缓存、对象存储客户端初始化。
 * middleware：中间件层，添加全局逻辑处理，如跨域、JWT认证等。
 * utils：工具目录，定义常用工具，如Token解析，文件操作等。
+# 项目依赖
+* MySQL
+* Redis
+* Minio
