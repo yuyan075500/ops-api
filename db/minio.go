@@ -8,13 +8,15 @@ import (
 	"ops-api/global"
 )
 
-var MinioClient *minio.Client
-
 func MinioInit() {
+
+	// 读取配置信息
 	endpoint := config.Conf.OSS.Endpoint
 	accessKey := config.Conf.OSS.AccessKey
 	secretKey := config.Conf.OSS.SecretKey
-	minioClient, err := minio.New(endpoint, &minio.Options{
+
+	// 客户端初始化
+	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
 		Secure: config.Conf.OSS.SSL,
 	})
@@ -23,6 +25,6 @@ func MinioInit() {
 		return
 	}
 
-	global.MinioClient = minioClient
+	global.MinioClient = client
 	logger.Info("Minio客户端初始化成功.")
 }

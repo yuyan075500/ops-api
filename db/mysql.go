@@ -8,20 +8,11 @@ import (
 	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
+	"time"
 )
 
-var (
-	isInit bool
-	err    error
-)
-
+// MySQLInit MySQL初始化
 func MySQLInit() {
-	// 判断否已经初始化
-	if isInit {
-		return
-	}
-
-	fmt.Printf("用户名为：" + config.Conf.MySQL.User)
 
 	// 组装数据库连接配置
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
@@ -32,28 +23,28 @@ func MySQLInit() {
 		config.Conf.MySQL.DB,
 	)
 
-	// 建议数据库连接，并生成*gorm.DB对象
-	global.MySQLClient, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// 建立数据库连接，并生成*gorm.DB对象
+	client, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("数据库连接失败：" + err.Error())
+		fmt.Println("建议MySQL数据库连接失败：" + err.Error())
 		return
 	}
 
 	// 表迁移
-	_ = global.MySQLClient.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
-	_ = global.MySQLClient.SetupJoinTable(&model.AuthGroup{}, "Permissions", &model.AuthGroupPermissions{})
-	_ = global.MySQLClient.AutoMigrate(
+	_ = client.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
+	_ = client.SetupJoinTable(&model.AuthGroup{}, "Permissions", &model.AuthGroupPermissions{})
+	_ = client.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},
 		&model.AuthPermission{},
 	)
 
-	// 数据库连接池设置
-	//DB, _ := GORM.DB()
-	//DB.SetMaxIdleConns(config.Conf.Database.MaxIdleConns)
-	//DB.SetMaxOpenConns(config.Conf.Database.MaxOpenConns)
-	//DB.SetConnMaxLifetime(time.Duration(config.Conf.Database.MaxLifeTime) * time.Second)
+	// 设置数据库连接池
+	DB, _ := client.DB()
+	DB.SetMaxIdleConns(config.Conf.MySQL.MaxIdleConns)
+	DB.SetMaxOpenConns(config.Conf.MySQL.MaxOpenConns)
+	DB.SetConnMaxLifetime(time.Duration(config.Conf.MySQL.MaxLifeTime) * time.Second)
 
-	isInit = true
+	global.MySQLClient = client
 	logger.Info("MySQL数据库初始化成功.")
 }
