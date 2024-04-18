@@ -8,6 +8,7 @@ import (
 // Conf 全局变量
 var Conf *Config
 
+// Config 配置文件结构体, 与YAML文件对应
 type Config struct {
 	Server string `yaml:"server"`
 	MySQL  MySQL  `yaml:"mysql"`
@@ -51,10 +52,10 @@ func Init() {
 
 	v := viper.New()
 
-	// 定义配置名称
+	// 定义配置名称, 不需要带后缀
 	v.SetConfigName("config")
 
-	// 指定配置文件路径
+	// 指定配置文件目录, 可以是相对路径
 	v.AddConfigPath("config")
 
 	// 指定配置文件类型

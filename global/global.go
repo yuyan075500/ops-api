@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// 全局变量
 var (
 	MinioClient *minio.Client
 	RedisClient *redis.Client
