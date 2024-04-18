@@ -10,11 +10,12 @@ var Conf *Config
 
 // Config 配置文件结构体, 与YAML文件对应
 type Config struct {
-	Server string `yaml:"server"`
-	MySQL  MySQL  `yaml:"mysql"`
-	JWT    JWT    `yaml:"jwt"`
-	Redis  Redis  `yaml:"redis"`
-	OSS    OSS    `yaml:"oss"`
+	Server  string `yaml:"server"`
+	MySQL   MySQL  `yaml:"mysql"`
+	JWT     JWT    `yaml:"jwt"`
+	Redis   Redis  `yaml:"redis"`
+	OSS     OSS    `yaml:"oss"`
+	Swagger bool   `yaml:"swagger"`
 }
 
 type MySQL struct {

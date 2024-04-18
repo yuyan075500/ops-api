@@ -22,6 +22,14 @@ var User user
 type user struct{}
 
 // Login 用户登录
+// @Summary 用户登录
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Accept application/json
+// @Produce application/json
+// @Param user body object true "用户名密码"
+// @Success 200 {string} json "{"code": 0, "msg": "认证成功", "token": "用户令牌"}"
+// @Router /login [post]
 func (u *user) Login(c *gin.Context) {
 	var (
 		user model.AuthUser
@@ -89,6 +97,14 @@ func (u *user) Login(c *gin.Context) {
 }
 
 // Logout 用户注销
+// @Summary 用户注销
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "msg": "注销成功"}"
+// @Router /logout [post]
 func (u *user) Logout(c *gin.Context) {
 	// 获取Token
 	token := c.Request.Header.Get("Authorization")
@@ -158,21 +174,18 @@ func (u *user) UploadAvatar(c *gin.Context) {
 }
 
 // GetUser 获取用户信息
+// @Summary 获取用户信息
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": }"
+// @Router /api/v1/user/info [get]
 func (u *user) GetUser(c *gin.Context) {
-	params := new(struct {
-		Token string `form:"token" binding:"required"`
-	})
-	if err := c.Bind(params); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
-			"msg":  "无效的请求参数",
-		})
-		return
-	}
+	token := c.Request.Header.Get("Authorization")
+	parts := strings.SplitN(token, " ", 2)
 
 	// 从Token中获取用户ID
-	mc, err := middleware.ParseToken(params.Token)
+	mc, err := middleware.ParseToken(parts[1])
 	if err != nil {
 		logger.Error("无效的Token：", err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{

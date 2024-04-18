@@ -21,3 +21,4 @@ oss:
   secretKey: "SblsJVWyePbuoIh1Wj5cHFmVVg31uPFA"
   bucketName: "ops"
   ssl: true
+swagger: true

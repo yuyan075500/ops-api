@@ -37,9 +37,9 @@ func (l *Login) IgnorePaths(path string) *Login {
 
 func (l *Login) Build() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 不需要认证的路径
+		// 不需要认证的路径，支持前缀匹配
 		for _, path := range l.paths {
-			if c.Request.URL.Path == path {
+			if c.Request.URL.Path == path || strings.HasPrefix(c.Request.URL.Path, path) {
 				return
 			}
 		}

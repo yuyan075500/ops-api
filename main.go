@@ -25,14 +25,17 @@ func main() {
 
 	r := gin.Default()
 
-	// 初始化中间件
+	// 初始化跨域中间件
 	r.Use(middleware.Cors())
+	// 初始化登录中间件，其中IgnorePaths()方法可以忽略某些路由，支持前缀匹配
 	r.Use(middleware.LoginBuilder().
 		IgnorePaths("/login").
+		IgnorePaths("/health").
+		IgnorePaths("/swagger/").
 		Build())
 
 	// 注册路由
-	controller.Router.InitApiRouter(r)
+	controller.Router.InitRouter(r)
 
 	// 启动服务
 	err := r.Run(fmt.Sprintf("%v", config.Conf.Server))
