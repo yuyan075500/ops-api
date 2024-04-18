@@ -11,3 +11,9 @@
 * MySQL
 * Redis
 * Minio
+# 功能概念
+* 用户管理
+* RBAC权限管理（支持Google Authenticator）
+* 双因素认证
+* 单点登录（CAS、OAuth2、SAML2）
+* 钉钉扫码登录（需要配置钉钉应用）
