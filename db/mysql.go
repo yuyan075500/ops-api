@@ -21,13 +21,15 @@ func MySQLInit() {
 		return
 	}
 
+	fmt.Printf("用户名为：" + config.Conf.MySQL.User)
+
 	// 组装数据库连接配置
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		config.Conf.Database.User,
-		config.Conf.Database.Password,
-		config.Conf.Database.Host,
-		config.Conf.Database.Port,
-		config.Conf.Database.DB,
+		config.Conf.MySQL.User,
+		config.Conf.MySQL.Password,
+		config.Conf.MySQL.Host,
+		config.Conf.MySQL.Port,
+		config.Conf.MySQL.DB,
 	)
 
 	// 建议数据库连接，并生成*gorm.DB对象

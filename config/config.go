@@ -1,20 +1,19 @@
 package config
 
 import (
+	"github.com/spf13/viper"
 	"github.com/wonderivan/logger"
-	"gopkg.in/yaml.v3"
-	"os"
 )
 
 // Conf 全局变量
 var Conf *Config
 
 type Config struct {
-	Server   string `yaml:"server"`
-	Database MySQL  `yaml:"mysql"`
-	JWT      JWT    `yaml:"jwt"`
-	Redis    Redis  `yaml:"redis"`
-	OSS      OSS    `yaml:"oss"`
+	Server string `yaml:"server"`
+	MySQL  MySQL  `yaml:"mysql"`
+	JWT    JWT    `yaml:"jwt"`
+	Redis  Redis  `yaml:"redis"`
+	OSS    OSS    `yaml:"oss"`
 }
 
 type MySQL struct {
@@ -47,19 +46,30 @@ type JWT struct {
 	Expires int    `yaml:"expires"`
 }
 
+// Init 配置文件初始化
 func Init() {
-	// 加载配置文件
-	data, err := os.ReadFile("config/config.yaml")
-	if err != nil {
-		logger.Error("读取配置文件失败：%v", err)
+
+	v := viper.New()
+
+	// 定义配置名称
+	v.SetConfigName("config")
+
+	// 指定配置文件路径
+	v.AddConfigPath("config")
+
+	// 指定配置文件类型
+	v.SetConfigType("yaml")
+
+	// 读取配置文件
+	if err := v.ReadInConfig(); err != nil {
+		logger.Error("配置文件初始化失败：" + err.Error())
 		return
 	}
 
-	// 解析配置文件
+	// 将配置文件反序列化成结构体
 	var cfg Config
-	err = yaml.Unmarshal(data, &cfg)
-	if err != nil {
-		logger.Error("配置文件解析失败: %v", err)
+	if err := v.Unmarshal(&cfg); err != nil {
+		logger.Error("配置文件初始化失败：" + err.Error())
 		return
 	}
 

@@ -1,5 +1,4 @@
 server: "0.0.0.0:8000"
-
 mysql:
   host: "127.0.0.1"
   port: 3306
@@ -9,16 +8,13 @@ mysql:
   maxIdleConns: 10
   maxOpenConns: 100
   maxLifeTime: 30
-
 redis:
   host: "127.0.0.1:6379"
   password: ""
   db: 0
-
 jwt:
   secret: "swfqezjzoqssvjck"
   expires: 6
-
 oss:
   endpoint: "d-minio.50yc.cn"
   accessKey: "p4gZSoyn1oP9VAqX"
