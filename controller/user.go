@@ -56,7 +56,7 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	// 判断用户是否禁用
-	if user.IsActive == false {
+	if *user.IsActive == false {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code": 4403,
 			"msg":  "用户未激活，请联系管理员",

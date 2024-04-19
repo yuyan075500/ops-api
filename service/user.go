@@ -81,7 +81,7 @@ func UpdateUser(data *UserUpdate) error {
 	// 更新指定字段的值
 	user.PhoneNumber = data.PhoneNumber
 	user.Email = data.Email
-	user.IsActive = data.IsActive
+	user.IsActive = &data.IsActive
 
 	return dao.User.UpdateUser(data.ID, user)
 }

@@ -14,7 +14,7 @@ type AuthUser struct {
 	Avatar      *string     `json:"avatar"`
 	Password    string      `json:"password"`
 	PhoneNumber string      `json:"phone_number"`
-	IsActive    bool        `json:"is_active" gorm:"default:true"`
+	IsActive    *bool       `json:"is_active" gorm:"default:true"`
 	Email       string      `json:"email"`
 	LastLoginAt *time.Time  `json:"last_login_at"`
 	MFACode     *string     `json:"mfa_code"`
