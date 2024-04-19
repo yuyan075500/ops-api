@@ -93,7 +93,7 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 	return nil
 }
 
-// UpdateUser 用户基本信息更新
+// UpdateUser 修改用户基本信息
 func (u *user) UpdateUser(userID uint, data *model.AuthUser) (err error) {
 	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userID).Updates(data)
 	if tx.Error != nil {
@@ -103,7 +103,7 @@ func (u *user) UpdateUser(userID uint, data *model.AuthUser) (err error) {
 	return nil
 }
 
-// DeleteUser 用户删除
+// DeleteUser 删除用户
 func (u *user) DeleteUser(id int) (err error) {
 	tx := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{})
 	if tx.Error != nil {
@@ -113,12 +113,12 @@ func (u *user) DeleteUser(id int) (err error) {
 	return nil
 }
 
-// UpdateUserPassword 用户密码更新
+// UpdateUserPassword 更改用户密码
 func (u *user) UpdateUserPassword(data *model.AuthUser) (err error) {
 	return nil
 }
 
-// ResetUserMFA 用户MFA重置
+// ResetUserMFA 重置用户MFA
 func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 	return nil
 }
