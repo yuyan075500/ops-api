@@ -58,6 +58,28 @@ paths:
       summary: 创建用户
       tags:
       - 用户管理
+  /api/v1/user/{id}:
+    delete:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除用户成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除用户
+      tags:
+      - 用户管理
   /api/v1/user/avatarUpload:
     post:
       description: 用户相关接口

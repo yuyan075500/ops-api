@@ -93,7 +93,7 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 	return nil
 }
 
-// UpdateUser 更新用户信息
+// UpdateUser 用户基本信息更新
 //func (u *user) UpdateUser(data map[string]interface{}) (err error) {
 //	tx := db.GORM.Model(&model.AuthUser{}).Updates(data)
 //	if tx.Error != nil {
@@ -102,3 +102,23 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 //	}
 //	return nil
 //}
+
+// DeleteUser 用户删除
+func (u *user) DeleteUser(id int) (err error) {
+	tx := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{})
+	if tx.Error != nil {
+		logger.Error("删除用户失败：", tx.Error)
+		return errors.New("删除用户失败：" + tx.Error.Error())
+	}
+	return nil
+}
+
+// UpdateUserPassword 用户密码更新
+func (u *user) UpdateUserPassword(data *model.AuthUser) (err error) {
+	return nil
+}
+
+// ResetUserMFA 用户MFA重置
+func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
+	return nil
+}

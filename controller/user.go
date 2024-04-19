@@ -13,6 +13,7 @@ import (
 	"ops-api/service"
 	"ops-api/utils"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -266,12 +267,9 @@ func (u *user) GetUserList(c *gin.Context) {
 // @Success 200 {string} json "{"code": 0, "msg": "创建用户成功"}"
 // @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
-	var (
-		user = &service.UserCreate{}
-		err  error
-	)
+	var user = &service.UserCreate{}
 
-	if err = c.ShouldBind(user); err != nil {
+	if err := c.ShouldBind(user); err != nil {
 		logger.Error("无效的请求参数：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
@@ -280,7 +278,7 @@ func (u *user) AddUser(c *gin.Context) {
 		return
 	}
 
-	if err = service.User.AddUser(user); err != nil {
+	if err := service.User.AddUser(user); err != nil {
 		logger.Error("新增用户失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
@@ -292,5 +290,43 @@ func (u *user) AddUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "创建用户成功",
+	})
+}
+
+// DeleteUser 删除用户
+// @Summary 删除用户
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param id path int true "用户ID"
+// @Success 200 {string} json "{"code": 0, "msg": "删除用户成功", "data": nil}"
+// @Router /api/v1/user/{id} [delete]
+func (u *user) DeleteUser(c *gin.Context) {
+
+	// 对ID进行类型转换
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Error("无效的用户ID：", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 4001,
+			"msg":  "无效的用户ID",
+		})
+		return
+	}
+
+	// 执行删除
+	if err := service.User.DeleteUser(userID); err != nil {
+		logger.Error("删除用户失败：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "删除用户成功",
+		"data": nil,
 	})
 }

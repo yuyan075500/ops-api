@@ -50,3 +50,12 @@ func (u *user) AddUser(data *UserCreate) (err error) {
 	}
 	return nil
 }
+
+// DeleteUser 删除用户
+func (u *user) DeleteUser(id int) (err error) {
+	err = dao.User.DeleteUser(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
