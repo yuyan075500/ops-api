@@ -97,7 +97,7 @@ func (u *user) Login(c *gin.Context) {
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "注销成功"}"
+// @Success 200 {string} json "{"code": 0, "msg": "注销成功", "data": nil}"
 // @Router /logout [post]
 func (u *user) Logout(c *gin.Context) {
 	// 获取Token
@@ -117,6 +117,7 @@ func (u *user) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "注销成功",
+		"data": nil,
 	})
 }
 
@@ -126,7 +127,7 @@ func (u *user) Logout(c *gin.Context) {
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param avatar formData file true "头像"
-// @Success 200 {string} json "{"code": 0, "msg": "头像更新成功"}"
+// @Success 200 {string} json "{"code": 0, "msg": "头像更新成功", "data": nil}"
 // @Router /api/v1/user/avatarUpload [post]
 func (u *user) UploadAvatar(c *gin.Context) {
 	// 获取上传的头像
@@ -171,6 +172,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "头像更新成功",
+		"data": nil,
 	})
 }
 
@@ -264,7 +266,7 @@ func (u *user) GetUserList(c *gin.Context) {
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param userinfo body service.UserCreate true "用户信息"
-// @Success 200 {string} json "{"code": 0, "msg": "创建用户成功"}"
+// @Success 200 {string} json "{"code": 0, "msg": "创建用户成功", "data": nil}"
 // @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
 	var user = &service.UserCreate{}
@@ -290,6 +292,7 @@ func (u *user) AddUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "创建用户成功",
+		"data": nil,
 	})
 }
 
