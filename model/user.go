@@ -11,13 +11,13 @@ type AuthUser struct {
 	gorm.Model
 	Name        string      `json:"name"`
 	Username    string      `json:"username" gorm:"unique"`
-	Avatar      string      `json:"avatar" gorm:"null"`
+	Avatar      *string     `json:"avatar"`
 	Password    string      `json:"password"`
 	PhoneNumber string      `json:"phone_number"`
 	IsActive    int         `json:"is_active" gorm:"default:1"` // 1激活 0禁用
 	Email       string      `json:"email"`
-	LastLoginAt time.Time   `json:"last_login_at" gorm:"null"`
-	MFACode     string      `json:"mfa_code" gorm:"null"`
+	LastLoginAt *time.Time  `json:"last_login_at"`
+	MFACode     *string     `json:"mfa_code"`
 	UserFrom    string      `json:"user_from" gorm:"default:本地"`
 	Groups      []AuthGroup `json:"groups" gorm:"many2many:auth_user_groups"`
 }
