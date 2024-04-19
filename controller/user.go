@@ -56,7 +56,7 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	// 判断用户是否禁用
-	if user.IsActive == 0 {
+	if user.IsActive == false {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code": 4403,
 			"msg":  "用户未激活，请联系管理员",
@@ -265,7 +265,7 @@ func (u *user) GetUserList(c *gin.Context) {
 // @Accept application/json
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Param userinfo body service.UserCreate true "用户信息"
+// @Param user body service.UserCreate true "用户信息"
 // @Success 200 {string} json "{"code": 0, "msg": "创建用户成功", "data": nil}"
 // @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
@@ -330,6 +330,44 @@ func (u *user) DeleteUser(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "删除用户成功",
+		"data": nil,
+	})
+}
+
+// UpdateUser 用户更新信息
+// @Summary 用户更新信息
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param user body service.UserUpdate true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新用户成功", "data": nil}"
+// @Router /api/v1/user [put]
+func (u *user) UpdateUser(c *gin.Context) {
+	var data = &service.UserUpdate{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("无效的请求参数：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.UpdateUser(data); err != nil {
+		logger.Error("更新用户失败：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新用户成功",
 		"data": nil,
 	})
 }

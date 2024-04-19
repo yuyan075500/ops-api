@@ -26,7 +26,7 @@ type UserInfo struct {
 	Name        string `json:"name"`
 	Username    string `json:"username"`
 	PhoneNumber string `json:"phone_number"`
-	IsActive    int    `json:"is_active"`
+	IsActive    bool   `json:"is_active"`
 	Email       string `json:"email"`
 	Avatar      string `json:"avatar"`
 }
@@ -94,14 +94,14 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 }
 
 // UpdateUser 用户基本信息更新
-//func (u *user) UpdateUser(data map[string]interface{}) (err error) {
-//	tx := db.GORM.Model(&model.AuthUser{}).Updates(data)
-//	if tx.Error != nil {
-//		logger.Error("更新用户信息失败：", tx.Error)
-//		return errors.New("更新用户信息失败：" + tx.Error.Error())
-//	}
-//	return nil
-//}
+func (u *user) UpdateUser(userID uint, data *model.AuthUser) (err error) {
+	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userID).Updates(data)
+	if tx.Error != nil {
+		logger.Error("更新用户失败：", tx.Error)
+		return errors.New("更新用户失败：" + tx.Error.Error())
+	}
+	return nil
+}
 
 // DeleteUser 用户删除
 func (u *user) DeleteUser(id int) (err error) {

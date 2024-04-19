@@ -28,6 +28,19 @@ definitions:
     - password
     - username
     type: object
+  service.UserUpdate:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      phone_number:
+        type: string
+    required:
+    - id
+    type: object
 info:
   contact: {}
 paths:
@@ -44,7 +57,7 @@ paths:
         type: string
       - description: 用户信息
         in: body
-        name: userinfo
+        name: user
         required: true
         schema:
           $ref: '#/definitions/service.UserCreate'
@@ -52,10 +65,32 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"code": 0, "msg": "创建用户成功"}'
+          description: '{"code": 0, "msg": "创建用户成功", "data": nil}'
           schema:
             type: string
       summary: 创建用户
+      tags:
+      - 用户管理
+    put:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新用户成功", "data": nil}'
+          schema:
+            type: string
+      summary: 用户更新信息
       tags:
       - 用户管理
   /api/v1/user/{id}:
@@ -96,7 +131,7 @@ paths:
         type: file
       responses:
         "200":
-          description: '{"code": 0, "msg": "头像更新成功"}'
+          description: '{"code": 0, "msg": "头像更新成功", "data": nil}'
           schema:
             type: string
       summary: 用户头像上传
@@ -183,7 +218,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "注销成功"}'
+          description: '{"code": 0, "msg": "注销成功", "data": nil}'
           schema:
             type: string
       summary: 用户注销

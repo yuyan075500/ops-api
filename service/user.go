@@ -2,6 +2,7 @@ package service
 
 import (
 	"ops-api/dao"
+	"ops-api/global"
 	"ops-api/model"
 )
 
@@ -15,13 +16,21 @@ type UserLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// UserCreate 创建用户结构体
+// UserCreate 创建用户结构体，定义新增用户时的字段信息
 type UserCreate struct {
 	Name        string `json:"name" binding:"required"`
 	Username    string `json:"username" gorm:"unique" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
 	Email       string `json:"email" binding:"required"`
+}
+
+// UserUpdate 用户更新构体，定义更新用户时的字段信息
+type UserUpdate struct {
+	ID          uint   `json:"id" binding:"required"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	IsActive    bool   `json:"is_active"`
 }
 
 // GetUserList 获取用户列表
@@ -58,4 +67,21 @@ func (u *user) DeleteUser(id int) (err error) {
 		return err
 	}
 	return nil
+}
+
+// UpdateUser 更新用户信息
+func UpdateUser(data *UserUpdate) error {
+
+	// 查询要修改的用户
+	user := &model.AuthUser{}
+	if err := global.MySQLClient.First(user, data.ID).Error; err != nil {
+		return err
+	}
+
+	// 更新指定字段的值
+	user.PhoneNumber = data.PhoneNumber
+	user.Email = data.Email
+	user.IsActive = data.IsActive
+
+	return dao.User.UpdateUser(data.ID, user)
 }

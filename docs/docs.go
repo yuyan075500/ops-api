@@ -16,6 +16,39 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/v1/user": {
+            "put": {
+                "description": "用户相关接口",
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "用户更新信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UserUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新用户成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "用户相关接口",
                 "consumes": [
@@ -38,7 +71,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "用户信息",
-                        "name": "userinfo",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -48,7 +81,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"创建用户成功\"}",
+                        "description": "{\"code\": 0, \"msg\": \"创建用户成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -81,7 +114,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"头像更新成功\"}",
+                        "description": "{\"code\": 0, \"msg\": \"头像更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -246,7 +279,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"注销成功\"}",
+                        "description": "{\"code\": 0, \"msg\": \"注销成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -294,6 +327,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserUpdate": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "phone_number": {
                     "type": "string"
                 }
             }
