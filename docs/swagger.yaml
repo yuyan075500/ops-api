@@ -1,6 +1,85 @@
+definitions:
+  service.UserCreate:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone_number:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone_number
+    - username
+    type: object
+  service.UserLogin:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
 paths:
+  /api/v1/user:
+    post:
+      consumes:
+      - application/json
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: userinfo
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建用户成功"}'
+          schema:
+            type: string
+      summary: 创建用户
+      tags:
+      - 用户管理
+  /api/v1/user/avatarUpload:
+    post:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 头像
+        in: formData
+        name: avatar
+        required: true
+        type: file
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "头像更新成功"}'
+          schema:
+            type: string
+      summary: 用户头像上传
+      tags:
+      - 用户管理
   /api/v1/user/info:
     get:
       description: 用户相关接口
@@ -12,10 +91,41 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取用户信息成功", "data": }'
+          description: '{"code": 0, "msg": "获取用户信息成功", "data": {}}'
           schema:
             type: string
       summary: 获取用户信息
+      tags:
+      - 用户管理
+  /api/v1/users:
+    get:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 用户姓名
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "获取用户列表成功", "data": []}'
+          schema:
+            type: string
+      summary: 获取用户列表
       tags:
       - 用户管理
   /login:
@@ -29,7 +139,7 @@ paths:
         name: user
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/service.UserLogin'
       produces:
       - application/json
       responses:
@@ -42,8 +152,6 @@ paths:
       - 用户管理
   /logout:
     post:
-      consumes:
-      - application/json
       description: 用户相关接口
       parameters:
       - description: Bearer 用户令牌
@@ -51,8 +159,6 @@ paths:
         name: Authorization
         required: true
         type: string
-      produces:
-      - application/json
       responses:
         "200":
           description: '{"code": 0, "msg": "注销成功"}'

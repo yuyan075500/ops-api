@@ -27,21 +27,16 @@ type user struct{}
 // @Tags 用户管理
 // @Accept application/json
 // @Produce application/json
-// @Param user body object true "用户名密码"
+// @Param user body service.UserLogin true "用户名密码"
 // @Success 200 {string} json "{"code": 0, "msg": "认证成功", "token": "用户令牌"}"
 // @Router /login [post]
 func (u *user) Login(c *gin.Context) {
 	var (
-		user model.AuthUser
-		err  error
+		user   = &model.AuthUser{}
+		params = &service.UserLogin{}
 	)
 
-	params := new(struct {
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	})
-
-	if err = c.Bind(params); err != nil {
+	if err := c.ShouldBind(params); err != nil {
 		logger.Error("无效的请求参数：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
@@ -100,8 +95,6 @@ func (u *user) Login(c *gin.Context) {
 // @Summary 用户注销
 // @Description 用户相关接口
 // @Tags 用户管理
-// @Accept application/json
-// @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "msg": "注销成功"}"
 // @Router /logout [post]
@@ -127,6 +120,13 @@ func (u *user) Logout(c *gin.Context) {
 }
 
 // UploadAvatar 用户头像上传
+// @Summary 用户头像上传
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param avatar formData file true "头像"
+// @Success 200 {string} json "{"code": 0, "msg": "头像更新成功"}"
+// @Router /api/v1/user/avatarUpload [post]
 func (u *user) UploadAvatar(c *gin.Context) {
 	// 获取上传的头像
 	avatar, err := c.FormFile("avatar")
@@ -178,7 +178,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": }"
+// @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": {}}"
 // @Router /api/v1/user/info [get]
 func (u *user) GetUser(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
@@ -214,6 +214,15 @@ func (u *user) GetUser(c *gin.Context) {
 }
 
 // GetUserList 获取用户列表
+// @Summary 获取用户列表
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param page query int true "分页"
+// @Param limit query int true "分页大小"
+// @Param name query string false "用户姓名"
+// @Success 200 {string} json "{"code": 0, "msg": "获取用户列表成功", "data": []}"
+// @Router /api/v1/users [get]
 func (u *user) GetUserList(c *gin.Context) {
 	params := new(struct {
 		Name  string `form:"name"`
@@ -241,11 +250,21 @@ func (u *user) GetUserList(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
+		"msg":  "获取用户列表成功",
 		"data": data,
 	})
 }
 
 // AddUser 创建用户
+// @Summary 创建用户
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param userinfo body service.UserCreate true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "创建用户成功"}"
+// @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
 	var (
 		user = &service.UserCreate{}
@@ -262,7 +281,7 @@ func (u *user) AddUser(c *gin.Context) {
 	}
 
 	if err = service.User.AddUser(user); err != nil {
-		logger.Error("创建用户失败：" + err.Error())
+		logger.Error("新增用户失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),

@@ -9,13 +9,19 @@ var User user
 
 type user struct{}
 
-// UserCreate 创建用户的结构体
+// UserLogin 用户登录结构体
+type UserLogin struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// UserCreate 创建用户结构体
 type UserCreate struct {
-	Name        string `json:"name"`
-	Username    string `json:"Username" gorm:"unique"`
-	Password    string `json:"password"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
+	Name        string `json:"name" binding:"required"`
+	Username    string `json:"username" gorm:"unique" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+	Email       string `json:"email" binding:"required"`
 }
 
 // GetUserList 获取用户列表
