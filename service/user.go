@@ -30,8 +30,8 @@ type UserCreate struct {
 // UserUpdate 用户更新构体，定义更新用户时的字段信息
 type UserUpdate struct {
 	ID          uint   `json:"id" binding:"required"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number" validate:"phone"`
+	Email       string `json:"email" validate:"email"`
 	IsActive    bool   `json:"is_active"`
 }
 
@@ -59,7 +59,9 @@ func (u *user) AddUser(data *UserCreate) (err error) {
 	// 字段校验
 	validate := validator.New()
 	// 注册自定义检验方法
-	err = validate.RegisterValidation("phone", check.PhoneNumberCheck)
+	if err := validate.RegisterValidation("phone", check.PhoneNumberCheck); err != nil {
+		return err
+	}
 	if err := validate.Struct(data); err != nil {
 		return err.(validator.ValidationErrors)
 	}
@@ -96,6 +98,16 @@ func (u *user) DeleteUser(id int) (err error) {
 
 // UpdateUser 更新用户信息
 func (u *user) UpdateUser(data *UserUpdate) error {
+
+	// 字段校验
+	validate := validator.New()
+	// 注册自定义检验方法
+	if err := validate.RegisterValidation("phone", check.PhoneNumberCheck); err != nil {
+		return err
+	}
+	if err := validate.Struct(data); err != nil {
+		return err.(validator.ValidationErrors)
+	}
 
 	// 查询要修改的用户
 	user := &model.AuthUser{}
