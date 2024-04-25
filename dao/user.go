@@ -97,8 +97,8 @@ func (u *user) AddUser(data *model.AuthUser) (err error) {
 func (u *user) UpdateUser(userID uint, data *model.AuthUser) (err error) {
 	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userID).Updates(data)
 	if tx.Error != nil {
-		logger.Error("更新用户失败：", tx.Error)
-		return errors.New("更新用户失败：" + tx.Error.Error())
+		logger.Error("更新失败：", tx.Error)
+		return errors.New("更新失败：" + tx.Error.Error())
 	}
 	return nil
 }
@@ -114,7 +114,20 @@ func (u *user) DeleteUser(id int) (err error) {
 }
 
 // UpdateUserPassword 更改用户密码
-func (u *user) UpdateUserPassword(data *model.AuthUser) (err error) {
+func (u *user) UpdateUserPassword(userID uint, data *model.AuthUser) (err error) {
+
+	// 对密码进行加密
+	cipherText, err := utils.Encrypt(data.Password)
+	if err != nil {
+		return err
+	}
+
+	// 更新
+	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userID).Update("password", cipherText)
+	if tx.Error != nil {
+		logger.Error("更新失败：", tx.Error)
+		return errors.New("更新失败：" + tx.Error.Error())
+	}
 	return nil
 }
 

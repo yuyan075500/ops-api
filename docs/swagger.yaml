@@ -28,6 +28,19 @@ definitions:
     - password
     - username
     type: object
+  service.UserPasswordUpdate:
+    properties:
+      id:
+        type: integer
+      password:
+        type: string
+      re_password:
+        type: string
+    required:
+    - id
+    - password
+    - re_password
+    type: object
   service.UserUpdate:
     properties:
       email:
@@ -87,10 +100,10 @@ paths:
           $ref: '#/definitions/service.UserUpdate'
       responses:
         "200":
-          description: '{"code": 0, "msg": "更新用户成功", "data": nil}'
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
           schema:
             type: string
-      summary: 用户更新信息
+      summary: 用户基本信息更新
       tags:
       - 用户管理
   /api/v1/user/{id}:
@@ -152,6 +165,29 @@ paths:
           schema:
             type: string
       summary: 获取用户信息
+      tags:
+      - 用户管理
+  /api/v1/user/password:
+    put:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserPasswordUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 用户密码更新
       tags:
       - 用户管理
   /api/v1/users:

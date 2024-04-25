@@ -10,7 +10,7 @@
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "用户更新信息",
+                "summary": "用户基本信息更新",
                 "parameters": [
                     {
                         "type": "string",
@@ -31,7 +31,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"更新用户成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -130,6 +130,41 @@
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"msg\": \"获取用户信息成功\", \"data\": {}}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/password": {
+            "put": {
+                "description": "用户相关接口",
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "用户密码更新",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UserPasswordUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -316,6 +351,25 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserPasswordUpdate": {
+            "type": "object",
+            "required": [
+                "id",
+                "password",
+                "re_password"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "re_password": {
                     "type": "string"
                 }
             }

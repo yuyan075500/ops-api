@@ -320,13 +320,13 @@ func (u *user) DeleteUser(c *gin.Context) {
 	})
 }
 
-// UpdateUser 用户更新信息
-// @Summary 用户更新信息
+// UpdateUser 用户基本信息更新
+// @Summary 用户基本信息更新
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param user body service.UserUpdate true "用户信息"
-// @Success 200 {string} json "{"code": 0, "msg": "更新用户成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
 // @Router /api/v1/user [put]
 func (u *user) UpdateUser(c *gin.Context) {
 	var data = &service.UserUpdate{}
@@ -343,7 +343,7 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.User.UpdateUser(data); err != nil {
-		logger.Error("更新用户失败：" + err.Error())
+		logger.Error("更新失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),
@@ -353,7 +353,45 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "更新用户成功",
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}
+
+// UpdateUserPassword 用户密码更新
+// @Summary 用户密码更新
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param user body service.UserPasswordUpdate true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/user/password [put]
+func (u *user) UpdateUserPassword(c *gin.Context) {
+	var data = &service.UserPasswordUpdate{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("无效的请求参数：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.User.UpdateUserPassword(data); err != nil {
+		logger.Error("更新失败：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
 		"data": nil,
 	})
 }

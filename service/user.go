@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/go-playground/validator/v10"
 	"ops-api/dao"
 	"ops-api/global"
@@ -25,6 +26,13 @@ type UserCreate struct {
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
 	Email       string `json:"email" binding:"required" validate:"email"`
+}
+
+// UserPasswordUpdate 用户密码更新结构体
+type UserPasswordUpdate struct {
+	ID         uint   `json:"id" binding:"required"`
+	Password   string `json:"password" binding:"required"`
+	RePassword string `json:"re_password" binding:"required"`
 }
 
 // UserUpdate 用户更新构体，定义更新用户时的字段信息
@@ -121,4 +129,27 @@ func (u *user) UpdateUser(data *UserUpdate) error {
 	user.IsActive = &data.IsActive
 
 	return dao.User.UpdateUser(data.ID, user)
+}
+
+// UpdateUserPassword 更新用户密码
+func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
+
+	// 检查密码校验
+	if data.Password != data.RePassword {
+		return errors.New("两次输入的密码不匹配")
+	}
+	if err := check.PasswordCheck(data.Password); err != nil {
+		return err
+	}
+
+	// 查询要修改的用户
+	user := &model.AuthUser{}
+	if err := global.MySQLClient.First(user, data.ID).Error; err != nil {
+		return err
+	}
+
+	// 更新密码
+	user.Password = data.Password
+
+	return dao.User.UpdateUserPassword(data.ID, user)
 }

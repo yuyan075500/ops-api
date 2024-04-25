@@ -26,8 +26,8 @@ func (*AuthUser) TableName() (name string) {
 	return "auth_user"
 }
 
-// BeforeSave 新用户创建前对密码字段加密
-func (u *AuthUser) BeforeSave(tx *gorm.DB) (err error) {
+// BeforeCreate 新用户创建时对密码字段加密，仅创建用户时候调用
+func (u *AuthUser) BeforeCreate(tx *gorm.DB) (err error) {
 	cipherText, err := utils.Encrypt(u.Password)
 	if err != nil {
 		return err

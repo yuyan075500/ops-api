@@ -2,13 +2,11 @@ package check
 
 import (
 	"errors"
-	"fmt"
 	"unicode"
 )
 
 // PasswordCheck 检查密码复杂度，用于检查密码复杂度
 func PasswordCheck(password string) error {
-	fmt.Println(password)
 
 	if len(password) < 8 {
 		return errors.New("密码长度不能少于8个字符")
