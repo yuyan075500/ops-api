@@ -365,7 +365,7 @@ func (u *user) UpdateUser(c *gin.Context) {
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param user body service.UserPasswordUpdate true "用户信息"
 // @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
-// @Router /api/v1/user/password [put]
+// @Router /api/v1/user/reset_password [put]
 func (u *user) UpdateUserPassword(c *gin.Context) {
 	var data = &service.UserPasswordUpdate{}
 
