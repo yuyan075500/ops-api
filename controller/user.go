@@ -183,22 +183,9 @@ func (u *user) UploadAvatar(c *gin.Context) {
 // @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": {}}"
 // @Router /api/v1/user/info [get]
 func (u *user) GetUser(c *gin.Context) {
-	token := c.Request.Header.Get("Authorization")
-	parts := strings.SplitN(token, " ", 2)
 
-	// 从Token中获取用户ID
-	mc, err := middleware.ParseToken(parts[1])
-	if err != nil {
-		logger.Error("无效的Token：", err.Error())
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"code": 90401,
-			"msg":  "无效的Token",
-		})
-		return
-	}
-
-	// 根据ID获取用户信息
-	data, err := service.User.GetUser(mc.ID)
+	// 获取用户信息
+	data, err := service.User.GetUser(c.GetUint("id"))
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": 90404,
