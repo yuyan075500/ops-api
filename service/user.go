@@ -1,9 +1,11 @@
 package service
 
 import (
+	"github.com/go-playground/validator/v10"
 	"ops-api/dao"
 	"ops-api/global"
 	"ops-api/model"
+	"ops-api/utils/check"
 )
 
 var User user
@@ -21,8 +23,8 @@ type UserCreate struct {
 	Name        string `json:"name" binding:"required"`
 	Username    string `json:"username" gorm:"unique" binding:"required"`
 	Password    string `json:"password" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
-	Email       string `json:"email" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
+	Email       string `json:"email" binding:"required" validate:"email"`
 }
 
 // UserUpdate 用户更新构体，定义更新用户时的字段信息
@@ -53,6 +55,20 @@ func (u *user) GetUser(userid uint) (user *dao.UserInfo, err error) {
 
 // AddUser 创建用户
 func (u *user) AddUser(data *UserCreate) (err error) {
+
+	// 字段校验
+	validate := validator.New()
+	// 注册自定义检验方法
+	err = validate.RegisterValidation("phone", check.PhoneNumberCheck)
+	if err := validate.Struct(data); err != nil {
+		return err.(validator.ValidationErrors)
+	}
+
+	// 检查密码是否复合要求
+	if err := check.PasswordCheck(data.Password); err != nil {
+		return err
+	}
+
 	user := &model.AuthUser{
 		Name:        data.Name,
 		Username:    data.Username,
