@@ -42,6 +42,15 @@ func (u *user) GetUserList(name string, page, limit int) (data *dao.UserList, er
 	return data, nil
 }
 
+// GetUser 获取用户信息
+func (u *user) GetUser(userid uint) (user *dao.UserInfo, err error) {
+	user, err = dao.User.GetUser(userid)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // AddUser 创建用户
 func (u *user) AddUser(data *UserCreate) (err error) {
 	user := &model.AuthUser{
@@ -70,7 +79,7 @@ func (u *user) DeleteUser(id int) (err error) {
 }
 
 // UpdateUser 更新用户信息
-func UpdateUser(data *UserUpdate) error {
+func (u *user) UpdateUser(data *UserUpdate) error {
 
 	// 查询要修改的用户
 	user := &model.AuthUser{}

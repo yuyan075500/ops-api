@@ -6,7 +6,6 @@ import (
 	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/config"
-	"ops-api/dao"
 	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/model"
@@ -199,7 +198,7 @@ func (u *user) GetUser(c *gin.Context) {
 	}
 
 	// 根据ID获取用户信息
-	data, err := dao.User.GetUser(mc.ID)
+	data, err := service.User.GetUser(mc.ID)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": 90404,
@@ -356,7 +355,7 @@ func (u *user) UpdateUser(c *gin.Context) {
 	}
 
 	// 更新用户信息
-	if err := service.UpdateUser(data); err != nil {
+	if err := service.User.UpdateUser(data); err != nil {
 		logger.Error("更新用户失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
