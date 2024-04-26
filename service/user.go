@@ -19,7 +19,14 @@ type UserLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// UserCreate 创建用户结构体，定义新增用户时的字段信息
+// UserPasswordUpdate 更改密码结构体
+type UserPasswordUpdate struct {
+	ID         uint   `json:"id" binding:"required"`
+	Password   string `json:"password" binding:"required"`
+	RePassword string `json:"re_password" binding:"required"`
+}
+
+// UserCreate 创建结构体，定义新增时的字段信息
 type UserCreate struct {
 	Name        string `json:"name" binding:"required"`
 	Username    string `json:"username" gorm:"unique" binding:"required"`
@@ -28,14 +35,7 @@ type UserCreate struct {
 	Email       string `json:"email" binding:"required" validate:"email"`
 }
 
-// UserPasswordUpdate 用户密码更新结构体
-type UserPasswordUpdate struct {
-	ID         uint   `json:"id" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	RePassword string `json:"re_password" binding:"required"`
-}
-
-// UserUpdate 用户更新构体，定义更新用户时的字段信息
+// UserUpdate 更新构体，定义更新时的字段信息
 type UserUpdate struct {
 	ID          uint   `json:"id" binding:"required"`
 	PhoneNumber string `json:"phone_number" validate:"phone"`
@@ -95,7 +95,7 @@ func (u *user) AddUser(data *UserCreate) (err error) {
 	return nil
 }
 
-// DeleteUser 删除用户
+// DeleteUser 删除
 func (u *user) DeleteUser(id int) (err error) {
 	err = dao.User.DeleteUser(id)
 	if err != nil {
@@ -104,7 +104,7 @@ func (u *user) DeleteUser(id int) (err error) {
 	return nil
 }
 
-// UpdateUser 更新用户信息
+// UpdateUser 更新
 func (u *user) UpdateUser(data *UserUpdate) error {
 
 	// 字段校验
@@ -128,10 +128,10 @@ func (u *user) UpdateUser(data *UserUpdate) error {
 	user.Email = data.Email
 	user.IsActive = &data.IsActive
 
-	return dao.User.UpdateUser(data.ID, user)
+	return dao.User.UpdateUser(user)
 }
 
-// UpdateUserPassword 更新用户密码
+// UpdateUserPassword 更改密码
 func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
 
 	// 检查密码校验
@@ -154,7 +154,7 @@ func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
 	return dao.User.UpdateUserPassword(user)
 }
 
-// ResetUserMFA 重置用户MFA
+// ResetUserMFA 重置MFA
 func (u *user) ResetUserMFA(id int) (err error) {
 
 	// 查询要重置的用户

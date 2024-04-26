@@ -21,7 +21,7 @@ const docTemplate = `{
                 "tags": [
                     "用户组管理"
                 ],
-                "summary": "用户组信息更新",
+                "summary": "更新用户组信息",
                 "parameters": [
                     {
                         "type": "string",
@@ -174,7 +174,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "用户基本信息更新",
+                "summary": "更新用户信息",
                 "parameters": [
                     {
                         "type": "string",
@@ -234,7 +234,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"创建用户成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"msg\": \"创建成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -248,7 +248,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "用户头像上传",
+                "summary": "头像上传",
                 "parameters": [
                     {
                         "type": "string",
@@ -277,9 +277,9 @@ const docTemplate = `{
         },
         "/api/v1/user/info": {
             "get": {
-                "description": "用户相关接口",
+                "description": "认证相关接口",
                 "tags": [
-                    "用户管理"
+                    "用户认证"
                 ],
                 "summary": "获取用户信息",
                 "parameters": [
@@ -307,7 +307,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "用户MFA重置",
+                "summary": "MFA重置",
                 "parameters": [
                     {
                         "type": "string",
@@ -326,7 +326,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"msg\": \"重置成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -340,7 +340,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "用户密码更新",
+                "summary": "密码更新",
                 "parameters": [
                     {
                         "type": "string",
@@ -394,7 +394,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"删除用户成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -440,7 +440,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取用户列表成功\", \"data\": []}",
+                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
                         "schema": {
                             "type": "string"
                         }
@@ -450,7 +450,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "用户相关接口",
+                "description": "认证相关接口",
                 "consumes": [
                     "application/json"
                 ],
@@ -458,9 +458,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户管理"
+                    "用户认证"
                 ],
-                "summary": "用户登录",
+                "summary": "登录",
                 "parameters": [
                     {
                         "description": "用户名密码",
@@ -484,11 +484,11 @@ const docTemplate = `{
         },
         "/logout": {
             "post": {
-                "description": "用户相关接口",
+                "description": "认证相关接口",
                 "tags": [
-                    "用户管理"
+                    "用户认证"
                 ],
-                "summary": "用户注销",
+                "summary": "注销",
                 "parameters": [
                     {
                         "type": "string",

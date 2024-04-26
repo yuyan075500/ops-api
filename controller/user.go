@@ -21,10 +21,10 @@ var User user
 
 type user struct{}
 
-// Login 用户登录
-// @Summary 用户登录
-// @Description 用户相关接口
-// @Tags 用户管理
+// Login 登录
+// @Summary 登录
+// @Description 认证相关接口
+// @Tags 用户认证
 // @Accept application/json
 // @Produce application/json
 // @Param user body service.UserLogin true "用户名密码"
@@ -91,10 +91,10 @@ func (u *user) Login(c *gin.Context) {
 	})
 }
 
-// Logout 用户注销
-// @Summary 用户注销
-// @Description 用户相关接口
-// @Tags 用户管理
+// Logout 注销
+// @Summary 注销
+// @Description 认证相关接口
+// @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "msg": "注销成功", "data": nil}"
 // @Router /logout [post]
@@ -120,8 +120,8 @@ func (u *user) Logout(c *gin.Context) {
 	})
 }
 
-// UploadAvatar 用户头像上传
-// @Summary 用户头像上传
+// UploadAvatar 头像上传
+// @Summary 头像上传
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
@@ -177,8 +177,8 @@ func (u *user) UploadAvatar(c *gin.Context) {
 
 // GetUser 获取用户信息
 // @Summary 获取用户信息
-// @Description 用户相关接口
-// @Tags 用户管理
+// @Description 认证相关接口
+// @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": {}}"
 // @Router /api/v1/user/info [get]
@@ -210,7 +210,7 @@ func (u *user) GetUser(c *gin.Context) {
 // @Param page query int true "分页"
 // @Param limit query int true "分页大小"
 // @Param name query string false "用户姓名"
-// @Success 200 {string} json "{"code": 0, "msg": "获取用户列表成功", "data": []}"
+// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
 // @Router /api/v1/users [get]
 func (u *user) GetUserList(c *gin.Context) {
 	params := new(struct {
@@ -229,7 +229,7 @@ func (u *user) GetUserList(c *gin.Context) {
 
 	data, err := service.User.GetUserList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("获取用户列表失败：" + err.Error())
+		logger.Error("获取列表失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),
@@ -239,7 +239,7 @@ func (u *user) GetUserList(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取用户列表成功",
+		"msg":  "获取列表成功",
 		"data": data,
 	})
 }
@@ -252,7 +252,7 @@ func (u *user) GetUserList(c *gin.Context) {
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param user body service.UserCreate true "用户信息"
-// @Success 200 {string} json "{"code": 0, "msg": "创建用户成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "创建成功", "data": nil}"
 // @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
 	var user = &service.UserCreate{}
@@ -267,7 +267,7 @@ func (u *user) AddUser(c *gin.Context) {
 	}
 
 	if err := service.User.AddUser(user); err != nil {
-		logger.Error("新增用户失败：" + err.Error())
+		logger.Error("新增失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),
@@ -277,7 +277,7 @@ func (u *user) AddUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "创建用户成功",
+		"msg":  "创建成功",
 		"data": nil,
 	})
 }
@@ -288,7 +288,7 @@ func (u *user) AddUser(c *gin.Context) {
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "用户ID"
-// @Success 200 {string} json "{"code": 0, "msg": "删除用户成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
 // @Router /api/v1/user/{id} [delete]
 func (u *user) DeleteUser(c *gin.Context) {
 
@@ -305,7 +305,7 @@ func (u *user) DeleteUser(c *gin.Context) {
 
 	// 执行删除
 	if err := service.User.DeleteUser(userID); err != nil {
-		logger.Error("删除用户失败：" + err.Error())
+		logger.Error("删除失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),
@@ -315,13 +315,13 @@ func (u *user) DeleteUser(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "删除用户成功",
+		"msg":  "删除成功",
 		"data": nil,
 	})
 }
 
-// UpdateUser 用户基本信息更新
-// @Summary 用户基本信息更新
+// UpdateUser 更新用户信息
+// @Summary 更新用户信息
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
@@ -358,8 +358,8 @@ func (u *user) UpdateUser(c *gin.Context) {
 	})
 }
 
-// UpdateUserPassword 用户密码更新
-// @Summary 用户密码更新
+// UpdateUserPassword 密码更新
+// @Summary 密码更新
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
@@ -396,13 +396,13 @@ func (u *user) UpdateUserPassword(c *gin.Context) {
 	})
 }
 
-// ResetUserMFA 用户MFA重置
-// @Summary 用户MFA重置
+// ResetUserMFA MFA重置
+// @Summary MFA重置
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "用户ID"
-// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "重置成功", "data": nil}"
 // @Router /api/v1/user/reset_mfa/{id} [put]
 func (u *user) ResetUserMFA(c *gin.Context) {
 

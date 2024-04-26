@@ -130,8 +130,8 @@ func (u *group) DeleteGroup(c *gin.Context) {
 	})
 }
 
-// UpdateGroup 用户组信息更新
-// @Summary 用户组信息更新
+// UpdateGroup 更新用户组信息
+// @Summary 更新用户组信息
 // @Description 用户组相关接口
 // @Tags 用户组管理
 // @Param Authorization header string true "Bearer 用户令牌"
