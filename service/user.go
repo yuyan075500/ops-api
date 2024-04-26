@@ -151,5 +151,17 @@ func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
 	// 更新密码
 	user.Password = data.Password
 
-	return dao.User.UpdateUserPassword(data.ID, user)
+	return dao.User.UpdateUserPassword(user)
+}
+
+// ResetUserMFA 重置用户MFA
+func (u *user) ResetUserMFA(id int) (err error) {
+
+	// 查询要重置的用户
+	user := &model.AuthUser{}
+	if err := global.MySQLClient.First(user, id).Error; err != nil {
+		return err
+	}
+
+	return dao.User.ResetUserMFA(user)
 }

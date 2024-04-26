@@ -395,3 +395,41 @@ func (u *user) UpdateUserPassword(c *gin.Context) {
 		"data": nil,
 	})
 }
+
+// ResetUserMFA 用户MFA重置
+// @Summary 用户MFA重置
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param id path int true "用户ID"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/user/reset_mfa/{id} [put]
+func (u *user) ResetUserMFA(c *gin.Context) {
+
+	// 对ID进行类型转换
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Error("无效的用户ID：", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": 4001,
+			"msg":  "无效的用户ID",
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.User.ResetUserMFA(userID); err != nil {
+		logger.Error("重置失败：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "重置成功",
+		"data": nil,
+	})
+}

@@ -29,6 +29,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		POST("/api/v1/user", User.AddUser).
 		PUT("/api/v1/user", User.UpdateUser).
 		PUT("/api/v1/user/reset_password", User.UpdateUserPassword).
+		PUT("/api/v1/user/reset_mfa/:id", User.ResetUserMFA).
 		GET("/api/v1/user/info", User.GetUser).
 		DELETE("/api/v1/user/:id", User.DeleteUser).
 		GET("/api/v1/users", User.GetUserList).

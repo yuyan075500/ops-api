@@ -114,7 +114,7 @@ func (u *user) DeleteUser(id int) (err error) {
 }
 
 // UpdateUserPassword 更改用户密码
-func (u *user) UpdateUserPassword(userID uint, data *model.AuthUser) (err error) {
+func (u *user) UpdateUserPassword(data *model.AuthUser) (err error) {
 
 	// 对密码进行加密
 	cipherText, err := utils.Encrypt(data.Password)
@@ -122,8 +122,8 @@ func (u *user) UpdateUserPassword(userID uint, data *model.AuthUser) (err error)
 		return err
 	}
 
-	// 更新
-	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userID).Update("password", cipherText)
+	// 更新密码
+	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("password", cipherText)
 	if tx.Error != nil {
 		logger.Error("更新失败：", tx.Error)
 		return errors.New("更新失败：" + tx.Error.Error())
@@ -133,5 +133,12 @@ func (u *user) UpdateUserPassword(userID uint, data *model.AuthUser) (err error)
 
 // ResetUserMFA 重置用户MFA
 func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
+
+	// 将MFA重置为nil
+	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil)
+	if tx.Error != nil {
+		logger.Error("重置MFA失败：", tx.Error)
+		return errors.New("重置MFA失败：" + tx.Error.Error())
+	}
 	return nil
 }

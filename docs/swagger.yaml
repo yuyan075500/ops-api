@@ -167,7 +167,29 @@ paths:
       summary: 获取用户信息
       tags:
       - 用户管理
-  /api/v1/user/password:
+  /api/v1/user/reset_mfa/{id}:
+    put:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 用户MFA重置
+      tags:
+      - 用户管理
+  /api/v1/user/reset_password:
     put:
       description: 用户相关接口
       parameters:
