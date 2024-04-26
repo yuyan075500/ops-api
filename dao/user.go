@@ -50,8 +50,8 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 		Offset(startSet).
 		Find(&userList)
 	if tx.Error != nil {
-		logger.Error("获取用户列表失败：", tx.Error)
-		return nil, errors.New("获取用户列表失败：" + tx.Error.Error())
+		logger.Error("获取列表失败：", tx.Error)
+		return nil, errors.New("获取列表失败：" + tx.Error.Error())
 	}
 
 	return &UserList{
@@ -67,8 +67,8 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 
 	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo)
 	if tx.Error != nil {
-		logger.Error("获取用户信息失败：", tx.Error)
-		return nil, errors.New("获取用户信息失败：" + tx.Error.Error())
+		logger.Error("获取失败：", tx.Error)
+		return nil, errors.New("获取失败：" + tx.Error.Error())
 	}
 
 	// 从OSS中获取头像临时访问URL，临时URL的过期时间与用户Token过期时间保持一致
@@ -87,8 +87,8 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 func (u *user) AddUser(data *model.AuthUser) (err error) {
 	tx := global.MySQLClient.Create(&data)
 	if tx.Error != nil {
-		logger.Error("新增用户失败：", tx.Error)
-		return errors.New("新增用户失败：" + tx.Error.Error())
+		logger.Error("新增失败：", tx.Error)
+		return errors.New("新增失败：" + tx.Error.Error())
 	}
 	return nil
 }
@@ -107,8 +107,8 @@ func (u *user) UpdateUser(userID uint, data *model.AuthUser) (err error) {
 func (u *user) DeleteUser(id int) (err error) {
 	tx := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{})
 	if tx.Error != nil {
-		logger.Error("删除用户失败：", tx.Error)
-		return errors.New("删除用户失败：" + tx.Error.Error())
+		logger.Error("删除失败：", tx.Error)
+		return errors.New("删除失败：" + tx.Error.Error())
 	}
 	return nil
 }
@@ -137,8 +137,8 @@ func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 	// 将MFA重置为nil
 	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil)
 	if tx.Error != nil {
-		logger.Error("重置MFA失败：", tx.Error)
-		return errors.New("重置MFA失败：" + tx.Error.Error())
+		logger.Error("重置失败：", tx.Error)
+		return errors.New("重置失败：" + tx.Error.Error())
 	}
 	return nil
 }

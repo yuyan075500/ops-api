@@ -1,4 +1,21 @@
 definitions:
+  service.GroupCreate:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  service.GroupUpdate:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
   service.UserCreate:
     properties:
       email:
@@ -57,6 +74,108 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/group:
+    post:
+      consumes:
+      - application/json
+      description: 用户组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 组信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.GroupCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 创建用户组
+      tags:
+      - 用户组管理
+    put:
+      description: 用户组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.GroupUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 用户组信息更新
+      tags:
+      - 用户组管理
+  /api/v1/group/{id}:
+    delete:
+      description: 用户组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 组ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除用户组
+      tags:
+      - 用户组管理
+  /api/v1/groups:
+    get:
+      description: 用户组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 组名称
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          schema:
+            type: string
+      summary: 获取组列表
+      tags:
+      - 用户组管理
   /api/v1/user:
     post:
       consumes:
