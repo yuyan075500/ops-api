@@ -21,6 +21,12 @@ type GroupUpdate struct {
 	Name string `json:"name" binding:"required"`
 }
 
+// GroupUpdateUser 更新组用户构体，定义更新时的字段信息
+type GroupUpdateUser struct {
+	ID    uint   `json:"id" binding:"required"`
+	Users []uint `json:"users" binding:"required"`
+}
+
 // GetGroupList 获取列表
 func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList, err error) {
 	data, err = dao.Group.GetGroupList(name, page, limit)
@@ -67,4 +73,22 @@ func (u *group) UpdateGroup(data *GroupUpdate) error {
 	group.Name = data.Name
 
 	return dao.Group.UpdateGroup(group)
+}
+
+// UpdateGroupUser 更新组用户
+func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
+
+	// 查询要修改的用户组
+	group := &model.AuthGroup{}
+	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
+		return err
+	}
+
+	// 查询出要更新的所有用户
+	var users []model.AuthUser
+	if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
+		return err
+	}
+
+	return dao.Group.UpdateGroupUser(group, users)
 }

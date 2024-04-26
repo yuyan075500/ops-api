@@ -6,6 +6,7 @@ import "gorm.io/gorm"
 type AuthGroup struct {
 	gorm.Model
 	Name        string           `json:"name" gorm:"unique"`
+	Users       []AuthUser       `json:"users" gorm:"many2many:auth_user_groups"`
 	Permissions []AuthPermission `json:"permissions" gorm:"many2many:auth_group_permissions"`
 }
 

@@ -14,8 +14,8 @@ type group struct{}
 
 // GetGroupList 获取组列表
 // @Summary 获取组列表
-// @Description 用户组相关接口
-// @Tags 用户组管理
+// @Description 组相关接口
+// @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param page query int true "分页"
 // @Param limit query int true "分页大小"
@@ -54,14 +54,14 @@ func (u *group) GetGroupList(c *gin.Context) {
 	})
 }
 
-// AddGroup 创建用户组
-// @Summary 创建用户组
-// @Description 用户组相关接口
-// @Tags 用户组管理
+// AddGroup 创建组
+// @Summary 创建组
+// @Description 组相关接口
+// @Tags 组管理
 // @Accept application/json
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Param user body service.GroupCreate true "组信息"
+// @Param group body service.GroupCreate true "组信息"
 // @Success 200 {string} json "{"code": 0, "msg": "创建成功", "data": nil}"
 // @Router /api/v1/group [post]
 func (u *group) AddGroup(c *gin.Context) {
@@ -92,10 +92,10 @@ func (u *group) AddGroup(c *gin.Context) {
 	})
 }
 
-// DeleteGroup 删除用户组
-// @Summary 删除用户组
-// @Description 用户组相关接口
-// @Tags 用户组管理
+// DeleteGroup 删除组
+// @Summary 删除组
+// @Description 组相关接口
+// @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "组ID"
 // @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
@@ -130,12 +130,12 @@ func (u *group) DeleteGroup(c *gin.Context) {
 	})
 }
 
-// UpdateGroup 更新用户组信息
-// @Summary 更新用户组信息
-// @Description 用户组相关接口
-// @Tags 用户组管理
+// UpdateGroup 更新组信息
+// @Summary 更新组信息
+// @Description 组相关接口
+// @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Param user body service.GroupUpdate true "用户信息"
+// @Param group body service.GroupUpdate true "组信息"
 // @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
 // @Router /api/v1/group [put]
 func (u *group) UpdateGroup(c *gin.Context) {
@@ -153,6 +153,44 @@ func (u *group) UpdateGroup(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.Group.UpdateGroup(data); err != nil {
+		logger.Error("更新失败：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}
+
+// UpdateGroupUser 更新组用户
+// @Summary 更新组用户
+// @Description 组相关接口
+// @Tags 组管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param users body service.GroupUpdateUser true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/group/users [put]
+func (u *group) UpdateGroupUser(c *gin.Context) {
+	var data = &service.GroupUpdateUser{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("无效的请求参数：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.Group.UpdateGroupUser(data); err != nil {
 		logger.Error("更新失败：" + err.Error())
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 4000,

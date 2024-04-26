@@ -16,6 +16,18 @@ definitions:
     - id
     - name
     type: object
+  service.GroupUpdateUser:
+    properties:
+      id:
+        type: integer
+      users:
+        items:
+          type: integer
+        type: array
+    required:
+    - id
+    - users
+    type: object
   service.UserCreate:
     properties:
       email:
@@ -78,7 +90,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 用户组相关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -87,7 +99,7 @@ paths:
         type: string
       - description: 组信息
         in: body
-        name: user
+        name: group
         required: true
         schema:
           $ref: '#/definitions/service.GroupCreate'
@@ -98,20 +110,20 @@ paths:
           description: '{"code": 0, "msg": "创建成功", "data": nil}'
           schema:
             type: string
-      summary: 创建用户组
+      summary: 创建组
       tags:
-      - 用户组管理
+      - 组管理
     put:
-      description: 用户组相关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
         name: Authorization
         required: true
         type: string
-      - description: 用户信息
+      - description: 组信息
         in: body
-        name: user
+        name: group
         required: true
         schema:
           $ref: '#/definitions/service.GroupUpdate'
@@ -120,12 +132,12 @@ paths:
           description: '{"code": 0, "msg": "更新成功", "data": nil}'
           schema:
             type: string
-      summary: 更新用户组信息
+      summary: 更新组信息
       tags:
-      - 用户组管理
+      - 组管理
   /api/v1/group/{id}:
     delete:
-      description: 用户组相关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -142,12 +154,35 @@ paths:
           description: '{"code": 0, "msg": "删除成功", "data": nil}'
           schema:
             type: string
-      summary: 删除用户组
+      summary: 删除组
       tags:
-      - 用户组管理
+      - 组管理
+  /api/v1/group/users:
+    put:
+      description: 组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/service.GroupUpdateUser'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新组用户
+      tags:
+      - 组管理
   /api/v1/groups:
     get:
-      description: 用户组相关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -175,7 +210,7 @@ paths:
             type: string
       summary: 获取组列表
       tags:
-      - 用户组管理
+      - 组管理
   /api/v1/user:
     post:
       consumes:

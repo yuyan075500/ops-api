@@ -36,6 +36,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		POST("/api/v1/user/avatarUpload", User.UploadAvatar).
 		POST("/api/v1/group", Group.AddGroup).
 		PUT("/api/v1/group", Group.UpdateGroup).
+		PUT("/api/v1/group/users", Group.UpdateGroupUser).
 		DELETE("/api/v1/group/:id", Group.DeleteGroup).
 		GET("/api/v1/groups", Group.GetGroupList)
 }

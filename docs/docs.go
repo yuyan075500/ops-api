@@ -17,11 +17,11 @@ const docTemplate = `{
     "paths": {
         "/api/v1/group": {
             "put": {
-                "description": "用户组相关接口",
+                "description": "组相关接口",
                 "tags": [
-                    "用户组管理"
+                    "组管理"
                 ],
-                "summary": "更新用户组信息",
+                "summary": "更新组信息",
                 "parameters": [
                     {
                         "type": "string",
@@ -31,8 +31,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "用户信息",
-                        "name": "user",
+                        "description": "组信息",
+                        "name": "group",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -50,7 +50,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "用户组相关接口",
+                "description": "组相关接口",
                 "consumes": [
                     "application/json"
                 ],
@@ -58,9 +58,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户组管理"
+                    "组管理"
                 ],
-                "summary": "创建用户组",
+                "summary": "创建组",
                 "parameters": [
                     {
                         "type": "string",
@@ -71,7 +71,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "组信息",
-                        "name": "user",
+                        "name": "group",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -89,13 +89,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/group/users": {
+            "put": {
+                "description": "组相关接口",
+                "tags": [
+                    "组管理"
+                ],
+                "summary": "更新组用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.GroupUpdateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/group/{id}": {
             "delete": {
-                "description": "用户组相关接口",
+                "description": "组相关接口",
                 "tags": [
-                    "用户组管理"
+                    "组管理"
                 ],
-                "summary": "删除用户组",
+                "summary": "删除组",
                 "parameters": [
                     {
                         "type": "string",
@@ -124,9 +159,9 @@ const docTemplate = `{
         },
         "/api/v1/groups": {
             "get": {
-                "description": "用户组相关接口",
+                "description": "组相关接口",
                 "tags": [
-                    "用户组管理"
+                    "组管理"
                 ],
                 "summary": "获取组列表",
                 "parameters": [
@@ -533,6 +568,24 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "service.GroupUpdateUser": {
+            "type": "object",
+            "required": [
+                "id",
+                "users"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
