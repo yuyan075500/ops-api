@@ -38,8 +38,8 @@ type UserCreate struct {
 // UserUpdate 更新构体，定义更新时的字段信息
 type UserUpdate struct {
 	ID          uint   `json:"id" binding:"required"`
-	PhoneNumber string `json:"phone_number" validate:"phone"`
-	Email       string `json:"email" validate:"email"`
+	PhoneNumber string `json:"phone_number" validate:"omitempty,phone"`
+	Email       string `json:"email" validate:"omitempty,email"`
 	IsActive    bool   `json:"is_active"`
 }
 
