@@ -13,8 +13,14 @@ type group struct{}
 
 // GroupList 返回给前端的结构体
 type GroupList struct {
-	Items []*model.AuthGroup `json:"items"`
-	Total int64              `json:"total"`
+	Items []*GroupInfo `json:"items"`
+	Total int64        `json:"total"`
+}
+
+// GroupInfo 返回字段信息
+type GroupInfo struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // GetGroupList 获取列表
@@ -24,7 +30,7 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 
 	// 定义返回的内容
 	var (
-		groupList []*model.AuthGroup
+		groupList []*GroupInfo
 		total     int64
 	)
 
