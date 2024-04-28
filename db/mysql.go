@@ -32,11 +32,9 @@ func MySQLInit() {
 
 	// 表迁移
 	_ = client.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
-	_ = client.SetupJoinTable(&model.AuthGroup{}, "Permissions", &model.AuthGroupPermissions{})
 	_ = client.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},
-		&model.AuthPermission{},
 	)
 
 	// 设置数据库连接池

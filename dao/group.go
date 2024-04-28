@@ -84,7 +84,7 @@ func (u *group) DeleteGroup(id int) (err error) {
 
 // UpdateGroupUser 更新组用户
 func (u *group) UpdateGroupUser(group *model.AuthGroup, users []model.AuthUser) (err error) {
-	if err := global.MySQLClient.Debug().Model(&group).Association("Users").Replace(users); err != nil {
+	if err := global.MySQLClient.Model(&group).Association("Users").Replace(users); err != nil {
 		logger.Error("更新失败：", err.Error)
 		return errors.New("更新失败：" + err.Error())
 	}

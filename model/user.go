@@ -9,17 +9,17 @@ import (
 // AuthUser 用户信息表
 type AuthUser struct {
 	gorm.Model
-	Name        string      `json:"name"`
-	Username    string      `json:"username" gorm:"unique"`
-	Avatar      *string     `json:"avatar"`
-	Password    string      `json:"password"`
-	PhoneNumber string      `json:"phone_number"`
-	IsActive    *bool       `json:"is_active" gorm:"default:true"`
-	Email       string      `json:"email"`
-	LastLoginAt *time.Time  `json:"last_login_at"`
-	MFACode     *string     `json:"mfa_code"`
-	UserFrom    string      `json:"user_from" gorm:"default:本地"`
-	Groups      []AuthGroup `json:"groups" gorm:"many2many:auth_user_groups"`
+	Name        string       `json:"name"`
+	Username    string       `json:"username" gorm:"unique"`
+	Avatar      *string      `json:"avatar"`
+	Password    string       `json:"password"`
+	PhoneNumber string       `json:"phone_number"`
+	IsActive    *bool        `json:"is_active" gorm:"default:true"`
+	Email       string       `json:"email"`
+	LastLoginAt *time.Time   `json:"last_login_at"`
+	MFACode     *string      `json:"mfa_code"`
+	UserFrom    string       `json:"user_from" gorm:"default:本地"`
+	Groups      []*AuthGroup `json:"groups" gorm:"many2many:auth_user_groups"`
 }
 
 func (*AuthUser) TableName() (name string) {
