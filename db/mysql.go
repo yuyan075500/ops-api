@@ -26,12 +26,11 @@ func MySQLInit() {
 	// 建立数据库连接，并生成*gorm.DB对象
 	client, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("建议MySQL数据库连接失败：" + err.Error())
+		fmt.Println("MySQL数据库连接失败：" + err.Error())
 		return
 	}
 
 	// 表迁移
-	_ = client.SetupJoinTable(&model.AuthUser{}, "Groups", &model.AuthUserGroups{})
 	_ = client.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},

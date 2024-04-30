@@ -2,9 +2,8 @@ package model
 
 // AuthUserGroups 自定义用户与组（角色）表
 type AuthUserGroups struct {
-	ID          uint `gorm:"primaryKey;"`
-	AuthUserID  uint
-	AuthGroupID uint
+	AuthUserID  uint `gorm:"primaryKey;index:users"`
+	AuthGroupID uint `gorm:"primaryKey;index:users"`
 }
 
 func (*AuthUserGroups) TableName() (name string) {
