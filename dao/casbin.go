@@ -11,6 +11,7 @@ var CasBin casbin
 
 type casbin struct{}
 
+// AddRole 添加角色
 func (u *casbin) AddRole(tx *gorm.DB, data *model.CasbinRule) (err error) {
 	if err := tx.Create(&data).Error; err != nil {
 		logger.Error("新增失败：", err)

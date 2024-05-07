@@ -148,6 +148,11 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 	return dao.Group.UpdateGroupUser(group, users)
 }
 
+// UpdatePermission 更新组权限
+func (u *group) UpdatePermission() (err error) {
+	return nil
+}
+
 // GetUserNamesFromIDs 根据用户ID列表返回对应的用户名列表
 func GetUserNamesFromIDs(userIDs []uint) ([]string, error) {
 	var usernames []string
