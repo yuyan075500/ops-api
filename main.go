@@ -23,16 +23,21 @@ func main() {
 	// 初始化Minio
 	db.MinioInit()
 
+	// 初始化CasBin权限
+	middleware.CasBinInit()
+
 	r := gin.Default()
 
-	// 初始化跨域中间件
+	// 加载跨域中间件
 	r.Use(middleware.Cors())
-	// 初始化登录中间件，其中IgnorePaths()方法可以忽略某些路由，支持前缀匹配
+	// 加载登录中间件，其中IgnorePaths()方法可以忽略某些路由，支持前缀匹配
 	r.Use(middleware.LoginBuilder().
 		IgnorePaths("/login").
 		IgnorePaths("/health").
 		IgnorePaths("/swagger/").
 		Build())
+	// 加载权限中间件
+	r.Use(middleware.PermissionCheck())
 
 	// 注册路由
 	controller.Router.InitRouter(r)

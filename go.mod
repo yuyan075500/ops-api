@@ -3,6 +3,7 @@ module ops-api
 go 1.21.8
 
 require (
+	github.com/casbin/gorm-adapter/v3 v3.24.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/go-redis/redis v6.15.9+incompatible
