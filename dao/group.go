@@ -3,6 +3,7 @@ package dao
 import (
 	"errors"
 	"github.com/wonderivan/logger"
+	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
 )
@@ -19,8 +20,9 @@ type GroupList struct {
 
 // GroupInfo 返回字段信息
 type GroupInfo struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	IsRoleGroup bool   `json:"is_role_group"`
 }
 
 // GetGroupList 获取列表
@@ -53,11 +55,10 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 }
 
 // AddGroup 新增
-func (u *group) AddGroup(data *model.AuthGroup) (err error) {
-	tx := global.MySQLClient.Create(&data)
-	if tx.Error != nil {
-		logger.Error("新增失败：", tx.Error)
-		return errors.New("新增失败：" + tx.Error.Error())
+func (u *group) AddGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
+	if err := tx.Create(&data).Error; err != nil {
+		logger.Error("新增失败：", err.Error)
+		return errors.New("新增失败：" + err.Error())
 	}
 	return nil
 }

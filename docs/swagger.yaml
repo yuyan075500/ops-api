@@ -1,8 +1,15 @@
 definitions:
   service.GroupCreate:
     properties:
+      is_role_group:
+        default: false
+        type: boolean
       name:
         type: string
+      users:
+        items:
+          type: integer
+        type: array
     required:
     - name
     type: object

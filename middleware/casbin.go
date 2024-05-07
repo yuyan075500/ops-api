@@ -6,6 +6,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/gin-gonic/gin"
 	"ops-api/global"
+	"ops-api/model"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ import (
 func CasBinInit() {
 
 	// 初始化CasBin适配器
-	adapter, err := gormadapter.NewAdapterByDB(global.MySQLClient)
+	adapter, err := gormadapter.NewAdapterByDBWithCustomTable(global.MySQLClient, &model.CasbinRule{}, "casbin_rules")
 	if err != nil {
 		fmt.Println("初始化CasBin适配器失败：" + err.Error())
 		return
@@ -56,7 +57,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/swagger/",
 		}
 		for _, item := range ignorePath {
-			if strings.HasPrefix(item, path) {
+			if strings.HasPrefix(path, item) {
 				c.Next()
 				return
 			}

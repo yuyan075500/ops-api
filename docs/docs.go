@@ -551,8 +551,18 @@ const docTemplate = `{
                 "name"
             ],
             "properties": {
+                "is_role_group": {
+                    "type": "boolean",
+                    "default": false
+                },
                 "name": {
                     "type": "string"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

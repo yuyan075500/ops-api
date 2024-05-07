@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"ops-api/dao"
 	"ops-api/global"
 	"ops-api/model"
@@ -12,7 +14,9 @@ type group struct{}
 
 // GroupCreate 创建构体，定义新增时的字段信息
 type GroupCreate struct {
-	Name string `json:"name" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	IsRoleGroup bool   `json:"is_role_group" default:"false"`
+	Users       []uint `json:"users"`
 }
 
 // GroupUpdate 更新构体，定义更新时的字段信息
@@ -27,6 +31,13 @@ type GroupUpdateUser struct {
 	Users []uint `json:"users" binding:"required"`
 }
 
+// RoleCreate CasBin角色创建构体
+type RoleCreate struct {
+	Ptype string `json:"ptype"`
+	V0    string `json:"v0"`
+	V1    string `json:"v1"`
+}
+
 // GetGroupList 获取列表
 func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList, err error) {
 	data, err = dao.Group.GetGroupList(name, page, limit)
@@ -36,18 +47,62 @@ func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList,
 	return data, nil
 }
 
-// AddGroup 创建
+// AddGroup 创建，支持同时添加用户
 func (u *group) AddGroup(data *GroupCreate) (err error) {
 
 	group := &model.AuthGroup{
-		Name: data.Name,
+		Name:        data.Name,
+		IsRoleGroup: data.IsRoleGroup,
 	}
 
+	if data.IsRoleGroup && len(data.Users) == 0 {
+		return errors.New("角色用户组必须至少添加一个用户")
+	}
+
+	// 如果传的的用户不为空，则添加用户
+	if len(data.Users) > 0 {
+		group.Users = make([]*model.AuthUser, len(data.Users))
+		for index, userId := range data.Users {
+			group.Users[index] = &model.AuthUser{
+				Model: gorm.Model{
+					ID: userId,
+				},
+			}
+		}
+	}
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
 	// 创建数据库数据
-	err = dao.Group.AddGroup(group)
-	if err != nil {
+	if err := dao.Group.AddGroup(tx, group); err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 同步角色用户组信息到CasBin策略表
+	users, err := GetUserNamesFromIDs(data.Users)
+	if data.IsRoleGroup {
+		for _, username := range users {
+			rule := &model.CasbinRule{
+				Ptype: "g",
+				V0:    username,
+				V1:    data.Name,
+			}
+			if err := dao.CasBin.AddRole(tx, rule); err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	// 提交事务
+	err = tx.Commit().Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 
@@ -91,4 +146,16 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 	}
 
 	return dao.Group.UpdateGroupUser(group, users)
+}
+
+// GetUserNamesFromIDs 根据用户ID列表返回对应的用户名列表
+func GetUserNamesFromIDs(userIDs []uint) ([]string, error) {
+	var usernames []string
+
+	err := global.MySQLClient.Model(&model.AuthUser{}).Select("username").Where("id IN (?)", userIDs).Find(&usernames).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return usernames, nil
 }
