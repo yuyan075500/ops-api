@@ -66,9 +66,11 @@ func (m *menu) GetUserMenu() (data []*MenuItem, err error) {
 				},
 			}
 
+			// 将二级菜单添加到一级菜单的子菜单中
 			menuItem.Children = append(menuItem.Children, subMenuItem)
 		}
 
+		// 将一级菜单添加到返回给前端的菜单列表中
 		menuItems = append(menuItems, menuItem)
 	}
 
