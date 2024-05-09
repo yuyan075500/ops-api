@@ -34,6 +34,8 @@ func MySQLInit() {
 	_ = client.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},
+		&model.Menu{},
+		&model.SubMenu{},
 	)
 
 	// 设置数据库连接池

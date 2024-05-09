@@ -218,6 +218,23 @@ paths:
       summary: 获取组列表
       tags:
       - 组管理
+  /api/v1/menus:
+    get:
+      description: 菜单关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          schema:
+            type: string
+      summary: 获取用户菜单
+      tags:
+      - 菜单管理
   /api/v1/user:
     post:
       consumes:

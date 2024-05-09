@@ -38,5 +38,6 @@ func (r *router) InitRouter(router *gin.Engine) {
 		PUT("/api/v1/group", Group.UpdateGroup).
 		PUT("/api/v1/group/users", Group.UpdateGroupUser).
 		DELETE("/api/v1/group/:id", Group.DeleteGroup).
-		GET("/api/v1/groups", Group.GetGroupList)
+		GET("/api/v1/groups", Group.GetGroupList).
+		GET("/api/v1/menus", Menu.GetUserMenu)
 }

@@ -203,6 +203,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/menus": {
+            "get": {
+                "description": "菜单关接口",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "获取用户菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user": {
             "put": {
                 "description": "用户相关接口",
