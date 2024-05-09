@@ -47,7 +47,7 @@ func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList,
 	return data, nil
 }
 
-// AddGroup 创建，支持同时添加用户
+// AddGroup 创建，支持同时添加用户信息到CasBin策略表
 func (u *group) AddGroup(data *GroupCreate) (err error) {
 
 	group := &model.AuthGroup{
@@ -81,7 +81,7 @@ func (u *group) AddGroup(data *GroupCreate) (err error) {
 	}
 
 	// 同步角色用户组信息到CasBin策略表
-	users, err := GetUserNamesFromIDs(data.Users)
+	users, _ := GetUserNamesFromIDs(tx, data.Users)
 	if data.IsRoleGroup {
 		for _, username := range users {
 			rule := &model.CasbinRule{
@@ -97,8 +97,7 @@ func (u *group) AddGroup(data *GroupCreate) (err error) {
 	}
 
 	// 提交事务
-	err = tx.Commit().Error
-	if err != nil {
+	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -108,56 +107,133 @@ func (u *group) AddGroup(data *GroupCreate) (err error) {
 
 // DeleteGroup 删除
 func (u *group) DeleteGroup(id int) (err error) {
-	err = dao.Group.DeleteGroup(id)
-	if err != nil {
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	group := &model.AuthGroup{}
+	if err := tx.First(group, id).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 删除分组
+	if err := dao.Group.DeleteGroup(tx, group); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 删除角色
+	if err := dao.CasBin.DeleteRole(tx, group.Name); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 
 // UpdateGroup 更新
 func (u *group) UpdateGroup(data *GroupUpdate) error {
 
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
 	// 查询要修改的数据
 	group := &model.AuthGroup{}
-	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
+	if err := tx.First(group, data.ID).Error; err != nil {
 		return err
 	}
 
-	// 更新指定字段的值
-	group.Name = data.Name
+	// 如果是角色用户组，同步更新名称到CasBin策略表
+	if err := dao.CasBin.UpdateRoleName(tx, group.Name, data.Name); err != nil {
+		return err
+	}
 
-	return dao.Group.UpdateGroup(group)
+	// 更新分组名称
+	group.Name = data.Name
+	if err := dao.Group.UpdateGroup(tx, group); err != nil {
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
 }
 
-// UpdateGroupUser 更新组用户
+// UpdateGroupUser 更新组内用户，如果是角色用户级则支持同步用户信息到CasBin策略表
 func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
 
 	// 查询要修改的用户组
 	group := &model.AuthGroup{}
-	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
+	if err := tx.First(group, data.ID).Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	// 查询出要更新的所有用户
-	var users []model.AuthUser
-	if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
+	if group.IsRoleGroup && len(data.Users) == 0 {
+		return errors.New("角色用户组必须确保至少1个用户存在")
+	}
+
+	// Users=0需要执行清空操作
+	if len(data.Users) == 0 {
+		if err := dao.Group.ClearGroupUser(tx, group); err != nil {
+			tx.Rollback()
+			return err
+		}
+	} else {
+
+		// 查询出要更新的所有用户
+		var users []model.AuthUser
+		if err := tx.Find(&users, data.Users).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 更新组内用户信息
+		if err := dao.Group.UpdateGroupUser(tx, group, users); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 同步角色用户组信息到CasBin策略表
+		if group.IsRoleGroup {
+			// 根据用户ID列表，将列表中的内容转换为用户名列表
+			usernames, _ := GetUserNamesFromIDs(tx, data.Users)
+
+			if err := dao.CasBin.UpdateRoleUser(tx, group.Name, usernames); err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return dao.Group.UpdateGroupUser(group, users)
-}
-
-// UpdatePermission 更新组权限
-func (u *group) UpdatePermission() (err error) {
 	return nil
 }
 
 // GetUserNamesFromIDs 根据用户ID列表返回对应的用户名列表
-func GetUserNamesFromIDs(userIDs []uint) ([]string, error) {
+func GetUserNamesFromIDs(tx *gorm.DB, userIDs []uint) ([]string, error) {
 	var usernames []string
 
-	err := global.MySQLClient.Model(&model.AuthUser{}).Select("username").Where("id IN (?)", userIDs).Find(&usernames).Error
+	err := tx.Model(&model.AuthUser{}).Select("username").Where("id IN (?)", userIDs).Find(&usernames).Error
 	if err != nil {
 		return nil, err
 	}

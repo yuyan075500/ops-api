@@ -44,8 +44,8 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 		Offset(startSet).
 		Find(&groupList)
 	if tx.Error != nil {
-		logger.Error("获取列表失败：", tx.Error)
-		return nil, errors.New("获取列表失败：" + tx.Error.Error())
+		logger.Error("ERROR：", tx.Error)
+		return nil, errors.New(tx.Error.Error())
 	}
 
 	return &GroupList{
@@ -57,37 +57,53 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 // AddGroup 新增
 func (u *group) AddGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
 	if err := tx.Create(&data).Error; err != nil {
-		logger.Error("新增失败：", err.Error)
-		return errors.New("新增失败：" + err.Error())
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
 	}
 	return nil
 }
 
 // UpdateGroup 修改
-func (u *group) UpdateGroup(data *model.AuthGroup) (err error) {
-	tx := global.MySQLClient.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data)
-	if tx.Error != nil {
-		logger.Error("更新失败：", tx.Error)
-		return errors.New("更新失败：" + tx.Error.Error())
+func (u *group) UpdateGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
+	if err := tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
 	}
 	return nil
 }
 
 // DeleteGroup 删除
-func (u *group) DeleteGroup(id int) (err error) {
-	tx := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.AuthGroup{})
-	if tx.Error != nil {
-		logger.Error("删除失败：", tx.Error)
-		return errors.New("删除失败：" + tx.Error.Error())
+func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
+
+	// 清除关联关系
+	if err := Group.ClearGroupUser(tx, group); err != nil {
+		logger.Error("ERROR：", err)
+		return err
+	}
+
+	// 删除分组
+	if err := tx.Unscoped().Delete(&group).Error; err != nil {
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
 	}
 	return nil
 }
 
 // UpdateGroupUser 更新组用户
-func (u *group) UpdateGroupUser(group *model.AuthGroup, users []model.AuthUser) (err error) {
-	if err := global.MySQLClient.Model(&group).Association("Users").Replace(users); err != nil {
-		logger.Error("更新失败：", err.Error)
-		return errors.New("更新失败：" + err.Error())
+func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []model.AuthUser) (err error) {
+	if err := tx.Model(&group).Association("Users").Replace(users); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
+	}
+
+	return nil
+}
+
+// ClearGroupUser 清空组用户
+func (u *group) ClearGroupUser(tx *gorm.DB, group *model.AuthGroup) (err error) {
+	if err := tx.Model(&group).Association("Users").Clear(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
 	}
 
 	return nil

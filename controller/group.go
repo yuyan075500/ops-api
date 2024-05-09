@@ -105,10 +105,10 @@ func (u *group) DeleteGroup(c *gin.Context) {
 	// 对ID进行类型转换
 	groupID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("无效的用户ID：", err.Error())
+		logger.Error("无效的分组ID：", err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 4001,
-			"msg":  "无效的用户ID",
+			"msg":  "无效的分组ID",
 		})
 		return
 	}
