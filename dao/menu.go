@@ -17,7 +17,7 @@ type MenuItem struct {
 	Component string            `json:"component"`
 	Name      string            `json:"name"`
 	Meta      map[string]string `json:"meta"`
-	Children  []*MenuItem       `json:"children"`
+	Children  []*MenuItem       `json:"children,omitempty"` // 没有数据时不返回，否则前端无法正确加载路由
 }
 
 // GetUserMenu 获取用户菜单
