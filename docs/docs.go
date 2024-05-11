@@ -250,7 +250,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserUpdate"
+                            "$ref": "#/definitions/dao.UserUpdate"
                         }
                     }
                 ],
@@ -404,19 +404,12 @@ const docTemplate = `{
                 "summary": "密码更新",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Bearer 用户令牌",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
                         "description": "用户信息",
                         "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserPasswordUpdate"
+                            "$ref": "#/definitions/dao.UserPasswordUpdate"
                         }
                     }
                 ],
@@ -571,6 +564,45 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dao.UserPasswordUpdate": {
+            "type": "object",
+            "required": [
+                "id",
+                "password",
+                "re_password"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "re_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dao.UserUpdate": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
         "service.GroupCreate": {
             "type": "object",
             "required": [
@@ -663,45 +695,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserPasswordUpdate": {
-            "type": "object",
-            "required": [
-                "id",
-                "password",
-                "re_password"
-            ],
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "re_password": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserUpdate": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "is_active": {
-                    "type": "boolean"
-                },
-                "phone_number": {
                     "type": "string"
                 }
             }

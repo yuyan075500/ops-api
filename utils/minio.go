@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"github.com/minio/minio-go/v7"
-	"github.com/wonderivan/logger"
 	"io"
 	"net/url"
 	"ops-api/config"
@@ -28,7 +27,6 @@ func GetPresignedURL(fileName string, expiryTime time.Duration) (url *url.URL, e
 
 	presignedURL, err := global.MinioClient.PresignedGetObject(context.Background(), config.Conf.OSS.BucketName, fileName, expiryTime, nil)
 	if err != nil {
-		logger.Error("获取对象失败：" + err.Error())
 		return nil, err
 	}
 

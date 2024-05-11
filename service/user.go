@@ -19,13 +19,6 @@ type UserLogin struct {
 	Password string `json:"password" binding:"required"`
 }
 
-// UserPasswordUpdate 更改密码结构体
-type UserPasswordUpdate struct {
-	ID         uint   `json:"id" binding:"required"`
-	Password   string `json:"password" binding:"required"`
-	RePassword string `json:"re_password" binding:"required"`
-}
-
 // UserCreate 创建结构体，定义新增时的字段信息
 type UserCreate struct {
 	Name        string `json:"name" binding:"required"`
@@ -33,14 +26,6 @@ type UserCreate struct {
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
 	Email       string `json:"email" binding:"required" validate:"email"`
-}
-
-// UserUpdate 更新构体，定义更新时的字段信息
-type UserUpdate struct {
-	ID          uint   `json:"id" binding:"required"`
-	PhoneNumber string `json:"phone_number" validate:"omitempty,phone"`
-	Email       string `json:"email" validate:"omitempty,email"`
-	IsActive    bool   `json:"is_active"`
 }
 
 // GetUserList 获取用户列表
@@ -105,7 +90,7 @@ func (u *user) DeleteUser(id int) (err error) {
 }
 
 // UpdateUser 更新
-func (u *user) UpdateUser(data *UserUpdate) error {
+func (u *user) UpdateUser(data *dao.UserUpdate) error {
 
 	// 字段校验
 	validate := validator.New()
@@ -123,16 +108,11 @@ func (u *user) UpdateUser(data *UserUpdate) error {
 		return err
 	}
 
-	// 更新指定字段的值
-	user.PhoneNumber = data.PhoneNumber
-	user.Email = data.Email
-	user.IsActive = &data.IsActive
-
-	return dao.User.UpdateUser(user)
+	return dao.User.UpdateUser(user, data)
 }
 
 // UpdateUserPassword 更改密码
-func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
+func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 
 	// 检查密码校验
 	if data.Password != data.RePassword {
@@ -148,10 +128,7 @@ func (u *user) UpdateUserPassword(data *UserPasswordUpdate) (err error) {
 		return err
 	}
 
-	// 更新密码
-	user.Password = data.Password
-
-	return dao.User.UpdateUserPassword(user)
+	return dao.User.UpdateUserPassword(user, data)
 }
 
 // ResetUserMFA 重置MFA
