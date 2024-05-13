@@ -33,6 +33,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		GET("/api/v1/user/info", User.GetUser).
 		DELETE("/api/v1/user/:id", User.DeleteUser).
 		GET("/api/v1/users", User.GetUserList).
+		GET("/api/v1/user/list", User.GetUserListAll).
 		POST("/api/v1/user/avatarUpload", User.UploadAvatar).
 		POST("/api/v1/group", Group.AddGroup).
 		PUT("/api/v1/group", Group.UpdateGroup).

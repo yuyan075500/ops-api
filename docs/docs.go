@@ -362,6 +362,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/list": {
+            "get": {
+                "description": "用户相关接口",
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "获取所有的用户列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/reset_mfa/{id}": {
             "put": {
                 "description": "用户相关接口",
@@ -403,6 +429,13 @@ const docTemplate = `{
                 ],
                 "summary": "密码更新",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "description": "用户信息",
                         "name": "user",
@@ -462,7 +495,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "获取用户列表",
+                "summary": "获取查询的用户列表",
                 "parameters": [
                     {
                         "type": "string",

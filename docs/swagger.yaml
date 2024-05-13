@@ -345,6 +345,23 @@ paths:
       summary: 获取用户信息
       tags:
       - 用户认证
+  /api/v1/user/list:
+    get:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          schema:
+            type: string
+      summary: 获取所有的用户列表
+      tags:
+      - 用户管理
   /api/v1/user/reset_mfa/{id}:
     put:
       description: 用户相关接口
@@ -371,6 +388,11 @@ paths:
     put:
       description: 用户相关接口
       parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
       - description: 用户信息
         in: body
         name: user
@@ -413,7 +435,7 @@ paths:
           description: '{"code": 0, "msg": "获取列表成功", "data": []}'
           schema:
             type: string
-      summary: 获取用户列表
+      summary: 获取查询的用户列表
       tags:
       - 用户管理
   /login:

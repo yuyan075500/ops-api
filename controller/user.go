@@ -204,8 +204,34 @@ func (u *user) GetUser(c *gin.Context) {
 	})
 }
 
-// GetUserList 获取用户列表
-// @Summary 获取用户列表
+// GetUserListAll 获取所有的用户列表
+// @Summary 获取所有的用户列表
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
+// @Router /api/v1/user/list [get]
+func (u *user) GetUserListAll(c *gin.Context) {
+
+	data, err := service.User.GetUserListAll()
+	if err != nil {
+		logger.Error("获取列表失败：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 4000,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "获取列表成功",
+		"data": data,
+	})
+}
+
+// GetUserList 获取查询的用户列表
+// @Summary 获取查询的用户列表
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"

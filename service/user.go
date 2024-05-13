@@ -28,7 +28,16 @@ type UserCreate struct {
 	Email       string `json:"email" binding:"required" validate:"email"`
 }
 
-// GetUserList 获取用户列表
+// GetUserListAll 获取用户列表（下拉框、穿梭框）
+func (u *user) GetUserListAll() (data *dao.UserListAll, err error) {
+	data, err = dao.User.GetUserListAll()
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// GetUserList 获取用户列表（表格）
 func (u *user) GetUserList(name string, page, limit int) (data *dao.UserList, err error) {
 	data, err = dao.User.GetUserList(name, page, limit)
 	if err != nil {

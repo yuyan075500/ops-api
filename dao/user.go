@@ -15,13 +15,13 @@ var User user
 
 type user struct{}
 
-// UserList 返回给前端的结构体
+// UserList 返回给前端表格的数据结构体
 type UserList struct {
 	Items []*UserInfo `json:"items"`
 	Total int64       `json:"total"`
 }
 
-// UserInfo 返回字段信息
+// UserInfo 用户信息结构体
 type UserInfo struct {
 	ID          int        `json:"id"`
 	Name        string     `json:"name"`
@@ -32,6 +32,17 @@ type UserInfo struct {
 	Avatar      string     `json:"avatar"`
 	LastLoginAt *time.Time `json:"last_login_at"`
 	UserFrom    string     `json:"user_from"`
+}
+
+// UserListAll 返回给前端下拉框或穿梭框的数据结构体
+type UserListAll struct {
+	Users []*UserBasicInfo `json:"users"`
+}
+
+// UserBasicInfo 用户基本信息结构体
+type UserBasicInfo struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // UserUpdate 更新构体，定义更新时的字段信息
@@ -49,7 +60,25 @@ type UserPasswordUpdate struct {
 	RePassword string `json:"re_password" binding:"required"`
 }
 
-// GetUserList 获取列表
+// GetUserListAll 获取所有用户
+func (u *user) GetUserListAll() (data *UserListAll, err error) {
+
+	var userBasicInfo []*UserBasicInfo
+
+	// 获取用户列表
+	if err := global.MySQLClient.Model(&model.AuthUser{}).
+		Select("id, name").
+		Find(&userBasicInfo).Error; err != nil {
+		logger.Error("获取列表失败：", err.Error())
+		return nil, errors.New(err.Error())
+	}
+
+	return &UserListAll{
+		Users: userBasicInfo,
+	}, nil
+}
+
+// GetUserList 获取用户列表
 func (u *user) GetUserList(name string, page, limit int) (data *UserList, err error) {
 	// 定义数据的起始位置
 	startSet := (page - 1) * limit
