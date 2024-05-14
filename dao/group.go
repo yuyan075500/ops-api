@@ -32,24 +32,23 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 
 	// 定义返回的内容
 	var (
-		groupList []*GroupInfo
+		groupInfo []*GroupInfo
 		total     int64
 	)
 
-	// 获取用户列表
+	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.AuthGroup{}).
 		Where("name like ?", "%"+name+"%"). // 实现过滤
 		Count(&total).                      // 获取总数
 		Limit(limit).
 		Offset(startSet).
-		Find(&groupList)
+		Find(&groupInfo)
 	if tx.Error != nil {
-		logger.Error("ERROR：", tx.Error)
 		return nil, errors.New(tx.Error.Error())
 	}
 
 	return &GroupList{
-		Items: groupList,
+		Items: groupInfo,
 		Total: total,
 	}, nil
 }

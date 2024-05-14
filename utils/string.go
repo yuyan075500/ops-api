@@ -9,3 +9,9 @@ func Contains(slice []string, value string) bool {
 	}
 	return false
 }
+
+// MapToJson Map转json
+//func MapToJson(data interface{}) string {
+//	byteStr, _ := json.Marshal(data)
+//	return string(byteStr)
+//}
