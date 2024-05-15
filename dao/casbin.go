@@ -12,15 +12,6 @@ var CasBin casbin
 
 type casbin struct{}
 
-// AddRole 添加角色
-func (c *casbin) AddRole(tx *gorm.DB, rule *model.CasbinRule) (err error) {
-	if err := tx.Create(&rule).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New(err.Error())
-	}
-	return nil
-}
-
 // UpdateRoleUser 更新角色关联的用户
 func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (err error) {
 

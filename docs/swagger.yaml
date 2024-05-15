@@ -32,10 +32,6 @@ definitions:
         type: boolean
       name:
         type: string
-      users:
-        items:
-          type: integer
-        type: array
     required:
     - name
     type: object

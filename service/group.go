@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"gorm.io/gorm"
 	"ops-api/dao"
 	"ops-api/global"
@@ -16,26 +15,18 @@ type group struct{}
 type GroupCreate struct {
 	Name        string `json:"name" binding:"required"`
 	IsRoleGroup bool   `json:"is_role_group" default:"false"`
-	Users       []uint `json:"users"`
 }
 
-// GroupUpdate 更新构体，定义更新时的字段信息
+// GroupUpdate 更新分组名称构体
 type GroupUpdate struct {
 	ID   uint   `json:"id" binding:"required"`
 	Name string `json:"name" binding:"required"`
 }
 
-// GroupUpdateUser 更新组用户构体，定义更新时的字段信息
+// GroupUpdateUser 更新分组用户构体
 type GroupUpdateUser struct {
 	ID    uint   `json:"id" binding:"required"`
 	Users []uint `json:"users" binding:"required"`
-}
-
-// RoleCreate CasBin角色创建构体
-type RoleCreate struct {
-	Ptype string `json:"ptype"`
-	V0    string `json:"v0"`
-	V1    string `json:"v1"`
 }
 
 // GetGroupList 获取列表
@@ -55,50 +46,8 @@ func (u *group) AddGroup(data *GroupCreate) (err error) {
 		IsRoleGroup: data.IsRoleGroup,
 	}
 
-	if data.IsRoleGroup && len(data.Users) == 0 {
-		return errors.New("角色用户组必须至少添加一个用户")
-	}
-
-	// 如果传的的用户不为空，则添加用户
-	if len(data.Users) > 0 {
-		group.Users = make([]*model.AuthUser, len(data.Users))
-		for index, userId := range data.Users {
-			group.Users[index] = &model.AuthUser{
-				Model: gorm.Model{
-					ID: userId,
-				},
-			}
-		}
-	}
-
-	// 开启事务
-	tx := global.MySQLClient.Begin()
-
 	// 创建数据库数据
-	if err := dao.Group.AddGroup(tx, group); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// 同步角色用户组信息到CasBin策略表
-	users, _ := GetUserNamesFromIDs(tx, data.Users)
-	if data.IsRoleGroup {
-		for _, username := range users {
-			rule := &model.CasbinRule{
-				Ptype: "g",
-				V0:    username,
-				V1:    data.Name,
-			}
-			if err := dao.CasBin.AddRole(tx, rule); err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-
-	// 提交事务
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
+	if err := dao.Group.AddGroup(group); err != nil {
 		return err
 	}
 
@@ -144,9 +93,9 @@ func (u *group) UpdateGroup(data *GroupUpdate) error {
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
-	// 查询要修改的数据
+	// 查询要修改的分组
 	group := &model.AuthGroup{}
-	if err := tx.First(group, data.ID).Error; err != nil {
+	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
 		return err
 	}
 
@@ -183,13 +132,16 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 		return err
 	}
 
-	if group.IsRoleGroup && len(data.Users) == 0 {
-		return errors.New("角色用户组必须确保至少1个用户存在")
-	}
-
 	// Users=0需要执行清空操作
 	if len(data.Users) == 0 {
+		// 清除分组内所有用户
 		if err := dao.Group.ClearGroupUser(tx, group); err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		// 清除CasBin策略表内角色相关信息（相当于删除角色）
+		if err := dao.CasBin.DeleteRole(tx, group.Name); err != nil {
 			tx.Rollback()
 			return err
 		}

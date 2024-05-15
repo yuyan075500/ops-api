@@ -77,9 +77,9 @@ func (u *group) AddGroup(c *gin.Context) {
 	}
 
 	if err := service.Group.AddGroup(group); err != nil {
-		logger.Error("新增失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("新增分组失败：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return

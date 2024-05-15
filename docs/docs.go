@@ -648,12 +648,6 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
-                },
-                "users": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 }
             }
         },
