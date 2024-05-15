@@ -41,7 +41,7 @@ type UserListAll struct {
 
 // UserBasicInfo 用户基本信息结构体
 type UserBasicInfo struct {
-	ID   int    `json:"id"`
+	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
