@@ -2,7 +2,7 @@ package dao
 
 import (
 	"errors"
-	"github.com/wonderivan/logger"
+	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
 )
@@ -11,13 +11,50 @@ var Menu menu
 
 type menu struct{}
 
+// MenuList 返回给前端菜单列表结构体
+type MenuList struct {
+	Items []*model.Menu `json:"items"`
+	Total int64         `json:"total"`
+}
+
 // MenuItem 菜单项
 type MenuItem struct {
+	Name      string            `json:"name"`
 	Path      string            `json:"path"`
 	Component string            `json:"component"`
-	Name      string            `json:"name"`
 	Meta      map[string]string `json:"meta"`
 	Children  []*MenuItem       `json:"children,omitempty"` // 当Children为Null时不返回，否则前端无法正确加载路由
+}
+
+func (m *menu) GetMenuList(page, limit int) (data *MenuList, err error) {
+
+	// 定义数据的起始位置
+	startSet := (page - 1) * limit
+
+	// 定义返回的内容
+	var (
+		menus []*model.Menu
+		total int64
+	)
+
+	// 获取分组列表
+	tx := global.MySQLClient.Model(&model.Menu{}).
+		Preload("SubMenus", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sort")
+		}).            // 加载二级菜单，指定使用sort字段进行排序
+		Count(&total). // 获取一级菜单总数
+		Limit(limit).
+		Offset(startSet).
+		Order("sort"). // 使用sort字段进行排序
+		Find(&menus)
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	return &MenuList{
+		Items: menus,
+		Total: total,
+	}, nil
 }
 
 // GetUserMenu 获取用户菜单
@@ -30,7 +67,6 @@ func (m *menu) GetUserMenu() (data []*MenuItem, err error) {
 
 	// 获取一级菜单
 	if err := global.MySQLClient.Find(&menus).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
 		return nil, errors.New(err.Error())
 	}
 
@@ -50,7 +86,6 @@ func (m *menu) GetUserMenu() (data []*MenuItem, err error) {
 		// 获取一级菜单对应的二级菜单
 		var subMenus []*model.SubMenu
 		if err := global.MySQLClient.Where("menu_id = ?", menu.Id).Find(&subMenus).Error; err != nil {
-			logger.Error("ERROR：", err.Error())
 			return nil, errors.New(err.Error())
 		}
 

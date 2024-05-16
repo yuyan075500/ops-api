@@ -9,7 +9,7 @@ type Menu struct {
 	Path      string `json:"path"`
 	Component string `json:"component"`
 	Sort      uint   `json:"sort"`
-	SubMenus  []*SubMenu
+	SubMenus  []SubMenu
 }
 
 func (*Menu) TableName() (name string) {

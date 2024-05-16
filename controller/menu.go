@@ -11,20 +11,34 @@ var Menu menu
 
 type menu struct{}
 
-// GetUserMenu 获取用户菜单
-// @Summary 获取用户菜单
+// GetMenuList 获取菜单列表
+// @Summary 获取菜单列表
 // @Description 菜单关接口
 // @Tags 菜单管理
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
+// @Param page query int true "分页"
+// @Param limit query int true "分页大小"
+// @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/menus [get]
-func (u *menu) GetUserMenu(c *gin.Context) {
+func (u *menu) GetMenuList(c *gin.Context) {
+	params := new(struct {
+		Page  int `form:"page" binding:"required"`
+		Limit int `form:"limit" binding:"required"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
 
-	data, err := service.Menu.GetUserMenu()
+	data, err := service.Menu.GetMenuList(params.Page, params.Limit)
 	if err != nil {
-		logger.Error("获取列表失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -32,7 +46,31 @@ func (u *menu) GetUserMenu(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取列表成功",
+		"data": data,
+	})
+}
+
+// GetUserMenu 获取用户菜单
+// @Summary 获取用户菜单
+// @Description 菜单关接口
+// @Tags 菜单管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "data": []}"
+// @Router /api/v1/user/menu [get]
+func (u *menu) GetUserMenu(c *gin.Context) {
+
+	data, err := service.Menu.GetUserMenu()
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
 		"data": data,
 	})
 }

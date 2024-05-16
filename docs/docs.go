@@ -209,7 +209,7 @@ const docTemplate = `{
                 "tags": [
                     "菜单管理"
                 ],
-                "summary": "获取用户菜单",
+                "summary": "获取菜单列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -217,11 +217,25 @@ const docTemplate = `{
                         "name": "Authorization",
                         "in": "header",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "description": "{\"code\": 0, \"data\": []}",
                         "schema": {
                             "type": "string"
                         }
@@ -381,6 +395,32 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/menu": {
+            "get": {
+                "description": "菜单关接口",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "获取用户菜单",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
                         "schema": {
                             "type": "string"
                         }

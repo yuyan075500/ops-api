@@ -223,12 +223,22 @@ paths:
         name: Authorization
         required: true
         type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取用户菜单
+      summary: 获取菜单列表
       tags:
       - 菜单管理
   /api/v1/user:
@@ -358,6 +368,23 @@ paths:
       summary: 获取所有的用户列表
       tags:
       - 用户管理
+  /api/v1/user/menu:
+    get:
+      description: 菜单关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取用户菜单
+      tags:
+      - 菜单管理
   /api/v1/user/reset_mfa/{id}:
     put:
       description: 用户相关接口
