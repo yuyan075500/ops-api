@@ -26,7 +26,7 @@ type MenuItem struct {
 	Children  []*MenuItem       `json:"children,omitempty"` // 当Children为Null时不返回，否则前端无法正确加载路由
 }
 
-func (m *menu) GetMenuList(page, limit int) (data *MenuList, err error) {
+func (m *menu) GetMenuList(title string, page, limit int) (data *MenuList, err error) {
 
 	// 定义数据的起始位置
 	startSet := (page - 1) * limit
@@ -41,8 +41,9 @@ func (m *menu) GetMenuList(page, limit int) (data *MenuList, err error) {
 	tx := global.MySQLClient.Model(&model.Menu{}).
 		Preload("SubMenus", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sort")
-		}).            // 加载二级菜单，指定使用sort字段进行排序
-		Count(&total). // 获取一级菜单总数
+		}).                                   // 加载二级菜单，指定使用sort字段进行排序
+		Where("title like ?", "%"+title+"%"). // 实现过滤
+		Count(&total).                        // 获取一级菜单总数
 		Limit(limit).
 		Offset(startSet).
 		Order("sort"). // 使用sort字段进行排序

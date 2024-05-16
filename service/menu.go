@@ -7,8 +7,8 @@ var Menu menu
 type menu struct{}
 
 // GetMenuList 获取菜单列表
-func (m *menu) GetMenuList(page, limit int) (data *dao.MenuList, err error) {
-	data, err = dao.Menu.GetMenuList(page, limit)
+func (m *menu) GetMenuList(title string, page, limit int) (data *dao.MenuList, err error) {
+	data, err = dao.Menu.GetMenuList(title, page, limit)
 	if err != nil {
 		return nil, err
 	}

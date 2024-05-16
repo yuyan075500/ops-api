@@ -22,8 +22,9 @@ type menu struct{}
 // @Router /api/v1/menus [get]
 func (u *menu) GetMenuList(c *gin.Context) {
 	params := new(struct {
-		Page  int `form:"page" binding:"required"`
-		Limit int `form:"limit" binding:"required"`
+		Title string `form:"title"`
+		Page  int    `form:"page" binding:"required"`
+		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
 		logger.Error("ERROR：" + err.Error())
@@ -34,7 +35,7 @@ func (u *menu) GetMenuList(c *gin.Context) {
 		return
 	}
 
-	data, err := service.Menu.GetMenuList(params.Page, params.Limit)
+	data, err := service.Menu.GetMenuList(params.Title, params.Page, params.Limit)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
