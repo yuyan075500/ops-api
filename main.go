@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/wonderivan/logger"
 	"ops-api/config"
 	"ops-api/controller"
 	"ops-api/db"
@@ -45,6 +46,6 @@ func main() {
 	// 启动服务
 	err := r.Run(fmt.Sprintf("%v", config.Conf.Server))
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Error("ERROR：", err.Error())
 	}
 }

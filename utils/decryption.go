@@ -6,7 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
 )
 
 var privateKey []byte
@@ -26,7 +25,7 @@ func Decrypt(cipherText string) (string, error) {
 	// 解析私钥
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return "", errors.New("私钥解析错误：")
+		return "", err
 	}
 
 	// 解密

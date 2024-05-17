@@ -20,11 +20,11 @@ type GroupList struct {
 
 // AuthGroup 返回分组的字段信息，这里结构体名称必须和实际模型名称保持一致
 type AuthGroup struct {
-	ID          int               `json:"id"`
-	Name        string            `json:"name"`
-	IsRoleGroup bool              `json:"is_role_group"`
-	Users       []*model.AuthUser `json:"users" gorm:"many2many:auth_user_groups"`
-	Menus       []*string         `json:"menus"`
+	ID          int              `json:"id"`
+	Name        string           `json:"name"`
+	IsRoleGroup bool             `json:"is_role_group"`
+	Users       []*UserBasicInfo `json:"users"`
+	Menus       []*string        `json:"menus"`
 }
 
 // GetGroupList 获取列表

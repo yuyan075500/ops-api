@@ -6,8 +6,6 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
-	"fmt"
 )
 
 var publicKey []byte
@@ -26,8 +24,7 @@ func Encrypt(str string) (string, error) {
 	// 解析PEM格式的公钥
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		fmt.Println(err)
-		return "", errors.New("公钥解析错误")
+		return "", err
 	}
 
 	// 根据公钥加密
