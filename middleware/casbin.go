@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"fmt"
 	"github.com/casbin/casbin/v2"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/gin-gonic/gin"
+	"github.com/wonderivan/logger"
 	"ops-api/global"
 	"ops-api/model"
 	"strings"
@@ -16,21 +16,21 @@ func CasBinInit() {
 	// 初始化CasBin适配器
 	adapter, err := gormadapter.NewAdapterByDBWithCustomTable(global.MySQLClient, &model.CasbinRule{}, "casbin_rules")
 	if err != nil {
-		fmt.Println("初始化CasBin适配器失败：" + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 
 	// 初始化CasBin执行器
 	enforcer, err := casbin.NewEnforcer("config/rbac_model.conf", adapter)
 	if err != nil {
-		fmt.Println("初始化CasBin执行器失败：" + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 
 	// 加载规则
 	err = enforcer.LoadPolicy()
 	if err != nil {
-		fmt.Println("加载CasBin规则失败：" + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 
@@ -66,16 +66,17 @@ func PermissionCheck() gin.HandlerFunc {
 		// 检查用户权限
 		ok, err := global.CasBinServer.Enforce(username, path, method)
 		if err != nil {
+			logger.Error("ERROR：", err.Error())
 			c.JSON(200, gin.H{
-				"code": 500,
-				"msg":  "检查权限失败：" + err.Error(),
+				"code": 90500,
+				"msg":  err.Error(),
 			})
 			c.Abort()
 			return
 		} else if !ok {
 			c.JSON(403, gin.H{
 				"code": 90403,
-				"msg":  "您无权访问该资源，请联系管理员",
+				"msg":  "该资源您无权访问",
 			})
 			c.Abort()
 			return

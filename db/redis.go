@@ -17,7 +17,7 @@ func RedisInit() {
 
 	_, err := client.Ping().Result()
 	if err != nil {
-		logger.Info("Redis客户端初始化失败." + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 

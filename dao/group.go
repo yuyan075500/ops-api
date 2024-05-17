@@ -24,6 +24,7 @@ type AuthGroup struct {
 	Name        string            `json:"name"`
 	IsRoleGroup bool              `json:"is_role_group"`
 	Users       []*model.AuthUser `json:"users" gorm:"many2many:auth_user_groups"`
+	Menus       []*string         `json:"menus"`
 }
 
 // GetGroupList 获取列表

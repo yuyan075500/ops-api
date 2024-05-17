@@ -49,7 +49,7 @@ func (l *Login) Build() gin.HandlerFunc {
 
 		// 未认证
 		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"code": 90401,
 				"msg":  "未认证",
 			})
@@ -60,9 +60,9 @@ func (l *Login) Build() gin.HandlerFunc {
 		// Token校验
 		parts := strings.SplitN(token, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 90401,
-				"msg":  "无效的Token",
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  "Token无效",
 			})
 			c.Abort()
 			return
@@ -71,10 +71,10 @@ func (l *Login) Build() gin.HandlerFunc {
 		// Token解析
 		mc, err := ParseToken(parts[1])
 		if err != nil {
-			logger.Error("无效的Token：", err.Error())
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 90401,
-				"msg":  "无效的Token",
+			logger.Error("ERROR：", err)
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
 			})
 			c.Abort()
 			return
@@ -83,19 +83,18 @@ func (l *Login) Build() gin.HandlerFunc {
 		// 判断Token是否已注销
 		val, err := global.RedisClient.Exists(parts[1]).Result()
 		if err != nil {
-			logger.Error("未知错误：", err)
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 90401,
-				"msg":  "未知错误",
+			logger.Error("ERROR：", err)
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
 			})
 			c.Abort()
 			return
 		}
 		if val == 1 {
-			logger.Error("无效的Token：", err)
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"code": 90401,
-				"msg":  "无效的Token",
+				"msg":  "token无效",
 			})
 			c.Abort()
 			return
@@ -145,5 +144,5 @@ func ParseToken(tokenString string) (*UserClaims, error) {
 		return mc, nil
 	}
 
-	return nil, errors.New("无效的Token")
+	return nil, errors.New("token无效")
 }

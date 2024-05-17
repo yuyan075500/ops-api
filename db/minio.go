@@ -21,7 +21,7 @@ func MinioInit() {
 		Secure: config.Conf.OSS.SSL,
 	})
 	if err != nil {
-		logger.Error("Minio客户端初始化失败." + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 

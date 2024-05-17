@@ -26,7 +26,7 @@ func MySQLInit() {
 	// 建立数据库连接，并生成*gorm.DB对象
 	client, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		fmt.Println("MySQL数据库连接失败：" + err.Error())
+		logger.Error("ERROR：", err.Error())
 		return
 	}
 
