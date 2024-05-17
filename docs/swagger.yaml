@@ -45,6 +45,18 @@ definitions:
     - id
     - name
     type: object
+  service.GroupUpdatePermission:
+    properties:
+      id:
+        type: integer
+      permissions:
+        items:
+          type: string
+        type: array
+    required:
+    - id
+    - permissions
+    type: object
   service.GroupUpdateUser:
     properties:
       id:
@@ -160,6 +172,29 @@ paths:
       summary: 删除组
       tags:
       - 组管理
+  /api/v1/group/permissions:
+    put:
+      description: 组相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 权限名称
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/service.GroupUpdatePermission'
+      responses:
+        "200":
+          description: '{"code": 0, "data": nil}'
+          schema:
+            type: string
+      summary: 更新组权限
+      tags:
+      - 组管理
   /api/v1/group/users:
     put:
       description: 组相关接口
@@ -214,6 +249,23 @@ paths:
       summary: 获取组列表
       tags:
       - 组管理
+  /api/v1/menu/list:
+    get:
+      description: 菜单关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取所有的菜单列表
+      tags:
+      - 菜单管理
   /api/v1/menus:
     get:
       description: 菜单关接口

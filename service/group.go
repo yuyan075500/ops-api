@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"ops-api/dao"
 	"ops-api/global"
@@ -27,6 +28,12 @@ type GroupUpdate struct {
 type GroupUpdateUser struct {
 	ID    uint   `json:"id" binding:"required"`
 	Users []uint `json:"users" binding:"required"`
+}
+
+// GroupUpdatePermission 更新分组权限结构体
+type GroupUpdatePermission struct {
+	ID          uint     `json:"id" binding:"required"`
+	Permissions []string `json:"permissions" binding:"required"`
 }
 
 // GetGroupList 获取列表
@@ -119,7 +126,27 @@ func (u *group) UpdateGroup(data *GroupUpdate) error {
 	return nil
 }
 
-// UpdateGroupUser 更新组内用户，如果是角色用户级则支持同步用户信息到CasBin策略表
+// UpdateGroupPermission 更新组权限
+func (u *group) UpdateGroupPermission(data *GroupUpdatePermission) (err error) {
+
+	// 查询要修改的用户组
+	group := &model.AuthGroup{}
+	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
+		return err
+	}
+
+	if !group.IsRoleGroup {
+		return errors.New("普通分组不支持权限分配")
+	}
+
+	if err := dao.CasBin.UpdateRolePermission(group.Name, data.Permissions); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateGroupUser 更新组内用户，如果是角色用户组则支持同步用户信息到CasBin策略表
 func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 
 	// 开启事务

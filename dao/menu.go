@@ -26,6 +26,31 @@ type MenuItem struct {
 	Children  []*MenuItem       `json:"children,omitempty"` // 当Children为Null时不返回，否则前端无法正确加载路由
 }
 
+// GetMenuListAll 获取所有菜单
+func (m *menu) GetMenuListAll() (data *MenuList, err error) {
+
+	// 定义返回的内容
+	var (
+		menus []*model.Menu
+		total int64
+	)
+
+	// 获取所有菜单
+	tx := global.MySQLClient.Model(&model.Menu{}).
+		Preload("SubMenus"). // 加载二级菜单
+		Count(&total).
+		Find(&menus)
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	return &MenuList{
+		Items: menus,
+		Total: total,
+	}, nil
+}
+
+// GetMenuList 获取菜单列表
 func (m *menu) GetMenuList(title string, page, limit int) (data *MenuList, err error) {
 
 	// 定义数据的起始位置
@@ -37,7 +62,7 @@ func (m *menu) GetMenuList(title string, page, limit int) (data *MenuList, err e
 		total int64
 	)
 
-	// 获取分组列表
+	// 获取菜单列表
 	tx := global.MySQLClient.Model(&model.Menu{}).
 		Preload("SubMenus", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sort")

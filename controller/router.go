@@ -38,8 +38,10 @@ func (r *router) InitRouter(router *gin.Engine) {
 		POST("/api/v1/group", Group.AddGroup).
 		PUT("/api/v1/group", Group.UpdateGroup).
 		PUT("/api/v1/group/users", Group.UpdateGroupUser).
+		PUT("/api/v1/group/permissions", Group.UpdateGroupPermission).
 		DELETE("/api/v1/group/:id", Group.DeleteGroup).
 		GET("/api/v1/groups", Group.GetGroupList).
 		GET("/api/v1/user/menu", Menu.GetUserMenu).
-		GET("/api/v1/menus", Menu.GetMenuList)
+		GET("/api/v1/menus", Menu.GetMenuList).
+		GET("/api/v1/menu/list", Menu.GetMenuListAll)
 }

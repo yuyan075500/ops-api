@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/wonderivan/logger"
 	"gorm.io/gorm"
+	"ops-api/global"
 	"ops-api/model"
 	"ops-api/utils"
 )
@@ -11,6 +12,55 @@ import (
 var CasBin casbin
 
 type casbin struct{}
+
+// UpdateRolePermission 更新角色关联的权限
+func (c *casbin) UpdateRolePermission(groupName string, permissions []string) (err error) {
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 查询当前角色中所有权限列表
+	var oldRolePermissions []string
+	if err := tx.Model(&model.CasbinRule{}).Select("v1").Where("ptype = ? AND v0 = ?", "p", groupName).Pluck("v1", &oldRolePermissions).Error; err != nil {
+		logger.Error("ERROR：", err.Error())
+		return errors.New(err.Error())
+	}
+
+	// 前端传入的权限列表中有，数据库中没有，则添加
+	for _, permission := range permissions {
+		if !utils.Contains(oldRolePermissions, permission) {
+			if err := tx.Create(&model.CasbinRule{
+				Ptype: "p",
+				V0:    groupName,
+				V1:    permission,
+				V2:    "read",
+			}).Error; err != nil {
+				tx.Rollback()
+				logger.Error("ERROR：", err.Error())
+				return errors.New(err.Error())
+			}
+		}
+	}
+
+	// 前端传入的权限列表中没有，数据库中有，则删除
+	for _, existingPermission := range oldRolePermissions {
+		if !utils.Contains(permissions, existingPermission) {
+			if err := tx.Where("ptype = ? AND v0 = ? AND v1 = ?", "p", groupName, existingPermission).Delete(&model.CasbinRule{}).Error; err != nil {
+				tx.Rollback()
+				logger.Error("ERROR：", err.Error())
+				return errors.New("ERROR：" + err.Error())
+			}
+		}
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
 
 // UpdateRoleUser 更新角色关联的用户
 func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (err error) {

@@ -205,3 +205,41 @@ func (u *group) UpdateGroupUser(c *gin.Context) {
 		"data": nil,
 	})
 }
+
+// UpdateGroupPermission 更新组权限
+// @Summary 更新组权限
+// @Description 组相关接口
+// @Tags 组管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param users body service.GroupUpdatePermission true "权限名称"
+// @Success 200 {string} json "{"code": 0, "data": nil}"
+// @Router /api/v1/group/permissions [put]
+func (u *group) UpdateGroupPermission(c *gin.Context) {
+	var data = &service.GroupUpdatePermission{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("无效的请求参数：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.Group.UpdateGroupPermission(data); err != nil {
+		logger.Error("更新失败：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}

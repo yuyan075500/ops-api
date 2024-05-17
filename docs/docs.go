@@ -89,6 +89,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/group/permissions": {
+            "put": {
+                "description": "组相关接口",
+                "tags": [
+                    "组管理"
+                ],
+                "summary": "更新组权限",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "权限名称",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.GroupUpdatePermission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/group/users": {
             "put": {
                 "description": "组相关接口",
@@ -196,6 +231,32 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/menu/list": {
+            "get": {
+                "description": "菜单关接口",
+                "tags": [
+                    "菜单管理"
+                ],
+                "summary": "获取所有的菜单列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
                         "schema": {
                             "type": "string"
                         }
@@ -703,6 +764,24 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "service.GroupUpdatePermission": {
+            "type": "object",
+            "required": [
+                "id",
+                "permissions"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
