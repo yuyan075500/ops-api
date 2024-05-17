@@ -3,7 +3,6 @@ package dao
 import (
 	"errors"
 	"fmt"
-	"github.com/wonderivan/logger"
 	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
@@ -69,7 +68,6 @@ func (u *user) GetUserListAll() (data *UserListAll, err error) {
 	if err := global.MySQLClient.Model(&model.AuthUser{}).
 		Select("id, name").
 		Find(&userBasicInfo).Error; err != nil {
-		logger.Error("获取列表失败：", err.Error())
 		return nil, errors.New(err.Error())
 	}
 
@@ -97,8 +95,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 		Offset(startSet).
 		Find(&userList)
 	if tx.Error != nil {
-		logger.Error("获取列表失败：", tx.Error)
-		return nil, errors.New("获取列表失败：" + tx.Error.Error())
+		return nil, errors.New(tx.Error.Error())
 	}
 
 	return &UserList{
@@ -112,16 +109,13 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 
 	var userInfo *UserInfo
 
-	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo)
-	if tx.Error != nil {
-		logger.Error("获取信息失败：", tx.Error)
-		return nil, errors.New("获取信息失败：" + tx.Error.Error())
+	if err := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo).Error; err != nil {
+		return nil, errors.New(err.Error())
 	}
 
 	// 从OSS中获取头像临时访问URL，临时URL的过期时间与用户Token过期时间保持一致
 	avatarURL, err := utils.GetPresignedURL(userInfo.Avatar, time.Duration(config.Conf.JWT.Expires)*time.Hour)
 	if err != nil {
-		logger.Error("获取用户头像失败：", err.Error())
 		userInfo.Avatar = ""
 		return userInfo, nil
 	}
@@ -176,10 +170,8 @@ func (u *user) UpdateUserPassword(user *model.AuthUser, data *UserPasswordUpdate
 func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 
 	// 将MFA重置为nil
-	tx := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil)
-	if tx.Error != nil {
-		logger.Error("重置失败：", tx.Error)
-		return errors.New("重置失败：" + tx.Error.Error())
+	if err := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil).Error; err != nil {
+		return errors.New(err.Error())
 	}
 	return nil
 }

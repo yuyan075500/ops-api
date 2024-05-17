@@ -68,7 +68,6 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 	// 查询当前角色中所有用户列表
 	var oldUsernames []string
 	if err := tx.Model(&model.CasbinRule{}).Select("v0").Where("ptype = ? AND v1 = ?", "g", groupName).Pluck("v0", &oldUsernames).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 
@@ -80,7 +79,6 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 				V0:    username,
 				V1:    groupName,
 			}).Error; err != nil {
-				logger.Error("ERROR：", err.Error())
 				return errors.New(err.Error())
 			}
 		}
@@ -90,8 +88,7 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 	for _, existingUser := range oldUsernames {
 		if !utils.Contains(users, existingUser) {
 			if err := tx.Where("ptype = ? AND v0 = ? AND v1 = ?", "g", existingUser, groupName).Delete(&model.CasbinRule{}).Error; err != nil {
-				logger.Error("ERROR：", err.Error())
-				return errors.New("ERROR：" + err.Error())
+				return errors.New(err.Error())
 			}
 		}
 	}
@@ -103,13 +100,11 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 func (c *casbin) UpdateRoleName(tx *gorm.DB, oldName, newName string) (err error) {
 
 	if err := tx.Model(&model.CasbinRule{}).Where("ptype = ? AND v1 = ?", "g", oldName).Update("v1", newName).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New("ERROR：" + err.Error())
+		return errors.New(err.Error())
 	}
 
 	if err := tx.Model(&model.CasbinRule{}).Where("ptype = ? AND v0 = ?", "p", oldName).Update("v0", newName).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New("ERROR：" + err.Error())
+		return errors.New(err.Error())
 	}
 
 	return nil
@@ -119,8 +114,7 @@ func (c *casbin) UpdateRoleName(tx *gorm.DB, oldName, newName string) (err error
 func (c *casbin) DeleteRole(tx *gorm.DB, groupName string) (err error) {
 
 	if err := tx.Where("v0 = ? OR v1 = ?", groupName, groupName).Delete(&model.CasbinRule{}).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New("ERROR：" + err.Error())
+		return errors.New(err.Error())
 	}
 
 	return nil

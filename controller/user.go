@@ -29,7 +29,7 @@ type user struct{}
 // @Accept application/json
 // @Produce application/json
 // @Param user body service.UserLogin true "用户名密码"
-// @Success 200 {string} json "{"code": 0, "msg": "认证成功", "token": "用户令牌"}"
+// @Success 200 {string} json "{"code": 0, "token": "用户令牌"}"
 // @Router /login [post]
 func (u *user) Login(c *gin.Context) {
 	var (
@@ -38,16 +38,17 @@ func (u *user) Login(c *gin.Context) {
 	)
 
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("请求参数错误：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90400,
-			"msg":  "请求参数错误",
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	// 根据用户名查询用户
 	if err := global.MySQLClient.Where("username = ?", params.Username).First(&user).Error; err != nil {
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90404,
 			"msg":  "用户不存在",
@@ -75,9 +76,10 @@ func (u *user) Login(c *gin.Context) {
 
 	token, err := middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
-			"msg":  "系统错误，请联系管理员",
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -87,7 +89,6 @@ func (u *user) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,
-		"msg":   "认证成功",
 		"token": token,
 	})
 }
@@ -97,7 +98,7 @@ func (u *user) Login(c *gin.Context) {
 // @Description 认证相关接口
 // @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "注销成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "data": nil}"
 // @Router /logout [post]
 func (u *user) Logout(c *gin.Context) {
 	// 获取Token
@@ -107,7 +108,7 @@ func (u *user) Logout(c *gin.Context) {
 	// 将Token存入Redis缓存
 	err := global.RedisClient.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
@@ -117,7 +118,6 @@ func (u *user) Logout(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
-		"msg":  "注销成功",
 		"data": nil,
 	})
 }
@@ -128,15 +128,16 @@ func (u *user) Logout(c *gin.Context) {
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param avatar formData file true "头像"
-// @Success 200 {string} json "{"code": 0, "msg": "头像更新成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "data": nil}"
 // @Router /api/v1/user/avatarUpload [post]
 func (u *user) UploadAvatar(c *gin.Context) {
 	// 获取上传的头像
 	avatar, err := c.FormFile("avatar")
 	if err != nil {
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90400,
-			"msg":  "请求参数错误",
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -144,9 +145,10 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	// 打开上传头像
 	src, err := avatar.Open()
 	if err != nil {
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
-			"msg":  "文件打开失败",
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -158,10 +160,10 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	avatarName := fmt.Sprintf("avatar/%v%v", username, filepath.Ext(avatar.Filename))
 	err = utils.FileUpload(avatarName, avatar.Header.Get("Content-Type"), src, avatar.Size)
 	if err != nil {
-		logger.Error("文件上传失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
-			"msg":  "文件上传失败",
+			"code": 90500,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -172,7 +174,6 @@ func (u *user) UploadAvatar(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
-		"msg":  "头像更新成功",
 		"data": nil,
 	})
 }
@@ -182,16 +183,17 @@ func (u *user) UploadAvatar(c *gin.Context) {
 // @Description 认证相关接口
 // @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "获取用户信息成功", "data": {}}"
+// @Success 200 {string} json "{"code": 0, "data": {}}"
 // @Router /api/v1/user/info [get]
 func (u *user) GetUser(c *gin.Context) {
 
 	// 获取用户信息
 	data, err := service.User.GetUser(c.GetUint("id"))
 	if err != nil {
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 90404,
-			"msg":  "获取用户信息失败",
+			"code": 90500,
+			"msg":  err.Error(),
 		})
 		return
 	}
@@ -199,7 +201,6 @@ func (u *user) GetUser(c *gin.Context) {
 	// 返回用户信息
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取用户信息成功",
 		"data": data,
 	})
 }
@@ -209,15 +210,15 @@ func (u *user) GetUser(c *gin.Context) {
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
+// @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/user/list [get]
 func (u *user) GetUserListAll(c *gin.Context) {
 
 	data, err := service.User.GetUserListAll()
 	if err != nil {
-		logger.Error("获取列表失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
@@ -225,7 +226,6 @@ func (u *user) GetUserListAll(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取列表成功",
 		"data": data,
 	})
 }
@@ -238,7 +238,7 @@ func (u *user) GetUserListAll(c *gin.Context) {
 // @Param page query int true "分页"
 // @Param limit query int true "分页大小"
 // @Param name query string false "用户姓名"
-// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
+// @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/users [get]
 func (u *user) GetUserList(c *gin.Context) {
 	params := new(struct {
@@ -247,17 +247,17 @@ func (u *user) GetUserList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 4000,
-			"msg":  "无效的请求参数",
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	data, err := service.User.GetUserList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("获取列表失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 4000,
 			"msg":  err.Error(),
@@ -267,7 +267,6 @@ func (u *user) GetUserList(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取列表成功",
 		"data": data,
 	})
 }
@@ -286,18 +285,18 @@ func (u *user) AddUser(c *gin.Context) {
 	var user = &service.UserCreate{}
 
 	if err := c.ShouldBind(user); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
 	}
 
 	if err := service.User.AddUser(user); err != nil {
-		logger.Error("新增失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -323,19 +322,19 @@ func (u *user) DeleteUser(c *gin.Context) {
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("无效的用户ID：", err.Error())
+		logger.Error("ERROR：", err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4001,
-			"msg":  "无效的用户ID",
+			"code": 90500,
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	// 执行删除
 	if err := service.User.DeleteUser(userID); err != nil {
-		logger.Error("删除失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -361,9 +360,9 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
@@ -371,9 +370,9 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.User.UpdateUser(data); err != nil {
-		logger.Error("更新失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -399,7 +398,7 @@ func (u *user) UpdateUserPassword(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90400,
 			"msg":  err.Error(),
@@ -409,7 +408,7 @@ func (u *user) UpdateUserPassword(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.User.UpdateUserPassword(data); err != nil {
-		logger.Error(err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
@@ -437,19 +436,19 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("无效的用户ID：", err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4001,
-			"msg":  "无效的用户ID",
+			"code": 90500,
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	// 更新用户信息
 	if err := service.User.ResetUserMFA(userID); err != nil {
-		logger.Error("重置失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return

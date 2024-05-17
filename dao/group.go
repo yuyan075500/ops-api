@@ -60,7 +60,6 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 // AddGroup 新增
 func (u *group) AddGroup(data *model.AuthGroup) (err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 	return nil
@@ -69,7 +68,6 @@ func (u *group) AddGroup(data *model.AuthGroup) (err error) {
 // UpdateGroup 修改
 func (u *group) UpdateGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
 	if err := tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 	return nil
@@ -80,7 +78,6 @@ func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
 
 	// 清除关联关系
 	if err := Group.ClearGroupUser(tx, group); err != nil {
-		logger.Error("ERROR：", err)
 		return err
 	}
 
@@ -95,7 +92,6 @@ func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
 // UpdateGroupUser 更新组用户
 func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []model.AuthUser) (err error) {
 	if err := tx.Model(&group).Association("Users").Replace(users); err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 
@@ -105,7 +101,6 @@ func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []mod
 // ClearGroupUser 清空组用户
 func (u *group) ClearGroupUser(tx *gorm.DB, group *model.AuthGroup) (err error) {
 	if err := tx.Model(&group).Association("Users").Clear(); err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 

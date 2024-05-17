@@ -212,8 +212,7 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 func GetUserNamesFromIDs(tx *gorm.DB, userIDs []uint) ([]string, error) {
 	var usernames []string
 
-	err := tx.Model(&model.AuthUser{}).Select("username").Where("id IN (?)", userIDs).Find(&usernames).Error
-	if err != nil {
+	if err := tx.Model(&model.AuthUser{}).Select("username").Where("id IN (?)", userIDs).Find(&usernames).Error; err != nil {
 		return nil, err
 	}
 

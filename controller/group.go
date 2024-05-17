@@ -20,7 +20,7 @@ type group struct{}
 // @Param page query int true "分页"
 // @Param limit query int true "分页大小"
 // @Param name query string false "组名称"
-// @Success 200 {string} json "{"code": 0, "msg": "获取列表成功", "data": []}"
+// @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/groups [get]
 func (u *group) GetGroupList(c *gin.Context) {
 	params := new(struct {
@@ -29,19 +29,19 @@ func (u *group) GetGroupList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
-			"msg":  "无效的请求参数",
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	data, err := service.Group.GetGroupList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("获取列表失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -49,7 +49,6 @@ func (u *group) GetGroupList(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "获取列表成功",
 		"data": data,
 	})
 }
@@ -68,16 +67,16 @@ func (u *group) AddGroup(c *gin.Context) {
 	var group = &service.GroupCreate{}
 
 	if err := c.ShouldBind(group); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
 	}
 
 	if err := service.Group.AddGroup(group); err != nil {
-		logger.Error("新增分组失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
@@ -105,19 +104,19 @@ func (u *group) DeleteGroup(c *gin.Context) {
 	// 对ID进行类型转换
 	groupID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("无效的分组ID：", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code": 4001,
-			"msg":  "无效的分组ID",
+		logger.Error("ERROR：", err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
 		})
 		return
 	}
 
 	// 执行删除
 	if err := service.Group.DeleteGroup(groupID); err != nil {
-		logger.Error("删除失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -143,9 +142,9 @@ func (u *group) UpdateGroup(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
@@ -153,9 +152,9 @@ func (u *group) UpdateGroup(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.Group.UpdateGroup(data); err != nil {
-		logger.Error("更新失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -181,9 +180,9 @@ func (u *group) UpdateGroupUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
@@ -191,9 +190,9 @@ func (u *group) UpdateGroupUser(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.Group.UpdateGroupUser(data); err != nil {
-		logger.Error("更新失败：" + err.Error())
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": 4000,
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
@@ -212,14 +211,14 @@ func (u *group) UpdateGroupUser(c *gin.Context) {
 // @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param users body service.GroupUpdatePermission true "权限名称"
-// @Success 200 {string} json "{"code": 0, "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
 // @Router /api/v1/group/permissions [put]
 func (u *group) UpdateGroupPermission(c *gin.Context) {
 	var data = &service.GroupUpdatePermission{}
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("无效的请求参数：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90400,
 			"msg":  err.Error(),
@@ -229,7 +228,7 @@ func (u *group) UpdateGroupPermission(c *gin.Context) {
 
 	// 更新用户信息
 	if err := service.Group.UpdateGroupPermission(data); err != nil {
-		logger.Error("更新失败：" + err.Error())
+		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
