@@ -9,6 +9,7 @@ type Menu struct {
 	Path      string `json:"path"`
 	Component string `json:"component"`
 	Sort      uint   `json:"sort"`
+	Redirect  string `json:"redirect"`
 	SubMenus  []SubMenu
 }
 
@@ -25,6 +26,7 @@ type SubMenu struct {
 	Path      string `json:"path"`
 	Component string `json:"component"`
 	Sort      uint   `json:"sort"`
+	Redirect  string `json:"redirect"`
 	MenuID    uint   `json:"menu_id"`
 }
 

@@ -23,6 +23,7 @@ type MenuItem struct {
 	Path      string            `json:"path"`
 	Component string            `json:"component"`
 	Meta      map[string]string `json:"meta"`
+	Redirect  string            `json:"redirect"`
 	Children  []*MenuItem       `json:"children,omitempty"` // 当Children为Null时不返回，否则前端无法正确加载路由
 }
 
@@ -108,6 +109,7 @@ func (m *menu) GetUserMenu(username string) (data []*MenuItem, err error) {
 				Path:      menu.Path,
 				Component: menu.Component,
 				Name:      menu.Name,
+				Redirect:  menu.Redirect,
 				Meta: map[string]string{
 					"title": menu.Title,
 					"icon":  menu.Icon,
@@ -129,6 +131,7 @@ func (m *menu) GetUserMenu(username string) (data []*MenuItem, err error) {
 						Path:      subMenu.Path,
 						Component: subMenu.Component,
 						Name:      subMenu.Name,
+						Redirect:  subMenu.Redirect,
 						Meta: map[string]string{
 							"title": subMenu.Title,
 							"icon":  subMenu.Icon,

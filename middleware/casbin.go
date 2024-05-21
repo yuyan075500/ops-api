@@ -54,6 +54,7 @@ func PermissionCheck() gin.HandlerFunc {
 		// 排除不需要权限验证的接口，支持前缀匹配
 		ignorePath := []string{
 			"/login",            // 登录接口
+			"/logout",           // 注销接口
 			"/health",           // 预留健身检查接口
 			"/api/v1/user/info", // 用户登录成功后获取用户信息接口
 			"/api/v1/user/menu", // 用户登录成功后获取用户菜单接口
