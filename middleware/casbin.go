@@ -5,6 +5,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	"net/http"
 	"ops-api/global"
 	"ops-api/model"
 	"strings"
@@ -52,9 +53,11 @@ func PermissionCheck() gin.HandlerFunc {
 
 		// 排除不需要权限验证的接口，支持前缀匹配
 		ignorePath := []string{
-			"/login",
-			"/health",
-			"/swagger/",
+			"/login",            // 登录接口
+			"/health",           // 预留健身检查接口
+			"/api/v1/user/info", // 用户登录成功后获取用户信息接口
+			"/api/v1/user/menu", // 用户登录成功后获取用户菜单接口
+			"/swagger/",         // swagger接口
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {
@@ -67,14 +70,14 @@ func PermissionCheck() gin.HandlerFunc {
 		ok, err := global.CasBinServer.Enforce(username, path, method)
 		if err != nil {
 			logger.Error("ERROR：", err.Error())
-			c.JSON(200, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"code": 90500,
 				"msg":  err.Error(),
 			})
 			c.Abort()
 			return
 		} else if !ok {
-			c.JSON(403, gin.H{
+			c.JSON(http.StatusOK, gin.H{
 				"code": 90403,
 				"msg":  "该资源您无权访问",
 			})

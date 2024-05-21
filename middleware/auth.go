@@ -50,7 +50,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		// 未认证
 		if token == "" {
 			c.JSON(http.StatusOK, gin.H{
-				"code": 90401,
+				"code": 90514,
 				"msg":  "未认证",
 			})
 			c.Abort()
@@ -61,7 +61,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		parts := strings.SplitN(token, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
 			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
+				"code": 90514,
 				"msg":  "Token无效",
 			})
 			c.Abort()
@@ -73,7 +73,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		if err != nil {
 			logger.Error("ERROR：", err)
 			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
+				"code": 90514,
 				"msg":  err.Error(),
 			})
 			c.Abort()
@@ -85,7 +85,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		if err != nil {
 			logger.Error("ERROR：", err)
 			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
+				"code": 90514,
 				"msg":  err.Error(),
 			})
 			c.Abort()
@@ -93,7 +93,7 @@ func (l *Login) Build() gin.HandlerFunc {
 		}
 		if val == 1 {
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 90401,
+				"code": 90514,
 				"msg":  "token无效",
 			})
 			c.Abort()
@@ -116,7 +116,7 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 		name,
 		username,
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间24小时
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                                                         // 签发时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                                                         // 生效时间
 		},

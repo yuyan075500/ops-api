@@ -59,6 +59,11 @@ func (c *casbin) UpdateRolePermission(groupName string, permissions []string) (e
 		return err
 	}
 
+	// 加载规则
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -93,6 +98,11 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 		}
 	}
 
+	// 加载规则
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -107,6 +117,11 @@ func (c *casbin) UpdateRoleName(tx *gorm.DB, oldName, newName string) (err error
 		return errors.New(err.Error())
 	}
 
+	// 加载规则
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -115,6 +130,11 @@ func (c *casbin) DeleteRole(tx *gorm.DB, groupName string) (err error) {
 
 	if err := tx.Where("v0 = ? OR v1 = ?", groupName, groupName).Delete(&model.CasbinRule{}).Error; err != nil {
 		return errors.New(err.Error())
+	}
+
+	// 加载规则
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
+		return err
 	}
 
 	return nil
