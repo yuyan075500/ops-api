@@ -86,7 +86,8 @@ func (u *menu) GetMenuList(c *gin.Context) {
 // @Router /api/v1/user/menu [get]
 func (u *menu) GetUserMenu(c *gin.Context) {
 
-	data, err := service.Menu.GetUserMenu()
+	username := c.GetString("username")
+	data, err := service.Menu.GetUserMenu(username)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{

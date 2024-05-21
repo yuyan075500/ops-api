@@ -20,11 +20,11 @@ type GroupList struct {
 
 // AuthGroup 返回分组的字段信息，这里结构体名称必须和实际模型名称保持一致
 type AuthGroup struct {
-	ID          int              `json:"id"`
+	ID          uint             `json:"id"`
 	Name        string           `json:"name"`
 	IsRoleGroup bool             `json:"is_role_group"`
 	Users       []*UserBasicInfo `json:"users"`
-	Menus       []*string        `json:"menus"`
+	Menus       []string         `json:"menus"`
 }
 
 // GetGroupList 获取列表
@@ -34,15 +34,13 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 
 	// 定义返回的内容
 	var (
-		authGroup []*AuthGroup
+		authGroup []*model.AuthGroup
 		total     int64
 	)
 
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.AuthGroup{}).
-		Preload("Users", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id, name")
-		}).                                 // 加载用户信息
+		Preload("Users").                   // 预加载用户信息
 		Where("name like ?", "%"+name+"%"). // 实现过滤
 		Count(&total).                      // 获取总数
 		Limit(limit).
@@ -52,10 +50,45 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 		return nil, errors.New(tx.Error.Error())
 	}
 
-	return &GroupList{
-		Items: authGroup,
+	// 绑定最外层结构体的数据
+	groupList := &GroupList{
 		Total: total,
-	}, nil
+		Items: make([]*AuthGroup, len(authGroup)), // 初始化分组列表切片，并指定长度为authGroup长度
+	}
+
+	for g, group := range authGroup {
+
+		// 获取分组的菜单权限列表
+		menus := global.CasBinServer.GetFilteredPolicy(0, group.Name)
+		// 提取菜单名称，并组成一个切片
+		menuList := make([]string, 0)
+		for _, menu := range menus {
+			v1 := menu[1]
+			menuList = append(menuList, v1)
+		}
+
+		// 绑定分组数据到结构体
+		groupItem := &AuthGroup{
+			ID:          group.ID,
+			Name:        group.Name,
+			IsRoleGroup: group.IsRoleGroup,
+			Users:       make([]*UserBasicInfo, len(group.Users)), // 初始化用户列表切片，并指定长度为group.Users长度
+			Menus:       menuList,
+		}
+
+		// 遍历用户列表，绑定用户数据到对应分组结构体
+		for u, user := range group.Users {
+			groupItem.Users[u] = &UserBasicInfo{
+				ID:   user.ID,
+				Name: user.Name,
+			}
+		}
+
+		// 追加分组数据到列表
+		groupList.Items[g] = groupItem
+	}
+
+	return groupList, nil
 }
 
 // AddGroup 新增

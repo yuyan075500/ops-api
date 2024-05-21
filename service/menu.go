@@ -25,8 +25,8 @@ func (m *menu) GetMenuList(title string, page, limit int) (data *dao.MenuList, e
 }
 
 // GetUserMenu 获取用户菜单
-func (m *menu) GetUserMenu() (data []*dao.MenuItem, err error) {
-	data, err = dao.Menu.GetUserMenu()
+func (m *menu) GetUserMenu(username string) (data []*dao.MenuItem, err error) {
+	data, err = dao.Menu.GetUserMenu(username)
 	if err != nil {
 		return nil, err
 	}
