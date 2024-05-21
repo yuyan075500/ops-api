@@ -37,8 +37,11 @@ func (m *menu) GetMenuListAll() (data *MenuList, err error) {
 
 	// 获取所有菜单
 	tx := global.MySQLClient.Model(&model.Menu{}).
-		Preload("SubMenus"). // 加载二级菜单
+		Preload("SubMenus", func(db *gorm.DB) *gorm.DB {
+			return db.Order("sort")
+		}). // 加载二级菜单
 		Count(&total).
+		Order("sort").
 		Find(&menus)
 	if tx.Error != nil {
 		return nil, errors.New(tx.Error.Error())
@@ -92,7 +95,7 @@ func (m *menu) GetUserMenu(username string) (data []*MenuItem, err error) {
 	)
 
 	// 获取一级菜单
-	if err := global.MySQLClient.Find(&menus).Error; err != nil {
+	if err := global.MySQLClient.Order("sort").Find(&menus).Error; err != nil {
 		return nil, errors.New(err.Error())
 	}
 
@@ -114,7 +117,7 @@ func (m *menu) GetUserMenu(username string) (data []*MenuItem, err error) {
 
 			// 获取一级菜单对应的二级菜单
 			var subMenus []*model.SubMenu
-			if err := global.MySQLClient.Where("menu_id = ?", menu.Id).Find(&subMenus).Error; err != nil {
+			if err := global.MySQLClient.Where("menu_id = ?", menu.Id).Order("sort").Find(&subMenus).Error; err != nil {
 				return nil, errors.New(err.Error())
 			}
 			for _, subMenu := range subMenus {
