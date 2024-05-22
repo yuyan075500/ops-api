@@ -114,8 +114,10 @@ func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
 
 	var userInfo *UserInfo
 
+	tx := global.MySQLClient.Begin()
+
 	// 获取用户信息
-	if err := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo).Error; err != nil {
+	if err := tx.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo).Error; err != nil {
 		return nil, errors.New(err.Error())
 	}
 
@@ -128,7 +130,7 @@ func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
 	}
 
 	// 获取用户菜单
-	menus, err := Menu.GetUserMenu(userInfo.Username)
+	menus, err := Menu.GetUserMenu(tx, userInfo.Username)
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
