@@ -23,7 +23,7 @@ type MenuItem struct {
 	Path      string            `json:"path"`
 	Component string            `json:"component"`
 	Meta      map[string]string `json:"meta"`
-	Redirect  string            `json:"redirect"`
+	Redirect  string            `json:"redirect,omitempty"`
 	Children  []*MenuItem       `json:"children,omitempty"` // 当Children为Null时不返回，否则前端无法正确加载路由
 }
 

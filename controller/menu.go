@@ -76,29 +76,3 @@ func (u *menu) GetMenuList(c *gin.Context) {
 		"data": data,
 	})
 }
-
-// GetUserMenu 获取用户菜单
-// @Summary 获取用户菜单
-// @Description 菜单关接口
-// @Tags 菜单管理
-// @Param Authorization header string true "Bearer 用户令牌"
-// @Success 200 {string} json "{"code": 0, "data": []}"
-// @Router /api/v1/user/menu [get]
-func (u *menu) GetUserMenu(c *gin.Context) {
-
-	username := c.GetString("username")
-	data, err := service.Menu.GetUserMenu(username)
-	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
-		return
-	}
-
-	c.JSON(200, gin.H{
-		"code": 0,
-		"data": data,
-	})
-}

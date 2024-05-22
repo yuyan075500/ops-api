@@ -19,6 +19,12 @@ type UserList struct {
 	Total int64       `json:"total"`
 }
 
+// UserInfoWithMenu 用户信息结构体，用于用户登录后获取用户信息
+type UserInfoWithMenu struct {
+	UserInfo
+	Menus []*MenuItem `json:"menus"`
+}
+
 // UserInfo 用户信息结构体
 type UserInfo struct {
 	ID          int        `json:"id"`
@@ -104,10 +110,11 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 }
 
 // GetUser 获取用户信息
-func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
+func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
 
 	var userInfo *UserInfo
 
+	// 获取用户信息
 	if err := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo).Error; err != nil {
 		return nil, errors.New(err.Error())
 	}
@@ -116,11 +123,21 @@ func (u *user) GetUser(userid uint) (user *UserInfo, err error) {
 	avatarURL, err := utils.GetPresignedURL(userInfo.Avatar, time.Duration(config.Conf.JWT.Expires)*time.Hour)
 	if err != nil {
 		userInfo.Avatar = ""
-		return userInfo, nil
+	} else {
+		userInfo.Avatar = avatarURL.String()
 	}
 
-	userInfo.Avatar = avatarURL.String()
-	return userInfo, nil
+	// 获取用户菜单
+	menus, err := Menu.GetUserMenu(userInfo.Username)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	userInfoWithMenu := &UserInfoWithMenu{
+		UserInfo: *userInfo,
+		Menus:    menus,
+	}
+
+	return userInfoWithMenu, nil
 }
 
 // AddUser 新增

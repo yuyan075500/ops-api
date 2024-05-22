@@ -47,7 +47,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *dao.UserList, er
 }
 
 // GetUser 获取用户信息
-func (u *user) GetUser(userid uint) (user *dao.UserInfo, err error) {
+func (u *user) GetUser(userid uint) (user *dao.UserInfoWithMenu, err error) {
 	user, err = dao.User.GetUser(userid)
 	if err != nil {
 		return nil, err
