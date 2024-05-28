@@ -32,8 +32,9 @@ type GroupUpdateUser struct {
 
 // GroupUpdatePermission 更新分组权限结构体
 type GroupUpdatePermission struct {
-	ID          uint     `json:"id" binding:"required"`
-	Permissions []string `json:"permissions" binding:"required"`
+	ID              uint     `json:"id" binding:"required"`
+	MenuPermissions []string `json:"menu_permissions" binding:"required"`
+	PathPermissions []string `json:"path_permissions" binding:"required"`
 }
 
 // GetGroupList 获取列表
@@ -139,7 +140,29 @@ func (u *group) UpdateGroupPermission(data *GroupUpdatePermission) (err error) {
 		return errors.New("普通分组不支持权限分配")
 	}
 
-	if err := dao.CasBin.UpdateRolePermission(group.Name, data.Permissions); err != nil {
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 更新角色关联的菜单权限
+	if err := dao.CasBin.UpdateRoleMenuPermission(tx, group.Name, data.MenuPermissions); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 更新角色关联的接口权限
+	if err := dao.CasBin.UpdateRolePathPermission(tx, group.Name, data.PathPermissions); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 加载规则
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
 		return err
 	}
 

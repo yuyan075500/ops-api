@@ -86,3 +86,16 @@ func (p *path) GetPathListAll() (data []MenuPaths, err error) {
 
 	return menuPaths, nil
 }
+
+// GetPathInfo 根据接口Name获取详情
+func (p *path) GetPathInfo(name string) (data *model.SystemPath, err error) {
+
+	var path *model.SystemPath
+
+	tx := global.MySQLClient.Where("name = ?", name).First(&path)
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	return path, nil
+}
