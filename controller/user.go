@@ -249,7 +249,7 @@ func (u *user) GetUserList(c *gin.Context) {
 	if err := c.Bind(params); err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90400,
 			"msg":  err.Error(),
 		})
 		return
@@ -259,7 +259,7 @@ func (u *user) GetUserList(c *gin.Context) {
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
-			"code": 4000,
+			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return
