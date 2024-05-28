@@ -150,3 +150,29 @@ func (m *menu) GetUserMenu(tx *gorm.DB, username string) (data []*MenuItem, err 
 
 	return menuItems, nil
 }
+
+// GetMenuTitle 根据菜单Name获取Title
+func (m *menu) GetMenuTitle(menuName string) (title *string, err error) {
+	var (
+		menu    model.Menu
+		subMenu model.SubMenu
+	)
+
+	// 在一级菜单中根据Name获取Title
+	tx := global.MySQLClient.Where("name = ?", menuName).First(&menu)
+
+	// 如果一级菜单没有找到对应的记录则在二级菜单中继续查找
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		tx := global.MySQLClient.Where("name = ?", menuName).First(&subMenu)
+		if tx.Error != nil {
+			return nil, errors.New(tx.Error.Error())
+		}
+		return &subMenu.Title, nil
+	}
+
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	return &menu.Title, nil
+}

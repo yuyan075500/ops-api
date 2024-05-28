@@ -36,6 +36,7 @@ func MySQLInit() {
 		&model.AuthGroup{},
 		&model.Menu{},
 		&model.SubMenu{},
+		&model.SystemPath{},
 	)
 
 	// 设置数据库连接池

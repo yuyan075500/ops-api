@@ -116,7 +116,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"data\": nil}",
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -230,7 +230,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "description": "{\"code\": 0, \"data\": []}",
                         "schema": {
                             "type": "string"
                         }
@@ -290,6 +290,79 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "分页大小",
                         "name": "limit",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/path/list": {
+            "get": {
+                "description": "接口相关接口",
+                "tags": [
+                    "接口管理"
+                ],
+                "summary": "获取所有接口（权限分配时选择）",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/paths": {
+            "get": {
+                "description": "接口相关接口",
+                "tags": [
+                    "接口管理"
+                ],
+                "summary": "获取接口列表（表格展示）",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "菜单名称",
+                        "name": "menu_name",
                         "in": "query",
                         "required": true
                     }
@@ -403,7 +476,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"头像更新成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -429,7 +502,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取用户信息成功\", \"data\": {}}",
+                        "description": "{\"code\": 0, \"data\": {}}",
                         "schema": {
                             "type": "string"
                         }
@@ -444,32 +517,6 @@ const docTemplate = `{
                     "用户管理"
                 ],
                 "summary": "获取所有的用户列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer 用户令牌",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/user/menu": {
-            "get": {
-                "description": "菜单关接口",
-                "tags": [
-                    "菜单管理"
-                ],
-                "summary": "获取用户菜单",
                 "parameters": [
                     {
                         "type": "string",
@@ -628,7 +675,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"获取列表成功\", \"data\": []}",
+                        "description": "{\"code\": 0, \"data\": []}",
                         "schema": {
                             "type": "string"
                         }
@@ -662,7 +709,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"认证成功\", \"token\": \"用户令牌\"}",
+                        "description": "{\"code\": 0, \"token\": \"用户令牌\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -688,7 +735,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"msg\": \"注销成功\", \"data\": nil}",
+                        "description": "{\"code\": 0, \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }

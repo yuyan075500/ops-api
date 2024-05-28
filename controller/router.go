@@ -42,5 +42,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		DELETE("/api/v1/group/:id", Group.DeleteGroup).
 		GET("/api/v1/groups", Group.GetGroupList).
 		GET("/api/v1/menus", Menu.GetMenuList).
-		GET("/api/v1/menu/list", Menu.GetMenuListAll)
+		GET("/api/v1/menu/list", Menu.GetMenuListAll).
+		GET("/api/v1/paths", Path.GetPathList).
+		GET("/api/v1/path/list", Path.GetPathListAll)
 }

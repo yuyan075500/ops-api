@@ -189,7 +189,7 @@ paths:
           $ref: '#/definitions/service.GroupUpdatePermission'
       responses:
         "200":
-          description: '{"code": 0, "data": nil}'
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
           schema:
             type: string
       summary: 更新组权限
@@ -243,7 +243,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          description: '{"code": 0, "data": []}'
           schema:
             type: string
       summary: 获取组列表
@@ -293,6 +293,55 @@ paths:
       summary: 获取菜单列表
       tags:
       - 菜单管理
+  /api/v1/path/list:
+    get:
+      description: 接口相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取所有接口（权限分配时选择）
+      tags:
+      - 接口管理
+  /api/v1/paths:
+    get:
+      description: 接口相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 菜单名称
+        in: query
+        name: menu_name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取接口列表（表格展示）
+      tags:
+      - 接口管理
   /api/v1/user:
     post:
       consumes:
@@ -380,7 +429,7 @@ paths:
         type: file
       responses:
         "200":
-          description: '{"code": 0, "msg": "头像更新成功", "data": nil}'
+          description: '{"code": 0, "data": nil}'
           schema:
             type: string
       summary: 头像上传
@@ -397,7 +446,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取用户信息成功", "data": {}}'
+          description: '{"code": 0, "data": {}}'
           schema:
             type: string
       summary: 获取用户信息
@@ -414,29 +463,12 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          description: '{"code": 0, "data": []}'
           schema:
             type: string
       summary: 获取所有的用户列表
       tags:
       - 用户管理
-  /api/v1/user/menu:
-    get:
-      description: 菜单关接口
-      parameters:
-      - description: Bearer 用户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{"code": 0, "data": []}'
-          schema:
-            type: string
-      summary: 获取用户菜单
-      tags:
-      - 菜单管理
   /api/v1/user/reset_mfa/{id}:
     put:
       description: 用户相关接口
@@ -507,7 +539,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "获取列表成功", "data": []}'
+          description: '{"code": 0, "data": []}'
           schema:
             type: string
       summary: 获取查询的用户列表
@@ -529,7 +561,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"code": 0, "msg": "认证成功", "token": "用户令牌"}'
+          description: '{"code": 0, "token": "用户令牌"}'
           schema:
             type: string
       summary: 登录
@@ -546,7 +578,7 @@ paths:
         type: string
       responses:
         "200":
-          description: '{"code": 0, "msg": "注销成功", "data": nil}'
+          description: '{"code": 0, "data": nil}'
           schema:
             type: string
       summary: 注销
