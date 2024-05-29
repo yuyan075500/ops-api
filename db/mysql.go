@@ -5,6 +5,7 @@ import (
 	"github.com/wonderivan/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	logger2 "gorm.io/gorm/logger"
 	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
@@ -24,7 +25,9 @@ func MySQLInit() {
 	)
 
 	// 建立数据库连接，并生成*gorm.DB对象
-	client, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	client, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: logger2.Default.LogMode(logger2.Silent),
+	})
 	if err != nil {
 		logger.Error("ERROR：", err.Error())
 		return
