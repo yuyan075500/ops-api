@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-	"github.com/wonderivan/logger"
 	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
@@ -13,85 +12,37 @@ var CasBin casbin
 
 type casbin struct{}
 
-// UpdateRoleMenuPermission 更新角色关联的菜单权限
-func (c *casbin) UpdateRoleMenuPermission(tx *gorm.DB, groupName string, permissions []string) (err error) {
+// UpdateRolePermission 更新角色关联的权限（使用CasBin API操作，不支持事务，如果要支持事务需要改成原生Gorm操作）
+func (c *casbin) UpdateRolePermission(groupName string, menus, paths []string) (err error) {
 
-	// 查询当前角色中所有权限列表
-	var oldPermissions []string
-	if err := tx.Model(&model.CasbinRule{}).Select("v1").Where("ptype = ? AND v0 = ? AND v2 = ?", "p", groupName, "read").Pluck("v1", &oldPermissions).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New(err.Error())
+	// 迁移角色对应的所有权限
+	_, err = global.CasBinServer.RemoveFilteredPolicy(0, groupName, "", "")
+	if err != nil {
+		return err
 	}
 
-	// 前端传入的权限列表中有，数据库中没有，则添加
-	for _, permission := range permissions {
-		if !utils.Contains(oldPermissions, permission) {
-			if err := tx.Create(&model.CasbinRule{
-				Ptype: "p",
-				V0:    groupName,
-				V1:    permission,
-				V2:    "read",
-			}).Error; err != nil {
-				logger.Error("ERROR：", err.Error())
-				return errors.New(err.Error())
-			}
+	// 添加角色对应的接口权限
+	for _, permission := range paths {
+
+		// 获取前端传入的接口信息
+		pathInfo, err := Path.GetPathInfo(permission)
+		if err != nil {
+			return err
+		}
+
+		// 添加角色对应的接口权限
+		_, err = global.CasBinServer.AddNamedPolicy("p", groupName, pathInfo.Path, pathInfo.Method)
+		if err != nil {
+			return err
 		}
 	}
 
-	// 前端传入的权限列表中没有，数据库中有，则删除
-	for _, existingPermission := range oldPermissions {
-		if !utils.Contains(permissions, existingPermission) {
-			if err := tx.Where("ptype = ? AND v0 = ? AND v1 = ? AND v2 = ?", "p", groupName, existingPermission, "read").Delete(&model.CasbinRule{}).Error; err != nil {
-				logger.Error("ERROR：", err.Error())
-				return errors.New("ERROR：" + err.Error())
-			}
-		}
-	}
+	// 添加角色对应的菜单权限
+	for _, permission := range menus {
 
-	return nil
-}
-
-// UpdateRolePathPermission 更新角色关联的接口权限
-func (c *casbin) UpdateRolePathPermission(tx *gorm.DB, groupName string, permissions []string) (err error) {
-
-	// 查询当前角色中所有权限列表
-	var oldPermissions []string
-	if err := tx.Model(&model.CasbinRule{}).Select("v1").Where("ptype = ? AND v0 = ? AND v2 != ?", "p", groupName, "read").Pluck("v1", &oldPermissions).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
-		return errors.New(err.Error())
-	}
-
-	// 前端传入的权限列表中有，数据库中没有，则添加
-	for _, permission := range permissions {
-		if !utils.Contains(oldPermissions, permission) {
-
-			// 获取接口详情
-			pathInfo, err := Path.GetPathInfo(permission)
-			if err != nil {
-				return err
-			}
-
-			if err := tx.Create(&model.CasbinRule{
-				Ptype: "p",
-				V0:    groupName,
-				V1:    pathInfo.Path,
-				V2:    pathInfo.Method,
-			}).Error; err != nil {
-				tx.Rollback()
-				logger.Error("ERROR：", err.Error())
-				return errors.New(err.Error())
-			}
-		}
-	}
-
-	// 前端传入的权限列表中没有，数据库中有，则删除
-	for _, existingPermission := range oldPermissions {
-		if !utils.Contains(permissions, existingPermission) {
-			if err := tx.Where("ptype = ? AND v0 = ? AND v1 = ? AND v2 != ?", "p", groupName, existingPermission, "read").Delete(&model.CasbinRule{}).Error; err != nil {
-				tx.Rollback()
-				logger.Error("ERROR：", err.Error())
-				return errors.New("ERROR：" + err.Error())
-			}
+		_, err = global.CasBinServer.AddNamedPolicy("p", groupName, permission, "read")
+		if err != nil {
+			return err
 		}
 	}
 

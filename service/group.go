@@ -140,24 +140,8 @@ func (u *group) UpdateGroupPermission(data *GroupUpdatePermission) (err error) {
 		return errors.New("普通分组不支持权限分配")
 	}
 
-	// 开启事务
-	tx := global.MySQLClient.Begin()
-
-	// 更新角色关联的菜单权限
-	if err := dao.CasBin.UpdateRoleMenuPermission(tx, group.Name, data.MenuPermissions); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// 更新角色关联的接口权限
-	if err := dao.CasBin.UpdateRolePathPermission(tx, group.Name, data.PathPermissions); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// 提交事务
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
+	// 更新角色关联权限
+	if err := dao.CasBin.UpdateRolePermission(group.Name, data.MenuPermissions, data.PathPermissions); err != nil {
 		return err
 	}
 
