@@ -23,7 +23,6 @@ INSERT INTO `system_path` VALUES (9, 'UpdateGroupUser', '/api/v1/group/users', '
 INSERT INTO `system_path` VALUES (10, 'UpdateGroupPermission', '/api/v1/group/permissions', 'PUT', 'GroupManagement', '更改分组权限');
 INSERT INTO `system_path` VALUES (11, 'DeleteGroup', '/api/v1/group/:id', 'DELETE', 'GroupManagement', '删除分组');
 INSERT INTO `system_path` VALUES (12, 'GetGroupList', '/api/v1/groups', 'GET', 'GroupManagement', '获取分组列表');
-INSERT INTO `system_path` VALUES (13, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
-INSERT INTO `system_path` VALUES (14, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
-
--- INSERT INTO `system_path` VALUES (15, 'GetPathListAll', '/api/v1/path/list', 'GET', 3, 2, '获取所有接口');
+INSERT INTO `system_path` VALUES (13, 'GetPathListAll', '/api/v1/path/list', 'GET', 'GroupManagement', '获取所有接口');
+INSERT INTO `system_path` VALUES (14, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
+INSERT INTO `system_path` VALUES (15, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');

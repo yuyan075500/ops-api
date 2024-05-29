@@ -25,6 +25,7 @@ type AuthGroup struct {
 	IsRoleGroup bool             `json:"is_role_group"`
 	Users       []*UserBasicInfo `json:"users"`
 	Menus       []string         `json:"menus"`
+	Paths       []string         `json:"paths"`
 }
 
 // GetGroupList 获取列表
@@ -58,22 +59,31 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 
 	for g, group := range authGroup {
 
-		// 获取分组的菜单权限列表
-		menus := global.CasBinServer.GetFilteredPolicy(0, group.Name)
-		// 提取菜单名称，并组成一个切片
-		menuList := make([]string, 0)
-		for _, menu := range menus {
-			v1 := menu[1]
-			menuList = append(menuList, v1)
+		// 获取分组的权限列表
+		permissions := global.CasBinServer.GetFilteredPolicy(0, group.Name)
+		menus := make([]string, 0)
+		paths := make([]string, 0)
+		for _, permission := range permissions {
+			if permission[2] == "read" {
+				v1 := permission[1]
+				menus = append(menus, v1)
+			} else {
+				name, err := Path.GetPathName(permission[1], permission[2])
+				if err != nil {
+					return nil, err
+				}
+				paths = append(paths, *name)
+			}
 		}
 
-		// 绑定分组数据到结构体
+		// 绑定分组相关数据到结构体
 		groupItem := &AuthGroup{
 			ID:          group.ID,
 			Name:        group.Name,
 			IsRoleGroup: group.IsRoleGroup,
 			Users:       make([]*UserBasicInfo, len(group.Users)), // 初始化用户列表切片，并指定长度为group.Users长度
-			Menus:       menuList,
+			Menus:       menus,
+			Paths:       paths,
 		}
 
 		// 遍历用户列表，绑定用户数据到对应分组结构体

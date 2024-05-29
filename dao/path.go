@@ -99,3 +99,18 @@ func (p *path) GetPathInfo(name string) (data *model.SystemPath, err error) {
 
 	return path, nil
 }
+
+// GetPathName 根据接口路径Path和请求方法Method获取接口Name
+func (p *path) GetPathName(path, method string) (title *string, err error) {
+	var systemPath model.SystemPath
+
+	// 获取用户列表
+	tx := global.MySQLClient.Model(&model.SystemPath{}).
+		Where("path = ? AND method = ?", path, method).
+		First(&systemPath)
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	return &systemPath.Name, nil
+}
