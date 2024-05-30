@@ -46,7 +46,7 @@ func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList,
 	return data, nil
 }
 
-// AddGroup 创建，支持同时添加用户信息到CasBin策略表
+// AddGroup 创建分组
 func (u *group) AddGroup(data *GroupCreate) (err error) {
 
 	group := &model.AuthGroup{
@@ -62,7 +62,7 @@ func (u *group) AddGroup(data *GroupCreate) (err error) {
 	return nil
 }
 
-// DeleteGroup 删除
+// DeleteGroup 删除分组
 func (u *group) DeleteGroup(id int) (err error) {
 
 	// 开启事务
@@ -89,6 +89,11 @@ func (u *group) DeleteGroup(id int) (err error) {
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
+		return err
+	}
+
+	// 重新加载策略
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
 		return err
 	}
 
@@ -124,6 +129,11 @@ func (u *group) UpdateGroup(data *GroupUpdate) error {
 		return err
 	}
 
+	// 重新加载策略
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -145,7 +155,7 @@ func (u *group) UpdateGroupPermission(data *GroupUpdatePermission) (err error) {
 		return err
 	}
 
-	// 加载规则
+	// 重新加载策略
 	if err := global.CasBinServer.LoadPolicy(); err != nil {
 		return err
 	}
@@ -209,6 +219,11 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
+		return err
+	}
+
+	// 重新加载策略
+	if err := global.CasBinServer.LoadPolicy(); err != nil {
 		return err
 	}
 
