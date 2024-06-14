@@ -818,13 +818,20 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
-                "permissions"
+                "menu_permissions",
+                "path_permissions"
             ],
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "permissions": {
+                "menu_permissions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "path_permissions": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -872,6 +879,9 @@ const docTemplate = `{
                 "phone_number": {
                     "type": "string"
                 },
+                "user_from": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -884,6 +894,9 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "ldap": {
+                    "type": "boolean"
+                },
                 "password": {
                     "type": "string"
                 },

@@ -15,6 +15,7 @@ type Config struct {
 	JWT     JWT    `yaml:"jwt"`
 	Redis   Redis  `yaml:"redis"`
 	OSS     OSS    `yaml:"oss"`
+	LDAP    LDAP   `yaml:"ldap"`
 	Swagger bool   `yaml:"swagger"`
 }
 
@@ -27,6 +28,13 @@ type MySQL struct {
 	MaxIdleConns int    `yaml:"maxIdleConns"`
 	MaxOpenConns int    `yaml:"maxOpenConns"`
 	MaxLifeTime  int    `yaml:"maxLifeTime"`
+}
+
+type LDAP struct {
+	Host             string `yaml:"host"`
+	BindUserDN       string `yaml:"bindUserDN"`
+	BindUserPassword string `yaml:"bindUserPassword"`
+	SearchDN         string `yaml:"searchDN"`
 }
 
 type Redis struct {

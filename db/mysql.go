@@ -13,7 +13,7 @@ import (
 )
 
 // MySQLInit MySQL初始化
-func MySQLInit() {
+func MySQLInit() error {
 
 	// 组装数据库连接配置
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
@@ -29,8 +29,7 @@ func MySQLInit() {
 		Logger: logger2.Default.LogMode(logger2.Silent),
 	})
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	// 表迁移
@@ -50,4 +49,6 @@ func MySQLInit() {
 
 	global.MySQLClient = client
 	logger.Info("MySQL数据库初始化成功.")
+
+	return nil
 }

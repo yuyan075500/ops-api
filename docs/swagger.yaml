@@ -49,13 +49,18 @@ definitions:
     properties:
       id:
         type: integer
-      permissions:
+      menu_permissions:
+        items:
+          type: string
+        type: array
+      path_permissions:
         items:
           type: string
         type: array
     required:
     - id
-    - permissions
+    - menu_permissions
+    - path_permissions
     type: object
   service.GroupUpdateUser:
     properties:
@@ -79,6 +84,8 @@ definitions:
         type: string
       phone_number:
         type: string
+      user_from:
+        type: string
       username:
         type: string
     required:
@@ -90,6 +97,8 @@ definitions:
     type: object
   service.UserLogin:
     properties:
+      ldap:
+        type: boolean
       password:
         type: string
       username:

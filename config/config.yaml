@@ -21,4 +21,9 @@ oss:
   secretKey: "SblsJVWyePbuoIh1Wj5cHFmVVg31uPFA"
   bucketName: "ops"
   ssl: true
+ldap:
+  host: "ldap://192.168.200.13:389"
+  bindUserDN: "LdapUser@wlyd.local"
+  bindUserPassword: "tv47a=uB@TmC"
+  searchDN: "dc=wlyd,dc=local"
 swagger: true

@@ -21,6 +21,7 @@ require (
 require github.com/jinzhu/now v1.1.5 // indirect
 
 require (
+	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.11.5 // indirect
 	github.com/bytedance/sonic/loader v0.1.1 // indirect
@@ -34,6 +35,8 @@ require (
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/glebarez/go-sqlite v1.20.3 // indirect
 	github.com/glebarez/sqlite v1.7.0 // indirect
+	github.com/go-asn1-ber/asn1-ber v1.5.5 // indirect
+	github.com/go-ldap/ldap/v3 v3.4.8 // indirect
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/spec v0.21.0 // indirect

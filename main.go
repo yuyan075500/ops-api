@@ -16,16 +16,28 @@ func main() {
 	config.Init()
 
 	// 初始化MySQL
-	db.MySQLInit()
+	if err := db.MySQLInit(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return
+	}
 
 	// 初始Redis
-	db.RedisInit()
+	if err := db.RedisInit(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return
+	}
 
 	// 初始化Minio
-	db.MinioInit()
+	if err := db.MinioInit(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return
+	}
 
 	// 初始化CasBin权限
-	middleware.CasBinInit()
+	if err := middleware.CasBinInit(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return
+	}
 
 	r := gin.Default()
 
@@ -44,8 +56,7 @@ func main() {
 	controller.Router.InitRouter(r)
 
 	// 启动服务
-	err := r.Run(fmt.Sprintf("%v", config.Conf.Server))
-	if err != nil {
+	if err := r.Run(fmt.Sprintf("%v", config.Conf.Server)); err != nil {
 		logger.Error("ERROR：", err.Error())
 	}
 }

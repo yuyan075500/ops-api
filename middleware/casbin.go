@@ -12,30 +12,29 @@ import (
 )
 
 // CasBinInit 权限初始化
-func CasBinInit() {
+func CasBinInit() error {
 
 	// 初始化CasBin适配器
 	adapter, err := gormadapter.NewAdapterByDBWithCustomTable(global.MySQLClient, &model.CasbinRule{}, "casbin_rules")
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	// 初始化CasBin执行器
 	enforcer, err := casbin.NewEnforcer("config/rbac_model.conf", adapter)
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	// 加载规则
 	err = enforcer.LoadPolicy()
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	global.CasBinServer = enforcer
+
+	return nil
 }
 
 // PermissionCheck 用户权限检查

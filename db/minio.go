@@ -8,7 +8,7 @@ import (
 	"ops-api/global"
 )
 
-func MinioInit() {
+func MinioInit() error {
 
 	// 读取配置信息
 	endpoint := config.Conf.OSS.Endpoint
@@ -21,10 +21,11 @@ func MinioInit() {
 		Secure: config.Conf.OSS.SSL,
 	})
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	global.MinioClient = client
 	logger.Info("Minio客户端初始化成功.")
+
+	return nil
 }

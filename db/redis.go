@@ -8,7 +8,7 @@ import (
 )
 
 // RedisInit Redis初始化
-func RedisInit() {
+func RedisInit() error {
 	client := redis.NewClient(&redis.Options{
 		Addr:     config.Conf.Redis.Host,
 		Password: config.Conf.Redis.Password,
@@ -17,10 +17,11 @@ func RedisInit() {
 
 	_, err := client.Ping().Result()
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		return
+		return err
 	}
 
 	global.RedisClient = client
 	logger.Info("Redis客户端初始化成功.")
+
+	return nil
 }

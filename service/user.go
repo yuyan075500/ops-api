@@ -17,6 +17,7 @@ type user struct{}
 type UserLogin struct {
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
+	LDAP     bool   `json:"ldap"`
 }
 
 // UserCreate 创建结构体，定义新增时的字段信息
@@ -26,6 +27,7 @@ type UserCreate struct {
 	Password    string `json:"password" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
 	Email       string `json:"email" binding:"required" validate:"email"`
+	UserFrom    string `json:"user_from"`
 }
 
 // GetUserListAll 获取用户列表（下拉框、穿梭框）
@@ -79,6 +81,7 @@ func (u *user) AddUser(data *UserCreate) (err error) {
 		Password:    data.Password,
 		PhoneNumber: data.PhoneNumber,
 		Email:       data.Email,
+		UserFrom:    data.UserFrom,
 	}
 
 	// 创建数据库数据

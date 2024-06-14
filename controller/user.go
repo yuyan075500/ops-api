@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	"gorm.io/gorm"
 	"net/http"
 	"ops-api/config"
 	"ops-api/dao"
@@ -46,14 +48,52 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	// 根据用户名查询用户
-	if err := global.MySQLClient.Where("username = ?", params.Username).First(&user).Error; err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90404,
-			"msg":  "用户不存在",
-		})
-		return
+	if params.LDAP {
+		// 生成LDAP连接
+		conn, err := middleware.CreateLDAPService()
+		if err != nil {
+			logger.Error("ERROR：" + err.Error())
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+		// 用户认证
+		userInfo, err := conn.LDAPUserAuthentication(params.Username, params.Password)
+		if err != nil {
+			logger.Error("ERROR：" + err.Error())
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		// 同步用户信息到本地数据库
+		if err := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
+			// 如果登录类型为LDAP且用户不存在，则创建用户
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				if err := service.User.AddUser(userInfo); err != nil {
+					logger.Error("ERROR：" + err.Error())
+					c.JSON(http.StatusOK, gin.H{
+						"code": 90500,
+						"msg":  err.Error(),
+					})
+					return
+				}
+			}
+		}
+	} else {
+		// 根据用户名查询用户
+		if err := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
+			logger.Error("ERROR：" + err.Error())
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90404,
+				"msg":  "用户不存在",
+			})
+			return
+		}
 	}
 
 	// 判断用户是否禁用
@@ -66,12 +106,14 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	// 检查密码
-	if user.CheckPassword(params.Password) == false {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90401,
-			"msg":  "用户或密码错误",
-		})
-		return
+	if !params.LDAP {
+		if user.CheckPassword(params.Password) == false {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90401,
+				"msg":  "用户密码错误",
+			})
+			return
+		}
 	}
 
 	token, err := middleware.GenerateJWT(user.ID, user.Name, user.Username)
