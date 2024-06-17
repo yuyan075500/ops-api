@@ -26,4 +26,8 @@ ldap:
   bindUserDN: "LdapUser@wlyd.local"
   bindUserPassword: "tv47a=uB@TmC"
   searchDN: "dc=wlyd,dc=local"
+sms:
+  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendSms/v1"
+  appKey: "6dW23s8dHP77OXXT808265P5gOta"
+  appSecret: "GTq6BliiGoSQNYHDzH7auKy6VSmG"
 swagger: true

@@ -16,6 +16,7 @@ type Config struct {
 	Redis   Redis  `yaml:"redis"`
 	OSS     OSS    `yaml:"oss"`
 	LDAP    LDAP   `yaml:"ldap"`
+	SMS     SMS    `yaml:"sms"`
 	Swagger bool   `yaml:"swagger"`
 }
 
@@ -49,6 +50,12 @@ type OSS struct {
 	SecretKey  string `yaml:"secretKey"`
 	BucketName string `yaml:"bucketName"`
 	SSL        bool   `yaml:"ssl"`
+}
+
+type SMS struct {
+	URL       string `yaml:"url"`
+	AppKey    string `yaml:"appKey"`
+	AppSecret string `yaml:"appSecret"`
 }
 
 type JWT struct {
