@@ -53,9 +53,10 @@ type OSS struct {
 }
 
 type SMS struct {
-	URL       string `yaml:"url"`
-	AppKey    string `yaml:"appKey"`
-	AppSecret string `yaml:"appSecret"`
+	URL         string `yaml:"url"`
+	AppKey      string `yaml:"appKey"`
+	AppSecret   string `yaml:"appSecret"`
+	CallbackUrl string `yaml:"callbackUrl"`
 }
 
 type JWT struct {

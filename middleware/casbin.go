@@ -59,6 +59,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/menu",         // 用户登录成功后获取用户菜单接口
 			"/api/v1/user/avatarUpload", // 用户头像上传接口
 			"/swagger/",                 // swagger接口
+			"/api/v1/sms/callback",      // 短信回调接口
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

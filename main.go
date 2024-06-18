@@ -48,6 +48,7 @@ func main() {
 		IgnorePaths("/login").
 		IgnorePaths("/health").
 		IgnorePaths("/swagger/").
+		IgnorePaths("/api/v1/sms/callback").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

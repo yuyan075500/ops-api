@@ -3,24 +3,45 @@ package sms
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
 	"ops-api/config"
+	"ops-api/dao"
+	"ops-api/model"
 	"ops-api/utils/sms/core"
 )
 
-// Send 发送短信
+type Response struct {
+	Result      []Result `json:"result"`
+	Code        string   `json:"code"`
+	Description string   `json:"description"`
+}
+
+type Result struct {
+	Total      int    `json:"total"`
+	OriginTo   string `json:"originTo"`
+	CreateTime string `json:"createTime"`
+	From       string `json:"from"`
+	SmsMsgId   string `json:"smsMsgId"`
+	CountryId  string `json:"countryId"`
+	Status     string `json:"status"`
+}
+
+// Send 发送短信（华为云）
 //
 // Param:
 //
-//	sender: 国内短信签名通道号
-//	receiver: 接口短信的电话号码，多个号码之间使用英文逗号分隔
-//	templateId: 短信模板ID
-//	templateParas: 模板参数
-//	statusCallBack: 短信发送状态回调地址，为空则表示不接收
-//	signature: 短信签名名称
-func Send(sender, receiver, templateId, templateParas, statusCallBack, signature string) error {
+//		sender: 国内短信签名通道号
+//		receiver: 接口短信的电话号码，多个号码之间使用英文逗号分隔
+//		templateId: 短信模板ID
+//		templateParas: 模板参数
+//		statusCallBack: 短信发送状态回调地址，为空则表示不接收
+//		signature: 短信签名名称
+//	 note: 标识短信用途
+func Send(sender, receiver, templateId, templateParas, statusCallBack, signature, note string) error {
 
 	// 创建签名对象
 	appInfo := core.Signer{
@@ -35,9 +56,37 @@ func Send(sender, receiver, templateId, templateParas, statusCallBack, signature
 	body := buildRequestBody(sender, receiver, templateId, templateParas, statusCallBack, signature)
 
 	// 发送短信请求
-	_, err := post(apiAddress, []byte(body), appInfo)
+	resp, err := post(apiAddress, []byte(body), appInfo)
 	if err != nil {
 		return err
+	}
+
+	// 解析API请求返回的数据
+	var response Response
+	if err := json.Unmarshal([]byte(resp), &response); err != nil {
+		return err
+	}
+
+	// 在数据库中创建短信发送记录
+	for _, result := range response.Result {
+		if response.Code != "E000510" && response.Code != "000000" {
+			return errors.New("短信发送失败，错误码：" + response.Code)
+		}
+
+		if response.Code == "E000510" && result.Status != "000000" {
+			return errors.New("短信发送失败，错误码：" + result.Status)
+		}
+		sms := &model.LogSMS{
+			Note:       note,
+			Signature:  signature,
+			TemplateId: templateId,
+			Receiver:   receiver,
+			Status:     "API请求成功",
+			SmsMsgId:   result.SmsMsgId,
+		}
+		if err := dao.Log.AddSMSRecord(sms); err != nil {
+			return err
+		}
 	}
 
 	return nil

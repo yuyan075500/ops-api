@@ -39,6 +39,7 @@ func MySQLInit() error {
 		&model.Menu{},
 		&model.SubMenu{},
 		&model.SystemPath{},
+		&model.LogSMS{},
 	)
 
 	// 设置数据库连接池
