@@ -11,6 +11,16 @@ var Log log
 
 type log struct{}
 
+// GetSMSRecordList 获取菜单列表
+func (l *log) GetSMSRecordList(receiver string, page, limit int) (data *dao.SMSRecordList, err error) {
+	data, err = dao.Log.GetSMSRecordList(receiver, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// SMSCallback 短信回调
 func (l *log) SMSCallback(data string) error {
 
 	// 对回调返回的数据进行处理

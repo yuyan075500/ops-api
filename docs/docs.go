@@ -238,6 +238,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/loginRecord": {
+            "get": {
+                "description": "日志相关接口",
+                "tags": [
+                    "日志管理"
+                ],
+                "summary": "获取短信发送列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/menu/list": {
             "get": {
                 "description": "菜单关接口",

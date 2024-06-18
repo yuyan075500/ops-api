@@ -14,7 +14,6 @@ import (
 	"ops-api/model"
 	"ops-api/service"
 	"ops-api/utils"
-	"ops-api/utils/sms"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -262,24 +261,6 @@ func (u *user) GetUserListAll(c *gin.Context) {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90400,
-			"msg":  err.Error(),
-		})
-		return
-	}
-
-	err = sms.Send(
-		"8822053031549",
-		"13357110502",
-		"770335531f48463283a478b179652f62",
-		"[\"yuyan\", \"111111\"]",
-		config.Conf.SMS.CallbackUrl,
-		"物联亿达",
-		"密码更改",
-	)
-	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
 			"msg":  err.Error(),
 		})
 		return

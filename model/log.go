@@ -16,8 +16,8 @@ type LogSMS struct {
 	SmsMsgId   string  `json:"sms_msg_id"`
 }
 
-// LogUserLogin 用户登录日志表
-type LogUserLogin struct {
+// LogLogin 用户登录日志表
+type LogLogin struct {
 	gorm.Model
 	Username   string `json:"username"`
 	SourceIP   string `json:"source_ip"`

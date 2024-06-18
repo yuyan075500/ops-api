@@ -258,6 +258,23 @@ paths:
       summary: 获取组列表
       tags:
       - 组管理
+  /api/v1/loginRecord:
+    get:
+      description: 日志相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取短信发送列表
+      tags:
+      - 日志管理
   /api/v1/menu/list:
     get:
       description: 菜单关接口

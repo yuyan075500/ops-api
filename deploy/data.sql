@@ -29,7 +29,7 @@ INSERT INTO `system_path` VALUES (12, 'GetGroupList', '/api/v1/groups', 'GET', '
 INSERT INTO `system_path` VALUES (13, 'GetMenuListAll', '/api/v1/menu/list', 'GET', 'GroupManagement', '获取菜单列表');
 INSERT INTO `system_path` VALUES (14, 'GetUserListAll', '/api/v1/user/list', 'GET', 'GroupManagement', '获取用户列表');
 INSERT INTO `system_path` VALUES (15, 'GetPathListAll', '/api/v1/path/list', 'GET', 'GroupManagement', '获取接口列表');
-INSERT INTO `system_path` VALUES (16, 'GetSMSRecordList', '/api/v1/loginRecord', 'GET', 'AuditSMSRecord', '获取短信发送记录');
+INSERT INTO `system_path` VALUES (16, 'GetSMSRecordList', '/api/v1/audit/sms/list', 'GET', 'AuditSMSRecord', '获取短信发送记录');
 INSERT INTO `system_path` VALUES (17, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
 INSERT INTO `system_path` VALUES (18, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
 
