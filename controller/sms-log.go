@@ -18,6 +18,9 @@ type log struct{}
 // @Description 日志相关接口
 // @Tags 日志管理
 // @Param Authorization header string true "Bearer 用户令牌"
+// @Param page query int true "分页"
+// @Param limit query int true "分页大小"
+// @Param receiver query string false "电话号码"
 // @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/audit/sms/list [get]
 func (l *log) GetSMSRecordList(c *gin.Context) {

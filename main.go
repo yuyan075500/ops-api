@@ -49,6 +49,7 @@ func main() {
 		IgnorePaths("/health").
 		IgnorePaths("/swagger/").
 		IgnorePaths("/api/v1/sms/callback").
+		IgnorePaths("/api/v1/sms/reset_password_code").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

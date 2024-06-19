@@ -35,6 +35,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		GET("/api/v1/users", User.GetUserList).
 		GET("/api/v1/user/list", User.GetUserListAll).
 		POST("/api/v1/user/avatarUpload", User.UploadAvatar).
+		POST("/api/v1/sms/reset_password_code", User.GetVerificationCode).
 		POST("/api/v1/group", Group.AddGroup).
 		PUT("/api/v1/group", Group.UpdateGroup).
 		PUT("/api/v1/group/users", Group.UpdateGroupUser).

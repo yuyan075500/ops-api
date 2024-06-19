@@ -15,6 +15,52 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/audit/sms/list": {
+            "get": {
+                "description": "日志相关接口",
+                "tags": [
+                    "日志管理"
+                ],
+                "summary": "获取短信发送列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "电话号码",
+                        "name": "receiver",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/group": {
             "put": {
                 "description": "组相关接口",
@@ -238,32 +284,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/loginRecord": {
-            "get": {
-                "description": "日志相关接口",
-                "tags": [
-                    "日志管理"
-                ],
-                "summary": "获取短信发送列表",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer 用户令牌",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 0, \"data\": []}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/menu/list": {
             "get": {
                 "description": "菜单关接口",
@@ -403,6 +423,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sms/reset_password_code": {
+            "post": {
+                "description": "个人信息管理相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "个人信息管理"
+                ],
+                "summary": "获取验证码",
+                "parameters": [
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UserInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"校验码已发送...\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user": {
             "put": {
                 "description": "用户相关接口",
@@ -479,9 +533,9 @@ const docTemplate = `{
         },
         "/api/v1/user/avatarUpload": {
             "post": {
-                "description": "用户相关接口",
+                "description": "个人信息管理相关接口",
                 "tags": [
-                    "用户管理"
+                    "个人信息管理"
                 ],
                 "summary": "头像上传",
                 "parameters": [
@@ -906,6 +960,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_from": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UserInfo": {
+            "type": "object",
+            "required": [
+                "phone_number",
+                "username"
+            ],
+            "properties": {
+                "phone_number": {
                     "type": "string"
                 },
                 "username": {

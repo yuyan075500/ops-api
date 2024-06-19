@@ -2,11 +2,14 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"ops-api/dao"
 	"ops-api/global"
 	"ops-api/model"
 	"ops-api/utils/check"
+	"strconv"
+	"time"
 )
 
 var User user
@@ -153,4 +156,43 @@ func (u *user) ResetUserMFA(id int) (err error) {
 	}
 
 	return dao.User.ResetUserMFA(user)
+}
+
+// GetVerificationCode 获取重置密码短信验证码
+func (u *user) GetVerificationCode(data *UserInfo, expirationTime int) (err error) {
+
+	var (
+		keyName = fmt.Sprintf("%s_rest_password_verification_code", data.Username)
+	)
+
+	// 判断Redis缓存中指定的Key是否存在
+	val, err := global.RedisClient.Exists(keyName).Result()
+	if err != nil {
+		return err
+	}
+	// 已存在
+	if val >= 1 {
+		// 判断Key的有效期
+		ttl, err := global.RedisClient.TTL(keyName).Result()
+		if err != nil {
+			return err
+		}
+		// 如果Key的有效期大于4分钟，则提示用户请勿频繁发送校验码
+		if ttl.Minutes() > 4 {
+			return errors.New("请勿频繁发送校验码")
+		}
+	}
+
+	// 发送短信验证码
+	code, err := Log.SMSSend(data, strconv.Itoa(expirationTime))
+	if err != nil {
+		return err
+	}
+
+	// 将验证码写入Redis缓存，如果已存在则会更新Key的值并刷新TTL
+	if err := global.RedisClient.Set(keyName, code, time.Duration(expirationTime)*time.Minute).Err(); err != nil {
+		return err
+	}
+
+	return nil
 }

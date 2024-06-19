@@ -95,6 +95,16 @@ definitions:
     - phone_number
     - username
     type: object
+  service.UserInfo:
+    properties:
+      phone_number:
+        type: string
+      username:
+        type: string
+    required:
+    - phone_number
+    - username
+    type: object
   service.UserLogin:
     properties:
       ldap:
@@ -110,6 +120,37 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/audit/sms/list:
+    get:
+      description: 日志相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 电话号码
+        in: query
+        name: receiver
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取短信发送列表
+      tags:
+      - 日志管理
   /api/v1/group:
     post:
       consumes:
@@ -258,23 +299,6 @@ paths:
       summary: 获取组列表
       tags:
       - 组管理
-  /api/v1/loginRecord:
-    get:
-      description: 日志相关接口
-      parameters:
-      - description: Bearer 用户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{"code": 0, "data": []}'
-          schema:
-            type: string
-      summary: 获取短信发送列表
-      tags:
-      - 日志管理
   /api/v1/menu/list:
     get:
       description: 菜单关接口
@@ -368,6 +392,28 @@ paths:
       summary: 获取接口列表（表格展示）
       tags:
       - 接口管理
+  /api/v1/sms/reset_password_code:
+    post:
+      consumes:
+      - application/json
+      description: 个人信息管理相关接口
+      parameters:
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserInfo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "校验码已发送..."}'
+          schema:
+            type: string
+      summary: 获取验证码
+      tags:
+      - 个人信息管理
   /api/v1/user:
     post:
       consumes:
@@ -441,7 +487,7 @@ paths:
       - 用户管理
   /api/v1/user/avatarUpload:
     post:
-      description: 用户相关接口
+      description: 个人信息管理相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -460,7 +506,7 @@ paths:
             type: string
       summary: 头像上传
       tags:
-      - 用户管理
+      - 个人信息管理
   /api/v1/user/info:
     get:
       description: 认证相关接口

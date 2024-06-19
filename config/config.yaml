@@ -27,8 +27,12 @@ ldap:
   bindUserPassword: "tv47a=uB@TmC"
   searchDN: "dc=wlyd,dc=local"
 sms:
-  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendSms/v1"
+  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
   appKey: "6dW23s8dHP77OXXT808265P5gOta"
   appSecret: "GTq6BliiGoSQNYHDzH7auKy6VSmG"
   callbackUrl: "https://ops-test.50yc.cn/api/v1/sms/callback"
+  verificationCode:
+    sender: "8822053031549"
+    templateId: "3aa3b4b4c38d4cc9b5960e31b76f5d96"
+    signature: "物联亿达"
 swagger: true

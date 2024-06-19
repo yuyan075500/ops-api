@@ -166,8 +166,8 @@ func (u *user) Logout(c *gin.Context) {
 
 // UploadAvatar 头像上传
 // @Summary 头像上传
-// @Description 用户相关接口
-// @Tags 用户管理
+// @Description 个人信息管理相关接口
+// @Tags 个人信息管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param avatar formData file true "头像"
 // @Success 200 {string} json "{"code": 0, "data": nil}"
@@ -500,5 +500,47 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 		"code": 0,
 		"msg":  "重置成功",
 		"data": nil,
+	})
+}
+
+// GetVerificationCode 获取验证码
+// @Summary 获取验证码
+// @Description 个人信息管理相关接口
+// @Tags 个人信息管理
+// @Accept application/json
+// @Produce application/json
+// @Param user body service.UserInfo true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "校验码已发送..."}"
+// @Router /api/v1/sms/reset_password_code [post]
+func (u *user) GetVerificationCode(c *gin.Context) {
+
+	var (
+		data           = &service.UserInfo{}
+		expirationTime = 5 // 指定验证码过期时间
+	)
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取短信验证码
+	if err := service.User.GetVerificationCode(data, expirationTime); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  fmt.Sprintf("校验码已发送，%s分钟之内有效", strconv.Itoa(expirationTime)),
 	})
 }
