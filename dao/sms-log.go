@@ -37,11 +37,11 @@ func (l *log) GetSMSRecordList(receiver string, page, limit int) (data *SMSRecor
 
 	// 获取菜单列表
 	tx := global.MySQLClient.Model(&model.LogSMS{}).
-		Where("receiver like ?", "%"+receiver+"%"). // 实现过滤
-		Count(&total).                              // 获取一级菜单总数
+		Where("receiver like ?", "%"+receiver+"%").
+		Count(&total).
 		Limit(limit).
 		Offset(startSet).
-		Order("id desc"). // 使用sort字段进行排序
+		Order("id desc").
 		Find(&record)
 	if tx.Error != nil {
 		return nil, errors.New(tx.Error.Error())

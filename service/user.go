@@ -33,6 +33,15 @@ type UserCreate struct {
 	UserFrom    string `json:"user_from"`
 }
 
+// RestPassword 重置密码时用户信息绑定的结构体
+type RestPassword struct {
+	Username    string `json:"username" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+	RePassword  string `json:"re_password" binding:"required"`
+}
+
 // GetUserListAll 获取用户列表（下拉框、穿梭框）
 func (u *user) GetUserListAll() (data *dao.UserListAll, err error) {
 	data, err = dao.User.GetUserListAll()
@@ -191,6 +200,42 @@ func (u *user) GetVerificationCode(data *UserInfo, expirationTime int) (err erro
 
 	// 将验证码写入Redis缓存，如果已存在则会更新Key的值并刷新TTL
 	if err := global.RedisClient.Set(keyName, code, time.Duration(expirationTime)*time.Minute).Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateSelfPassword 用户重置密码
+func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
+
+	var (
+		user    model.AuthUser
+		keyName = fmt.Sprintf("%s_rest_password_verification_code", data.Username)
+	)
+
+	// 获取用户信息
+	tx := global.MySQLClient.First(&user, "username = ? AND phone_number = ?", data.Username, data.PhoneNumber)
+	if tx.Error != nil {
+		return errors.New("用户名或手机号错误")
+	}
+
+	// 验证码校验
+	result, err := global.RedisClient.Get(keyName).Result()
+	if err != nil {
+		return err
+	}
+	if result != data.Code {
+		return errors.New("校验码错误")
+	}
+
+	// 执行密码重置
+	userInfo := &dao.UserPasswordUpdate{
+		ID:         user.ID,
+		Password:   data.Password,
+		RePassword: data.RePassword,
+	}
+	if err := u.UpdateUserPassword(userInfo); err != nil {
 		return err
 	}
 

@@ -443,7 +443,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserInfo"
+                            "$ref": "#/definitions/service.RestPassword"
                         }
                     }
                 ],
@@ -677,6 +677,32 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "个人信息管理相关接口",
+                "tags": [
+                    "个人信息管理"
+                ],
+                "summary": "密码更新",
+                "parameters": [
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.UserPasswordUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -937,6 +963,33 @@ const docTemplate = `{
                 }
             }
         },
+        "service.RestPassword": {
+            "type": "object",
+            "required": [
+                "code",
+                "password",
+                "phone_number",
+                "re_password",
+                "username"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "re_password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "service.UserCreate": {
             "type": "object",
             "required": [
@@ -960,21 +1013,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_from": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserInfo": {
-            "type": "object",
-            "required": [
-                "phone_number",
-                "username"
-            ],
-            "properties": {
-                "phone_number": {
                     "type": "string"
                 },
                 "username": {
