@@ -1,16 +1,13 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
-	"gorm.io/gorm"
 	"net/http"
 	"ops-api/config"
 	"ops-api/dao"
 	"ops-api/global"
-	"ops-api/middleware"
 	"ops-api/model"
 	"ops-api/service"
 	"ops-api/utils"
@@ -34,10 +31,7 @@ type user struct{}
 // @Success 200 {string} json "{"code": 0, "token": "用户令牌"}"
 // @Router /login [post]
 func (u *user) Login(c *gin.Context) {
-	var (
-		user   = &model.AuthUser{}
-		params = &service.UserLogin{}
-	)
+	var params = &service.UserLogin{}
 
 	if err := c.ShouldBind(params); err != nil {
 		logger.Error("ERROR：" + err.Error())
@@ -48,75 +42,7 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	if params.LDAP {
-		// 生成LDAP连接
-		conn, err := middleware.CreateLDAPService()
-		if err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
-			return
-		}
-		// 用户认证
-		userInfo, err := conn.LDAPUserAuthentication(params.Username, params.Password)
-		if err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
-			return
-		}
-
-		// 同步用户信息到本地数据库
-		if err := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
-			// 如果登录类型为LDAP且用户不存在，则创建用户
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				if err := service.User.AddUser(userInfo); err != nil {
-					logger.Error("ERROR：" + err.Error())
-					c.JSON(http.StatusOK, gin.H{
-						"code": 90500,
-						"msg":  err.Error(),
-					})
-					return
-				}
-			}
-		}
-	} else {
-		// 根据用户名查询用户
-		if err := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90404,
-				"msg":  "用户不存在",
-			})
-			return
-		}
-	}
-
-	// 判断用户是否禁用
-	if *user.IsActive == false {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90403,
-			"msg":  "拒绝登录，请联系管理员",
-		})
-		return
-	}
-
-	// 检查密码
-	if !params.LDAP {
-		if user.CheckPassword(params.Password) == false {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90401,
-				"msg":  "用户密码错误",
-			})
-			return
-		}
-	}
-
-	token, err := middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	token, err := service.User.Login(params)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -125,9 +51,6 @@ func (u *user) Login(c *gin.Context) {
 		})
 		return
 	}
-
-	// 记录用户最后登录时间
-	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":  0,

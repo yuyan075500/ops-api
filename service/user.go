@@ -6,7 +6,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"ops-api/dao"
 	"ops-api/global"
+	"ops-api/middleware"
 	"ops-api/model"
+	"ops-api/utils"
 	"ops-api/utils/check"
 	"strconv"
 	"time"
@@ -152,6 +154,11 @@ func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 		return err
 	}
 
+	// 如果是AD域账号则访问AD进行用户密码重置
+	//if err := utils.AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
+	//	return err
+	//}
+
 	return dao.User.UpdateUserPassword(user, data)
 }
 
@@ -240,4 +247,48 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 	}
 
 	return nil
+}
+
+// Login 用户登录
+func (u *user) Login(params *UserLogin) (token string, err error) {
+
+	var user model.AuthUser
+
+	// 本地用户认证
+	if !params.LDAP {
+		// 根据用户名查询用户
+		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
+			return "", errors.New("用户不存在")
+		}
+		if user.CheckPassword(params.Password) == false {
+			return "", errors.New("用户密码错误")
+		}
+	}
+
+	// AD域用户认证
+	if params.LDAP {
+		// 根据用户名查询用户
+		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
+			return "", errors.New("用户不存在")
+		}
+		if _, err := utils.AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
+			return "", errors.New("用户密码错误或系统错误")
+		}
+	}
+
+	// 判断用户是否禁用
+	if *user.IsActive == false {
+		return "", errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 生成用户Token
+	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", err
+	}
+
+	// 记录用户最后登录时间
+	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
+
+	return token, nil
 }
