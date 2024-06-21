@@ -243,11 +243,11 @@ func (u *user) GetUserList(c *gin.Context) {
 // @Accept application/json
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Param user body service.UserCreate true "用户信息"
+// @Param user body dao.UserCreate true "用户信息"
 // @Success 200 {string} json "{"code": 0, "msg": "创建成功", "data": nil}"
 // @Router /api/v1/user [post]
 func (u *user) AddUser(c *gin.Context) {
-	var user = &service.UserCreate{}
+	var user = &dao.UserCreate{}
 
 	if err := c.ShouldBind(user); err != nil {
 		logger.Error("ERROR：" + err.Error())
@@ -501,5 +501,30 @@ func (u *user) UpdateSelfPassword(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "更新成功",
+	})
+}
+
+// UserSync AD域用户同步
+// @Summary AD域用户同步
+// @Description 用户相关接口
+// @Tags 用户管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "msg": "同步成功"}"
+// @Router /api/v1/user/sync [post]
+func (u *user) UserSync(c *gin.Context) {
+
+	// 同步用户
+	if err := service.User.UserSync(); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "同步成功",
 	})
 }

@@ -699,6 +699,32 @@
                 }
             }
         },
+        "/api/v1/user/sync": {
+            "post": {
+                "description": "用户相关接口",
+                "tags": [
+                    "用户管理"
+                ],
+                "summary": "AD域用户同步",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"同步成功\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/{id}": {
             "delete": {
                 "description": "用户相关接口",

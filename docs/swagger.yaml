@@ -612,6 +612,23 @@ paths:
       summary: 密码更新
       tags:
       - 用户管理
+  /api/v1/user/sync:
+    post:
+      description: 用户相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "同步成功"}'
+          schema:
+            type: string
+      summary: AD域用户同步
+      tags:
+      - 用户管理
   /api/v1/users:
     get:
       description: 用户相关接口

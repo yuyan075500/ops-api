@@ -2,6 +2,9 @@ package dao
 
 import (
 	"errors"
+	"fmt"
+	"github.com/go-sql-driver/mysql"
+	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
@@ -62,6 +65,16 @@ type UserPasswordUpdate struct {
 	ID         uint   `json:"id" binding:"required"`
 	Password   string `json:"password" binding:"required"`
 	RePassword string `json:"re_password" binding:"required"`
+}
+
+// UserCreate 创建结构体，定义新增时的字段信息
+type UserCreate struct {
+	Name        string `json:"name" binding:"required"`
+	Username    string `json:"username" gorm:"unique" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
+	Email       string `json:"email" binding:"required" validate:"email"`
+	UserFrom    string `json:"user_from"`
 }
 
 // GetUserListAll 获取所有用户
@@ -145,6 +158,35 @@ func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
 // AddUser 新增
 func (u *user) AddUser(data *model.AuthUser) (err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// SyncUsers 用户同步
+func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
+
+	// 使用事务（Transaction）来处理批量插入，这样可以确保数据一致性，要么全部成功，要么全部失败
+	if err := global.MySQLClient.Transaction(func(tx *gorm.DB) error {
+		// 遍历用户列表，逐个插入，需要对数据库中相同用户名的用户进行特殊处理
+		for _, user := range users {
+
+			var mysqlError *mysql.MySQLError
+
+			err := tx.Create(user).Error
+			// 如果用户已存在，代码1062就表示Duplicate entry错误
+			if errors.As(err, &mysqlError) && mysqlError.Number == 1062 {
+				// 如果用户来源为AD域，则进行用户更新，否则跳过 }
+				if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
+					fmt.Println(user.Username)
+					return errors.New(err.Error())
+				}
+			} else {
+				continue
+			}
+		}
+		return nil
+	}); err != nil {
 		return errors.New(err.Error())
 	}
 	return nil

@@ -8,7 +8,6 @@ import (
 	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/model"
-	"ops-api/utils"
 	"ops-api/utils/check"
 	"strconv"
 	"time"
@@ -25,16 +24,6 @@ type UserLogin struct {
 	LDAP     bool   `json:"ldap"`
 }
 
-// UserCreate 创建结构体，定义新增时的字段信息
-type UserCreate struct {
-	Name        string `json:"name" binding:"required"`
-	Username    string `json:"username" gorm:"unique" binding:"required"`
-	Password    string `json:"password" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
-	Email       string `json:"email" binding:"required" validate:"email"`
-	UserFrom    string `json:"user_from"`
-}
-
 // RestPassword 重置密码时用户信息绑定的结构体
 type RestPassword struct {
 	Username    string `json:"username" binding:"required"`
@@ -42,6 +31,17 @@ type RestPassword struct {
 	Code        string `json:"code" binding:"required"`
 	Password    string `json:"password" binding:"required"`
 	RePassword  string `json:"re_password" binding:"required"`
+}
+
+// UserSync 用户同步结构体，用于AD用户同步
+type UserSync struct {
+	Name        string `json:"name"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	IsActive    bool   `json:"is_active"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	UserFrom    string `json:"user_from"`
 }
 
 // GetUserListAll 获取用户列表（下拉框、穿梭框）
@@ -72,7 +72,7 @@ func (u *user) GetUser(userid uint) (user *dao.UserInfoWithMenu, err error) {
 }
 
 // AddUser 创建用户
-func (u *user) AddUser(data *UserCreate) (err error) {
+func (u *user) AddUser(data *dao.UserCreate) (err error) {
 
 	// 字段校验
 	validate := validator.New()
@@ -94,6 +94,7 @@ func (u *user) AddUser(data *UserCreate) (err error) {
 		Username:    data.Username,
 		Password:    data.Password,
 		PhoneNumber: data.PhoneNumber,
+		IsActive:    true,
 		Email:       data.Email,
 		UserFrom:    data.UserFrom,
 	}
@@ -155,9 +156,9 @@ func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 	}
 
 	// 如果是AD域账号则访问AD进行用户密码重置
-	//if err := utils.AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
-	//	return err
-	//}
+	if err := AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
+		return err
+	}
 
 	return dao.User.UpdateUserPassword(user, data)
 }
@@ -271,13 +272,13 @@ func (u *user) Login(params *UserLogin) (token string, err error) {
 		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
 			return "", errors.New("用户不存在")
 		}
-		if _, err := utils.AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
+		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
 			return "", errors.New("用户密码错误或系统错误")
 		}
 	}
 
 	// 判断用户是否禁用
-	if *user.IsActive == false {
+	if user.IsActive == false {
 		return "", errors.New("拒绝登录，请联系管理员")
 	}
 
@@ -291,4 +292,31 @@ func (u *user) Login(params *UserLogin) (token string, err error) {
 	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
 
 	return token, nil
+}
+
+// UserSync AD域用户同步
+func (u *user) UserSync() (err error) {
+	// 获取AD域中的用户
+	users, err := AD.LDAPUserSync()
+	if err != nil {
+		return err
+	}
+
+	// 创建用户
+	var usersList []*model.AuthUser
+	for _, user := range users {
+		usersList = append(usersList, &model.AuthUser{
+			Username:    user.Username,
+			Name:        user.Name,
+			Email:       user.Email,
+			Password:    user.Password,
+			IsActive:    user.IsActive,
+			PhoneNumber: user.PhoneNumber,
+			UserFrom:    user.UserFrom,
+		})
+	}
+	if err := dao.User.SyncUsers(usersList); err != nil {
+		return err
+	}
+	return nil
 }

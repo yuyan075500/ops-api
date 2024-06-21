@@ -25,7 +25,7 @@ ldap:
   host: "ldap://192.168.200.13:389"
   bindUserDN: "LdapUser@wlyd.local"
   bindUserPassword: "tv47a=uB@TmC"
-  searchDN: "dc=wlyd,dc=local"
+  searchDN: "ou=物联亿达用户,dc=wlyd,dc=local&ou=离职用户,dc=wlyd,dc=local"
 sms:
   url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
   appKey: "6dW23s8dHP77OXXT808265P5gOta"
