@@ -50,8 +50,8 @@ func (a *ad) Connect() (*LDAPServer, error) {
 	return &LDAPServer{Conn: conn, Config: conf}, nil
 }
 
-// LDAPUserAuthentication 用户认证
-func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.SearchResult, err error) {
+// LDAPUserSearch 根据用户名查找用户信息
+func (a *ad) LDAPUserSearch(username string) (result *ldap.SearchResult, err error) {
 
 	// 建立LDAP连接
 	l, err := a.Connect()
@@ -62,6 +62,8 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 	// 查找用户
 	searchDN := strings.Split(config.Conf.LDAP.SearchDN, "&")
 	for _, dn := range searchDN {
+
+		// 构建查找请求
 		searchRequest := ldap.NewSearchRequest(
 			dn,
 			ldap.ScopeWholeSubtree,
@@ -73,6 +75,8 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 			[]string{},
 			nil,
 		)
+
+		// 执行查找
 		searchResult, err := l.Conn.Search(searchRequest)
 		if err != nil {
 			return nil, err
@@ -83,18 +87,37 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 			continue
 		}
 
-		// 验证用户密码是否正确
-		userDN := searchResult.Entries[0].DN
-		err = l.Conn.Bind(userDN, password)
-		if err != nil {
-			return nil, errors.New("用户密码错误或账号异常")
-		}
-
 		// 返回用户信息
 		return searchResult, nil
 	}
 
 	return nil, errors.New("用户不存在")
+}
+
+// LDAPUserAuthentication 用户认证
+func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.SearchResult, err error) {
+
+	// 建立LDAP连接
+	l, err := a.Connect()
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取用户信息
+	searchResult, err := a.LDAPUserSearch(username)
+	if err != nil {
+		return nil, err
+	}
+
+	// 密码认证
+	userDN := searchResult.Entries[0].DN
+	err = l.Conn.Bind(userDN, password)
+	if err != nil {
+		return nil, errors.New("用户密码错误或账号异常")
+	}
+
+	// 返回用户信息
+	return searchResult, nil
 }
 
 // LDAPUserResetPassword 重置用户密码
@@ -105,19 +128,31 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 		return err
 	}
 
+	// 对密码进行utf16编码
 	utf16 := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
 	pwdEncoded, _ := utf16.NewEncoder().String("\"" + password + "\"")
-	req := ldap.NewModifyRequest(
-		fmt.Sprintf("user=%s,%s", username, l.Config.SearchDN),
-		[]ldap.Control{},
-	)
-	fmt.Println(pwdEncoded, req)
-	fmt.Println(username, l.Config.SearchDN)
-	//modReq.Replace("unicodePwd", []string{pwdEncoded})
-	//modReq.Replace("userAccountControl", []string{fmt.Sprintf("%d", 512)})
-	//if err := l.Conn.Modify(modReq); err != nil {
-	//	return err
-	//}
+
+	// 获取用户信息
+	searchResult, err := a.LDAPUserSearch(username)
+	if err != nil {
+		return err
+	}
+
+	// 构建修改请求
+	userDN := searchResult.Entries[0].DN
+	req := ldap.NewModifyRequest(userDN, []ldap.Control{})
+
+	// 修改密码
+	req.Replace("unicodePwd", []string{pwdEncoded})
+
+	// 修改用户账户状态
+	//req.Replace("userAccountControl", []string{fmt.Sprintf("%d", 512)})
+
+	// 执行修改请求
+	// 注意：修改用户密码需要确保BindUserDN账号具备修改用户密码权限，以及需要使用ldaps方式连接，ldaps默认端口号为636，如：ldaps://192.168.200.13:636
+	if err := l.Conn.Modify(req); err != nil {
+		return err
+	}
 	return nil
 }
 
