@@ -11,6 +11,7 @@ var Conf *Config
 // Config 配置文件结构体, 与YAML文件对应
 type Config struct {
 	Server  string `yaml:"server"`
+	MFA     MFA    `yaml:"mfa"`
 	MySQL   MySQL  `yaml:"mysql"`
 	JWT     JWT    `yaml:"jwt"`
 	Redis   Redis  `yaml:"redis"`
@@ -29,6 +30,11 @@ type MySQL struct {
 	MaxIdleConns int    `yaml:"maxIdleConns"`
 	MaxOpenConns int    `yaml:"maxOpenConns"`
 	MaxLifeTime  int    `yaml:"maxLifeTime"`
+}
+
+type MFA struct {
+	Enable bool   `yaml:"enable"`
+	Issuer string `yaml:"issuer"`
 }
 
 type LDAP struct {

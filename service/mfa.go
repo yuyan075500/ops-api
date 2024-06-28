@@ -1,0 +1,109 @@
+package service
+
+import (
+	"bytes"
+	"errors"
+	"github.com/pquerna/otp/totp"
+	"gorm.io/gorm"
+	"image/png"
+	"ops-api/config"
+	"ops-api/global"
+	"ops-api/middleware"
+	"ops-api/model"
+	"time"
+)
+
+var MFA mfa
+
+type mfa struct{}
+
+// MFAValidate MFA认证接口请求参数
+type MFAValidate struct {
+	Username string `json:"username" binding:"required"`
+	Code     string `json:"code" binding:"required"`
+	Token    string `json:"token" binding:"required"`
+}
+
+// GetGoogleQrcode 生成Google MFA认证二维码
+func (m *mfa) GetGoogleQrcode(token string) (image []byte, err error) {
+
+	// 获取登录用户名
+	username, err := global.RedisClient.Get(token).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	// 创建TOTP
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      config.Conf.MFA.Issuer,
+		AccountName: username,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 使用TOTP Key获取MFA密钥
+	mfaSecret := key.Secret()
+
+	// 使用TOTP Key生成二维码图片
+	var buf bytes.Buffer
+	img, err := key.Image(256, 256)
+	if err := png.Encode(&buf, img); err != nil {
+		return nil, err
+	}
+
+	// 将mfaSecret更新至缓存，如果用户MFA检验成功则将mfaSecret与用户进行绑定
+	if err := global.RedisClient.Set(token, mfaSecret, 0).Err(); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), err
+}
+
+// GoogleQrcodeValidate Google MFA认证校验
+func (m *mfa) GoogleQrcodeValidate(username, token, code string) (jwtToken string, err error) {
+
+	var (
+		user   model.AuthUser
+		secret string
+	)
+
+	// 获取登录用户信息
+	tx := global.MySQLClient.First(&user, "username = ?", username)
+	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
+		return "", errors.New("用户不存在")
+	}
+
+	// 获取Secret，如果用户还没有绑定MFA，则从Redis中获取Secret
+	if user.MFACode == nil {
+		srt, err := global.RedisClient.Get(token).Result()
+		if err != nil {
+			return "", err
+		}
+		secret = srt
+	} else {
+		secret = *user.MFACode
+	}
+
+	// 校验MFA
+	valid := totp.Validate(code, secret)
+	if valid {
+		// 生成用户Token
+		jwtToken, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+		if err != nil {
+			return "", err
+		}
+
+		// 记录用户最后登录时间和绑定用户MFA
+		now := time.Now()
+		user.LastLoginAt = &now
+		if user.MFACode == nil {
+			user.MFACode = &secret
+		}
+		global.MySQLClient.Save(&user)
+
+		return jwtToken, nil
+	} else {
+		return "", errors.New("验证码错误")
+	}
+}

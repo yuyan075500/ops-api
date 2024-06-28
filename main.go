@@ -50,6 +50,8 @@ func main() {
 		IgnorePaths("/swagger/").
 		IgnorePaths("/api/v1/sms/callback").
 		IgnorePaths("/api/v1/sms/reset_password_code").
+		IgnorePaths("/api/v1/user/mfa_qrcode").
+		IgnorePaths("/api/v1/user/mfa_auth").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

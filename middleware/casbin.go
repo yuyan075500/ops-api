@@ -60,6 +60,8 @@ func PermissionCheck() gin.HandlerFunc {
 			"/swagger/",                       // swagger接口
 			"/api/v1/sms/callback",            // 短信回调接口
 			"/api/v1/sms/reset_password_code", // 获取重置密码验证码
+			"/api/v1/user/mfa_qrcode",         // 获取MFA二维码
+			"/api/v1/user/mfa_auth",           // MFA认证
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

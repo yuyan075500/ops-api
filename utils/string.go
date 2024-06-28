@@ -25,3 +25,16 @@ func GenerateRandomNumber() int {
 	result := firstDigit*100000 + otherDigits
 	return result
 }
+
+// GenerateRandomString 生成随机字符串
+func GenerateRandomString(n int) string {
+
+	// 指定随机字符串包含的字符集
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	return string(b)
+}

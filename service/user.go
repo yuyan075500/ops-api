@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"ops-api/config"
 	"ops-api/dao"
 	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/model"
+	"ops-api/utils"
 	"ops-api/utils/check"
 	"strconv"
 	"time"
@@ -251,7 +253,7 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 }
 
 // Login 用户登录
-func (u *user) Login(params *UserLogin) (token string, err error) {
+func (u *user) Login(params *UserLogin) (token string, redirect *string, err error) {
 
 	var user model.AuthUser
 
@@ -259,10 +261,10 @@ func (u *user) Login(params *UserLogin) (token string, err error) {
 	if !params.LDAP {
 		// 根据用户名查询用户
 		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
-			return "", errors.New("用户不存在")
+			return "", nil, errors.New("用户不存在")
 		}
 		if user.CheckPassword(params.Password) == false {
-			return "", errors.New("用户密码错误")
+			return "", nil, errors.New("用户密码错误")
 		}
 	}
 
@@ -270,28 +272,48 @@ func (u *user) Login(params *UserLogin) (token string, err error) {
 	if params.LDAP {
 		// 根据用户名查询用户
 		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
-			return "", errors.New("用户不存在")
+			return "", nil, errors.New("用户不存在")
 		}
 		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
-			return "", errors.New("用户密码错误或系统错误")
+			return "", nil, errors.New("用户密码错误或系统错误")
 		}
 	}
 
 	// 判断用户是否禁用
 	if user.IsActive == false {
-		return "", errors.New("拒绝登录，请联系管理员")
+		return "", nil, errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 判断系统是否启用MFA认证
+	if config.Conf.MFA.Enable == true {
+		// 生成一个32位长度的随机字符串，当用户进行MFA检验的时候判断用户否认证通过
+		token := utils.GenerateRandomString(32)
+
+		// 将token写入Redis缓存，设置有效期为2分钟
+		if err := global.RedisClient.Set(token, user.Username, 2*time.Minute).Err(); err != nil {
+			return "", nil, err
+		}
+
+		// 判断用户是否已经绑定MFA，为空则未绑定。redirect为前端跳转页面名称，如果用户未绑定MFA则跳转到MFA绑定页面，否则跳转MFA认证页面
+		redirect := "MFA_AUTH"
+		if user.MFACode == nil {
+			redirect = "MFA_ENABLE"
+			return token, &redirect, nil
+		}
+
+		return token, &redirect, nil
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	// 记录用户最后登录时间
 	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
 
-	return token, nil
+	return token, nil, nil
 }
 
 // UserSync AD域用户同步

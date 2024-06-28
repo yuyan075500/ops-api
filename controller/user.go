@@ -42,12 +42,21 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := service.User.Login(params)
+	token, redirect, err := service.User.Login(params)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
+		})
+		return
+	}
+
+	if redirect != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":     0,
+			"token":    token,
+			"redirect": redirect,
 		})
 		return
 	}
@@ -526,5 +535,82 @@ func (u *user) UserSync(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "同步成功",
+	})
+}
+
+// GetGoogleQrcode 获取MFA二维码
+// @Summary 获取MFA二维码
+// @Description 个人信息管理相关接口
+// @Tags 个人信息管理
+// @Param token query string true "用户认证通过后的Token"
+// @Success 200 {string} json "{"code": 0, "qrcode": ""}"
+// @Router /api/v1/user/mfa_qrcode [get]
+func (u *user) GetGoogleQrcode(c *gin.Context) {
+	params := new(struct {
+		Token string `form:"token"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取二维码
+	qrcode, err := service.MFA.GetGoogleQrcode(params.Token)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 返回用户信息
+	c.Header("Content-Type", "image/png")
+	c.JSON(200, gin.H{
+		"code":   0,
+		"qrcode": qrcode,
+	})
+}
+
+// GoogleQrcodeValidate MFA认证
+// @Summary MFA认证
+// @Description 个人信息管理相关接口
+// @Tags 个人信息管理
+// @Param user body service.MFAValidate true "MFA认证信息"
+// @Success 200 {string} json "{"code": 0, "token": "用户令牌"}"
+// @Router /api/v1/user/mfa_auth [post]
+func (u *user) GoogleQrcodeValidate(c *gin.Context) {
+
+	var params = &service.MFAValidate{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// MFA校验
+	token, err := service.MFA.GoogleQrcodeValidate(params.Username, params.Token, params.Code)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code":  0,
+		"token": token,
 	})
 }

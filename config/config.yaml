@@ -15,6 +15,9 @@ redis:
 jwt:
   secret: "swfqezjzoqssvjck"
   expires: 6
+mfa:
+  enable: true
+  issuer: "统一认证平台"
 oss:
   endpoint: "d-minio.50yc.cn"
   accessKey: "p4gZSoyn1oP9VAqX"

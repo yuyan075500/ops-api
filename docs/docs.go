@@ -517,7 +517,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UserCreate"
+                            "$ref": "#/definitions/dao.UserCreate"
                         }
                     }
                 ],
@@ -609,6 +609,60 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/mfa_auth": {
+            "post": {
+                "description": "个人信息管理相关接口",
+                "tags": [
+                    "个人信息管理"
+                ],
+                "summary": "MFA认证",
+                "parameters": [
+                    {
+                        "description": "MFA认证信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.MFAValidate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"token\": \"用户令牌\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/mfa_qrcode": {
+            "get": {
+                "description": "个人信息管理相关接口",
+                "tags": [
+                    "个人信息管理"
+                ],
+                "summary": "获取MFA二维码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户认证通过后的Token",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"qrcode\": \"\"}",
                         "schema": {
                             "type": "string"
                         }
@@ -877,6 +931,36 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dao.UserCreate": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "phone_number",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "user_from": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "dao.UserPasswordUpdate": {
             "type": "object",
             "required": [
@@ -989,6 +1073,21 @@ const docTemplate = `{
                 }
             }
         },
+        "service.MFAValidate": {
+            "type": "object",
+            "required": [
+                "code",
+                "token"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "service.RestPassword": {
             "type": "object",
             "required": [
@@ -1009,36 +1108,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "re_password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UserCreate": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password",
-                "phone_number",
-                "username"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "user_from": {
                     "type": "string"
                 },
                 "username": {

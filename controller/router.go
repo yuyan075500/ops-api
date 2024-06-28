@@ -38,6 +38,8 @@ func (r *router) InitRouter(router *gin.Engine) {
 		POST("/api/v1/sms/reset_password_code", User.GetVerificationCode).
 		POST("/api/v1/user/reset_password", User.UpdateSelfPassword).
 		POST("/api/v1/user/sync", User.UserSync).
+		GET("/api/v1/user/mfa_qrcode", User.GetGoogleQrcode).
+		POST("/api/v1/user/mfa_auth", User.GoogleQrcodeValidate).
 		POST("/api/v1/group", Group.AddGroup).
 		PUT("/api/v1/group", Group.UpdateGroup).
 		PUT("/api/v1/group/users", Group.UpdateGroupUser).
