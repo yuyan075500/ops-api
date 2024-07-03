@@ -312,11 +312,11 @@ const docTemplate = `{
         },
         "/api/v1/menus": {
             "get": {
-                "description": "菜单关接口",
+                "description": "站点关接口",
                 "tags": [
-                    "菜单管理"
+                    "站点管理"
                 ],
-                "summary": "获取菜单列表",
+                "summary": "获取站点列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -338,6 +338,12 @@ const docTemplate = `{
                         "name": "limit",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "站点名称",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1077,13 +1083,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "code",
-                "token"
+                "token",
+                "username"
             ],
             "properties": {
                 "code": {
                     "type": "string"
                 },
                 "token": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

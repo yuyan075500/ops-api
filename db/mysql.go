@@ -36,6 +36,8 @@ func MySQLInit() error {
 	_ = client.AutoMigrate(
 		&model.AuthUser{},
 		&model.AuthGroup{},
+		&model.SiteGroup{},
+		&model.Site{},
 		&model.Menu{},
 		&model.SubMenu{},
 		&model.SystemPath{},

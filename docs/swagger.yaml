@@ -101,9 +101,12 @@ definitions:
         type: string
       token:
         type: string
+      username:
+        type: string
     required:
     - code
     - token
+    - username
     type: object
   service.RestPassword:
     properties:
@@ -337,7 +340,7 @@ paths:
       - 菜单管理
   /api/v1/menus:
     get:
-      description: 菜单关接口
+      description: 站点关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -354,14 +357,18 @@ paths:
         name: limit
         required: true
         type: integer
+      - description: 站点名称
+        in: query
+        name: name
+        type: string
       responses:
         "200":
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取菜单列表
+      summary: 获取站点列表
       tags:
-      - 菜单管理
+      - 站点管理
   /api/v1/path/list:
     get:
       description: 接口相关接口
