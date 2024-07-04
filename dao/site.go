@@ -53,9 +53,9 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
-		Preload("Sites"). // 预加载分组包含的站点
+		Preload("Sites").                   // 预加载分组包含的站点
 		Where("name like ?", "%"+name+"%"). // 实现过滤
-		Count(&total). // 获取总数
+		Count(&total).                      // 获取总数
 		Limit(limit).
 		Offset(startSet).
 		Find(&siteGroups)
