@@ -21,14 +21,14 @@ type SiteList struct {
 
 // SiteGroup 站点分组
 type SiteGroup struct {
-	Id    uint        `json:"id"`
+	ID    uint        `json:"id"`
 	Name  string      `json:"name"`
 	Sites []*SiteItem `json:"sites"`
 }
 
 // SiteItem 站点
 type SiteItem struct {
-	Id           uint   `json:"id"`
+	ID           uint   `json:"id"`
 	Name         string `json:"name"`
 	Icon         string `json:"icon"`
 	Address      string `json:"address"`
@@ -53,9 +53,9 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
-		Preload("Sites").                   // 预加载分组包含的站点
+		Preload("Sites"). // 预加载分组包含的站点
 		Where("name like ?", "%"+name+"%"). // 实现过滤
-		Count(&total).                      // 获取总数
+		Count(&total). // 获取总数
 		Limit(limit).
 		Offset(startSet).
 		Find(&siteGroups)
@@ -72,7 +72,7 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 	// 对分组进行循环处理
 	for i, sg := range siteGroups {
 		siteGroup := &SiteGroup{
-			Id:    sg.Id,
+			ID:    sg.ID,
 			Name:  sg.Name,
 			Sites: make([]*SiteItem, len(sg.Sites)), // 初始化分组内的站点列表切片，指定长度为sg.Sites
 		}
@@ -80,7 +80,7 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 		// 对分组内的站点循环处理
 		for j, s := range sg.Sites {
 			siteItem := &SiteItem{
-				Id:           s.Id,
+				ID:           s.ID,
 				Name:         s.Name,
 				Icon:         *s.Icon,
 				Address:      s.Address,
@@ -112,4 +112,36 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 	}
 
 	return siteList, nil
+}
+
+// AddGroup 新增
+func (s *site) AddGroup(data *model.SiteGroup) (err error) {
+	if err := global.MySQLClient.Create(&data).Error; err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// UpdateGroup 修改
+func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
+	if err := global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// DeleteGroup 删除
+func (s *site) DeleteGroup(group *model.SiteGroup) (err error) {
+
+	// 删除分组
+	if err := global.MySQLClient.Unscoped().Delete(&group).Error; err != nil {
+
+		// 如果分组中包含站点，则返回对应的提示信息
+		if utils.IsForeignKeyConstraintError(err) {
+			return errors.New("请确保分组中不包含站点")
+		}
+
+		return errors.New(err.Error())
+	}
+	return nil
 }

@@ -2,7 +2,7 @@ package model
 
 // SiteGroup 站点分组
 type SiteGroup struct {
-	Id    uint   `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID    uint   `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name  string `json:"name"`
 	Sites []Site
 }
@@ -13,7 +13,7 @@ func (*SiteGroup) TableName() (name string) {
 
 // Site 站点
 type Site struct {
-	Id           uint        `json:"id" gorm:"primaryKey;autoIncrement"`
+	ID           uint        `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name         string      `json:"name"`
 	Icon         *string     `json:"icon"`
 	Address      string      `json:"address"`

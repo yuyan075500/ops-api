@@ -10,7 +10,7 @@ INSERT INTO `system_sub_menu` VALUES (1, '站点导航', 'SiteNavigation', 'sub-
 INSERT INTO `system_sub_menu` VALUES (2, '用户管理', 'UserManagement', 'sub-menu-user', 'user', 'user/user/index', 1, null, 2);
 INSERT INTO `system_sub_menu` VALUES (3, '分组管理', 'GroupManagement', 'sub-menu-group', 'group', 'user/group/index', 2, null, 2);
 INSERT INTO `system_sub_menu` VALUES (4, '账号管理', 'AccountManagement', 'sub-menu-account', 'account', 'asset/account/index', 1, null, 3);
-INSERT INTO `system_sub_menu` VALUES (5, '站点管理', 'AssetManagement', 'sub-menu-site', 'site', 'asset/site/index', 2, null, 3);
+INSERT INTO `system_sub_menu` VALUES (5, '站点管理', 'SiteManagement', 'sub-menu-site', 'site', 'asset/site/index', 2, null, 3);
 INSERT INTO `system_sub_menu` VALUES (6, '登录日志', 'AuditLoginRecord', 'sub-menu-login-record', 'login', 'audit/login/index', 1, null, 4);
 INSERT INTO `system_sub_menu` VALUES (7, '短信记录', 'AuditSMSRecord', 'sub-menu-sms-record', 'sms', 'audit/sms/index', 2, null, 4);
 INSERT INTO `system_sub_menu` VALUES (8, '菜单管理', 'MenuManagement', 'sub-menu-menu', 'menu', 'system/menu/index', 1, null, 5);
@@ -36,3 +36,7 @@ INSERT INTO `system_path` VALUES (16, 'GetSMSRecordList', '/api/v1/audit/sms/lis
 INSERT INTO `system_path` VALUES (17, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
 INSERT INTO `system_path` VALUES (18, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
 
+INSERT INTO `system_path` VALUES (19, 'GetSiteList', '/api/v1/sites', 'GET', 'SiteManagement', '获取站点列表');
+INSERT INTO `system_path` VALUES (20, 'AddSiteGroup', '/api/v1/site/group', 'POST', 'SiteManagement', '新增站点分组');
+INSERT INTO `system_path` VALUES (21, 'UpdateSiteGroup', '/api/v1/site/group', 'PUT', 'SiteManagement', '修改站点分组');
+INSERT INTO `system_path` VALUES (22, 'DeleteSiteGroup', '/api/v1/site/group/:id', 'DELETE', 'SiteManagement', '删除站点分组');

@@ -2,7 +2,6 @@ package dao
 
 import (
 	"errors"
-	"github.com/wonderivan/logger"
 	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
@@ -127,7 +126,6 @@ func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
 
 	// 删除分组
 	if err := tx.Unscoped().Delete(&group).Error; err != nil {
-		logger.Error("ERROR：", err.Error())
 		return errors.New(err.Error())
 	}
 	return nil

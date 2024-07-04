@@ -127,6 +127,23 @@ definitions:
     - re_password
     - username
     type: object
+  service.SiteGroupCreate:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  service.SiteGroupUpdate:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
   service.UserLogin:
     properties:
       ldap:
@@ -340,7 +357,7 @@ paths:
       - 菜单管理
   /api/v1/menus:
     get:
-      description: 站点关接口
+      description: 菜单关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -357,18 +374,14 @@ paths:
         name: limit
         required: true
         type: integer
-      - description: 站点名称
-        in: query
-        name: name
-        type: string
       responses:
         "200":
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取站点列表
+      summary: 获取菜单列表
       tags:
-      - 站点管理
+      - 菜单管理
   /api/v1/path/list:
     get:
       description: 接口相关接口
@@ -418,6 +431,108 @@ paths:
       summary: 获取接口列表（表格展示）
       tags:
       - 接口管理
+  /api/v1/site/group:
+    post:
+      consumes:
+      - application/json
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组信息
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/service.SiteGroupCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 创建分组
+      tags:
+      - 站点管理
+    put:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组信息
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/service.SiteGroupUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新分组信息
+      tags:
+      - 站点管理
+  /api/v1/site/group/{id}:
+    delete:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除分组
+      tags:
+      - 站点管理
+  /api/v1/sites:
+    get:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 站点名称
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取站点列表
+      tags:
+      - 站点管理
   /api/v1/sms/reset_password_code:
     post:
       consumes:

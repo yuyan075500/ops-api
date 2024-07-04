@@ -2,8 +2,6 @@ package dao
 
 import (
 	"errors"
-	"fmt"
-	"github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/global"
@@ -171,14 +169,10 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 		// 遍历用户列表，逐个插入，需要对数据库中相同用户名的用户进行特殊处理
 		for _, user := range users {
 
-			var mysqlError *mysql.MySQLError
-
-			err := tx.Create(user).Error
-			// 如果用户已存在，代码1062就表示Duplicate entry错误
-			if errors.As(err, &mysqlError) && mysqlError.Number == 1062 {
-				// 如果用户来源为AD域，则进行用户更新，否则跳过 }
+			// 如果用户已存在则更新
+			if utils.IsDuplicateEntryError(tx.Error) {
+				// 仅更新来源为AD域的用户，则进行用户更新
 				if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
-					fmt.Println(user.Username)
 					return errors.New(err.Error())
 				}
 			} else {
