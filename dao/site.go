@@ -35,12 +35,26 @@ type SiteItem struct {
 	AllOpen      bool   `json:"all_open"`
 	Description  string `json:"description"`
 	SSO          bool   `json:"sso"`
-	SSOType      string `json:"sso_type"`
+	SSOType      uint   `json:"sso_type"`
 	ClientId     string `json:"client_id"`
 	ClientSecret string `json:"client_secret"`
 	CallbackUrl  string `json:"callback_url"`
 }
 
+// UpdateSite 更新站点结构体，定义新增时的字段信息
+type UpdateSite struct {
+	ID          uint    `json:"id"`
+	Name        string  `json:"name"`
+	Address     string  `json:"address"`
+	SSO         *bool   `json:"sso"`      // 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
+	AllOpen     *bool   `json:"all_open"` // 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
+	SSOType     uint    `json:"sso_type"`
+	Icon        string  `json:"icon"`
+	CallbackUrl *string `json:"callback_url"` // 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
+	Description string  `json:"description"`
+}
+
+// GetSiteList 获取站点列表（表格）
 func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err error) {
 	// 定义数据的起始位置
 	startSet := (page - 1) * limit
@@ -82,7 +96,6 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 			siteItem := &SiteItem{
 				ID:           s.ID,
 				Name:         s.Name,
-				Icon:         *s.Icon,
 				Address:      s.Address,
 				AllOpen:      s.AllOpen,
 				Description:  s.Description,
@@ -114,7 +127,7 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 	return siteList, nil
 }
 
-// AddGroup 新增
+// AddGroup 新增站点分组
 func (s *site) AddGroup(data *model.SiteGroup) (err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
 		return errors.New(err.Error())
@@ -122,7 +135,15 @@ func (s *site) AddGroup(data *model.SiteGroup) (err error) {
 	return nil
 }
 
-// UpdateGroup 修改
+// AddSite 新增站点
+func (s *site) AddSite(data *model.Site) (err error) {
+	if err := global.MySQLClient.Create(&data).Error; err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// UpdateGroup 修改站点分组
 func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
 	if err := global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
 		return errors.New(err.Error())
@@ -130,7 +151,15 @@ func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
 	return nil
 }
 
-// DeleteGroup 删除
+// UpdateSite 修改站点
+func (s *site) UpdateSite(site *model.Site, data *UpdateSite) (err error) {
+	if err := global.MySQLClient.Model(&site).Updates(data).Error; err != nil {
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// DeleteGroup 删除站点分组
 func (s *site) DeleteGroup(group *model.SiteGroup) (err error) {
 
 	// 删除分组
@@ -141,6 +170,16 @@ func (s *site) DeleteGroup(group *model.SiteGroup) (err error) {
 			return errors.New("请确保分组中不包含站点")
 		}
 
+		return errors.New(err.Error())
+	}
+	return nil
+}
+
+// DeleteSite 删除站点
+func (s *site) DeleteSite(site *model.Site) (err error) {
+
+	// 删除分组
+	if err := global.MySQLClient.Unscoped().Delete(&site).Error; err != nil {
 		return errors.New(err.Error())
 	}
 	return nil

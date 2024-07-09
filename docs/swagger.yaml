@@ -1,4 +1,28 @@
 definitions:
+  dao.UpdateSite:
+    properties:
+      address:
+        type: string
+      all_open:
+        description: 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
+        type: boolean
+      callback_url:
+        description: 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sso:
+        description: 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
+        type: boolean
+      sso_type:
+        type: integer
+    type: object
   dao.UserCreate:
     properties:
       email:
@@ -126,6 +150,31 @@ definitions:
     - phone_number
     - re_password
     - username
+    type: object
+  service.SiteCreate:
+    properties:
+      address:
+        type: string
+      callback_url:
+        type: string
+      description:
+        type: string
+      icon:
+        type: string
+      name:
+        type: string
+      site_group_id:
+        type: integer
+      sso:
+        type: boolean
+      sso_type:
+        type: integer
+    required:
+    - address
+    - description
+    - name
+    - site_group_id
+    - sso
     type: object
   service.SiteGroupCreate:
     properties:
@@ -431,6 +480,77 @@ paths:
       summary: 获取接口列表（表格展示）
       tags:
       - 接口管理
+  /api/v1/site:
+    post:
+      consumes:
+      - application/json
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组信息
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/service.SiteCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 创建站点
+      tags:
+      - 站点管理
+    put:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组信息
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/dao.UpdateSite'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新站点信息
+      tags:
+      - 站点管理
+  /api/v1/site/{id}:
+    delete:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分组ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除站点
+      tags:
+      - 站点管理
   /api/v1/site/group:
     post:
       consumes:
@@ -499,7 +619,29 @@ paths:
           description: '{"code": 0, "msg": "删除成功", "data": nil}'
           schema:
             type: string
-      summary: 删除分组
+      summary: 删除站点分组
+      tags:
+      - 站点管理
+  /api/v1/site/logoUpload:
+    post:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 头像
+        in: formData
+        name: logo
+        required: true
+        type: file
+      responses:
+        "200":
+          description: '{"code": 0, "path": logoPath}'
+          schema:
+            type: string
+      summary: 站点图片上传
       tags:
       - 站点管理
   /api/v1/sites:

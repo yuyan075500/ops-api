@@ -62,6 +62,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/sms/reset_password_code", // 获取重置密码验证码
 			"/api/v1/user/mfa_qrcode",         // 获取MFA二维码
 			"/api/v1/user/mfa_auth",           // MFA认证
+			"/api/v1/site/logoUpload",         // 站点图片上传
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

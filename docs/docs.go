@@ -423,6 +423,80 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/site": {
+            "put": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "更新站点信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "分组信息",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.UpdateSite"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "站点关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "创建站点",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "分组信息",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.SiteCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"创建成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/site/group": {
             "put": {
                 "description": "站点关接口",
@@ -503,7 +577,73 @@ const docTemplate = `{
                 "tags": [
                     "站点管理"
                 ],
-                "summary": "删除分组",
+                "summary": "删除站点分组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site/logoUpload": {
+            "post": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "站点图片上传",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "头像",
+                        "name": "logo",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"path\": logoPath}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site/{id}": {
+            "delete": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "删除站点",
                 "parameters": [
                     {
                         "type": "string",
@@ -1084,6 +1224,41 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dao.UpdateSite": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "all_open": {
+                    "description": "指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功",
+                    "type": "boolean"
+                },
+                "callback_url": {
+                    "description": "指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功",
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "sso": {
+                    "description": "指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功",
+                    "type": "boolean"
+                },
+                "sso_type": {
+                    "type": "integer"
+                }
+            }
+        },
         "dao.UserCreate": {
             "type": "object",
             "required": [
@@ -1269,6 +1444,42 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "service.SiteCreate": {
+            "type": "object",
+            "required": [
+                "address",
+                "description",
+                "name",
+                "site_group_id",
+                "sso"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "callback_url": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "site_group_id": {
+                    "type": "integer"
+                },
+                "sso": {
+                    "type": "boolean"
+                },
+                "sso_type": {
+                    "type": "integer"
                 }
             }
         },

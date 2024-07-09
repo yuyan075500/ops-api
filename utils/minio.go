@@ -32,3 +32,14 @@ func GetPresignedURL(fileName string, expiryTime time.Duration) (url *url.URL, e
 
 	return presignedURL, nil
 }
+
+// StatObject 获取对象信息
+func StatObject(objectName string) (objectInfo *minio.ObjectInfo, err error) {
+
+	info, err := global.MinioClient.StatObject(context.Background(), config.Conf.OSS.BucketName, objectName, minio.StatObjectOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &info, nil
+}

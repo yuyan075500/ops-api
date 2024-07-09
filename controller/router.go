@@ -55,5 +55,9 @@ func (r *router) InitRouter(router *gin.Engine) {
 		GET("/api/v1/sites", Site.GetSiteList).
 		POST("/api/v1/site/group", Site.AddGroup).
 		PUT("/api/v1/site/group", Site.UpdateGroup).
-		DELETE("/api/v1/site/group/:id", Site.DeleteGroup)
+		DELETE("/api/v1/site/group/:id", Site.DeleteGroup).
+		POST("/api/v1/site", Site.AddSite).
+		POST("/api/v1/site/logoUpload", Site.UploadLogo).
+		PUT("/api/v1/site", Site.UpdateSite).
+		DELETE("/api/v1/site/:id", Site.DeleteSite)
 }
