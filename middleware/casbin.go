@@ -63,6 +63,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/mfa_qrcode",         // 获取MFA二维码
 			"/api/v1/user/mfa_auth",           // MFA认证
 			"/api/v1/site/logoUpload",         // 站点图片上传
+			"/api/v1/site/guide",              // 获取导航站点信息
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

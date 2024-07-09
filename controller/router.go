@@ -53,6 +53,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		GET("/api/v1/audit/sms/list", Log.GetSMSRecordList).
 		POST("/api/v1/sms/callback", Log.SMSCallback).
 		GET("/api/v1/sites", Site.GetSiteList).
+		GET("/api/v1/site/guide", Site.GetSiteGuideList).
 		POST("/api/v1/site/group", Site.AddGroup).
 		PUT("/api/v1/site/group", Site.UpdateGroup).
 		DELETE("/api/v1/site/group/:id", Site.DeleteGroup).

@@ -56,6 +56,31 @@ func (s *site) GetSiteList(c *gin.Context) {
 	})
 }
 
+// GetSiteGuideList 获取站点列表
+// @Summary 获取站点列表
+// @Description 站点关接口
+// @Tags 站点管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Success 200 {string} json "{"code": 0, "data": []}"
+// @Router /api/v1/site/guide [get]
+func (s *site) GetSiteGuideList(c *gin.Context) {
+
+	data, err := service.Site.GetSiteGuideList()
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"data": data,
+	})
+}
+
 // AddGroup 创建分组
 // @Summary 创建分组
 // @Description 站点关接口

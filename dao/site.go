@@ -13,20 +13,32 @@ var Site site
 
 type site struct{}
 
-// SiteList 返回给站点列表结构体
+// SiteList 返回给站点列表结构体（表格）
 type SiteList struct {
 	Items []*SiteGroup `json:"items"`
 	Total int64        `json:"total"`
 }
 
-// SiteGroup 站点分组
+// SiteGuideList 返回给站点列表结构体（站点导航）
+type SiteGuideList struct {
+	Items []*SiteGuideGroup `json:"items"`
+}
+
+// SiteGroup 站点分组（表格）
 type SiteGroup struct {
 	ID    uint        `json:"id"`
 	Name  string      `json:"name"`
 	Sites []*SiteItem `json:"sites"`
 }
 
-// SiteItem 站点
+// SiteGuideGroup 站点分组（站点导航）
+type SiteGuideGroup struct {
+	ID    uint             `json:"id"`
+	Name  string           `json:"name"`
+	Sites []*SiteGuideItem `json:"sites"`
+}
+
+// SiteItem 站点（表格）
 type SiteItem struct {
 	ID           uint   `json:"id"`
 	Name         string `json:"name"`
@@ -41,6 +53,15 @@ type SiteItem struct {
 	CallbackUrl  string `json:"callback_url"`
 }
 
+// SiteGuideItem 站点（站点导航）
+type SiteGuideItem struct {
+	ID          uint   `json:"id"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	Address     string `json:"address"`
+	Description string `json:"description"`
+}
+
 // UpdateSite 更新站点结构体，定义新增时的字段信息
 type UpdateSite struct {
 	ID          uint    `json:"id"`
@@ -52,6 +73,62 @@ type UpdateSite struct {
 	Icon        string  `json:"icon"`
 	CallbackUrl *string `json:"callback_url"` // 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
 	Description string  `json:"description"`
+}
+
+// GetSiteGuideList 获取站点列表（站点导航）
+func (s *site) GetSiteGuideList() (data *SiteGuideList, err error) {
+	// 定义返回的内容
+	var siteGroups []*model.SiteGroup
+
+	// 获取分组列表
+	tx := global.MySQLClient.Model(&model.SiteGroup{}).
+		Preload("Sites"). // 预加载分组包含的站点
+		Find(&siteGroups)
+	if tx.Error != nil {
+		return nil, errors.New(tx.Error.Error())
+	}
+
+	// 最外层结构体数据绑定（由于需要对站点URL特殊处理，所以不能直接返回siteGroups结果）
+	siteList := &SiteGuideList{
+		Items: make([]*SiteGuideGroup, len(siteGroups)), // 初始化分组列表切片，指定长度为siteGroups
+	}
+
+	// 对分组进行循环处理
+	for i, sg := range siteGroups {
+		siteGroup := &SiteGuideGroup{
+			ID:    sg.ID,
+			Name:  sg.Name,
+			Sites: make([]*SiteGuideItem, len(sg.Sites)), // 初始化分组内的站点列表切片，指定长度为sg.Sites
+		}
+
+		// 对分组内的站点循环处理
+		for j, s := range sg.Sites {
+			siteItem := &SiteGuideItem{
+				ID:          s.ID,
+				Name:        s.Name,
+				Address:     s.Address,
+				Description: s.Description,
+			}
+
+			// 对站点图标进行特殊处理，返回一个Minio中的临时URL链接
+			if s.Icon != nil {
+				iconUrl, err := utils.GetPresignedURL(*s.Icon, time.Duration(config.Conf.JWT.Expires)*time.Hour)
+				if err != nil {
+					siteItem.Icon = ""
+				} else {
+					siteItem.Icon = iconUrl.String()
+				}
+			}
+
+			// 追加站点到分组
+			siteGroup.Sites[j] = siteItem
+		}
+
+		// 追加分组到返回给前端的结构体
+		siteList.Items[i] = siteGroup
+	}
+
+	return siteList, nil
 }
 
 // GetSiteList 获取站点列表（表格）

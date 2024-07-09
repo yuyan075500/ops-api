@@ -622,6 +622,23 @@ paths:
       summary: 删除站点分组
       tags:
       - 站点管理
+  /api/v1/site/guide:
+    get:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取站点列表
+      tags:
+      - 站点管理
   /api/v1/site/logoUpload:
     post:
       description: 站点关接口

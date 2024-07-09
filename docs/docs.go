@@ -604,6 +604,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/site/guide": {
+            "get": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "获取站点列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/site/logoUpload": {
             "post": {
                 "description": "站点关接口",
