@@ -4,6 +4,7 @@ import (
 	"errors"
 	"ops-api/global"
 	"ops-api/model"
+	"ops-api/utils"
 )
 
 var Path path
@@ -57,29 +58,40 @@ func (p *path) GetPathListAll() (data []MenuPaths, err error) {
 	)
 
 	// 获取用户列表
-	if err := global.MySQLClient.Model(&model.SystemPath{}).
-		Find(&paths).Error; err != nil {
+	if err := global.MySQLClient.Model(&model.SystemPath{}).Find(&paths).Error; err != nil {
 		return nil, errors.New(err.Error())
 	}
 
 	// 按名称分类
-	result := make(map[string][]*model.SystemPath)
+	result := utils.NewOrderedMap()
 	for _, path := range paths {
-		result[path.MenuName] = append(result[path.MenuName], path)
+		// 获取现有的路径列表
+		existingPaths, _ := result.Get(path.MenuName)
+		if existingPaths == nil {
+			existingPaths = []*model.SystemPath{}
+		}
+		// 类型断言
+		existingPaths = append(existingPaths.([]*model.SystemPath), path)
+		result.Set(path.MenuName, existingPaths)
 	}
 
 	// 构建返回结果
-	for menuName, pathList := range result {
+	for _, key := range result.Keys() {
+
+		value, _ := result.Get(key)
+
+		// 类型断言
+		paths := value.([]*model.SystemPath)
 
 		// 根据菜单Name获取对应的Title
-		title, err := Menu.GetMenuTitle(menuName)
+		title, err := Menu.GetMenuTitle(key)
 		if err != nil {
 			return nil, err
 		}
 
 		path := MenuPaths{
 			MenuName: *title,
-			Paths:    pathList,
+			Paths:    paths,
 		}
 		menuPaths = append(menuPaths, path)
 	}
