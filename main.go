@@ -50,6 +50,7 @@ func main() {
 		IgnorePaths("/swagger/").
 		IgnorePaths("/api/v1/sms/callback").
 		IgnorePaths("/api/v1/sms/reset_password_code").
+		IgnorePaths("/api/v1/reset_password").
 		IgnorePaths("/api/v1/user/mfa_qrcode").
 		IgnorePaths("/api/v1/user/mfa_auth").
 		Build())

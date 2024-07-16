@@ -484,7 +484,7 @@ func (u *user) GetVerificationCode(c *gin.Context) {
 // @Tags 个人信息管理
 // @Param user body dao.UserPasswordUpdate true "用户信息"
 // @Success 200 {string} json "{"code": 0, "msg": "更新成功"}"
-// @Router /api/v1/user/reset_password [post]
+// @Router /api/v1/reset_password [post]
 func (u *user) UpdateSelfPassword(c *gin.Context) {
 	var data = &service.RestPassword{}
 

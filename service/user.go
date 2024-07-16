@@ -142,8 +142,7 @@ func (u *user) UpdateUser(data *dao.UserUpdate) error {
 
 // UpdateUserPassword 更改密码
 func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
-
-	// 检查密码校验
+	// 密码校验
 	if data.Password != data.RePassword {
 		return errors.New("两次输入的密码不匹配")
 	}
@@ -158,8 +157,10 @@ func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 	}
 
 	// 如果是AD域账号则访问AD进行用户密码重置
-	if err := AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
-		return err
+	if user.UserFrom == "AD域" {
+		if err := AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
+			return err
+		}
 	}
 
 	return dao.User.UpdateUserPassword(user, data)

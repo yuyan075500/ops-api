@@ -16,7 +16,7 @@
 * RBAC权限管理（基于CasBin实现）
 * 统一站点管理（SSO认证）
 ## 认证相关
-* 双因素认证（使用Google Authenticator）
+* 双因素认证（支持Google Authenticator、华为云、阿里云）
 * 单点登录（支持CAS 3.0、OAuth 2.0和SAML2）
 * 钉钉扫码登录（需要配置钉钉应用）
 * AD认证
