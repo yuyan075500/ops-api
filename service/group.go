@@ -178,17 +178,18 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 
 	// Users=0需要执行清空操作
 	if len(data.Users) == 0 {
+		return errors.New("角色分组需要至少保留一个用户")
 		// 清除分组内所有用户
-		if err := dao.Group.ClearGroupUser(tx, group); err != nil {
-			tx.Rollback()
-			return err
-		}
+		//if err := dao.Group.ClearGroupUser(tx, group); err != nil {
+		//	tx.Rollback()
+		//	return err
+		//}
 
 		// 清除CasBin策略表内角色相关信息（相当于删除角色）
-		if err := dao.CasBin.DeleteRole(tx, group.Name); err != nil {
-			tx.Rollback()
-			return err
-		}
+		//if err := dao.CasBin.DeleteRole(tx, group.Name); err != nil {
+		//	tx.Rollback()
+		//	return err
+		//}
 	} else {
 
 		// 查询出要更新的所有用户
