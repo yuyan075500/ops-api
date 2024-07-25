@@ -18,6 +18,7 @@ type Config struct {
 	OSS     OSS    `yaml:"oss"`
 	LDAP    LDAP   `yaml:"ldap"`
 	SMS     SMS    `yaml:"sms"`
+	Mail    Mail   `yaml:"mail"`
 	Swagger bool   `yaml:"swagger"`
 }
 
@@ -30,6 +31,13 @@ type MySQL struct {
 	MaxIdleConns int    `yaml:"maxIdleConns"`
 	MaxOpenConns int    `yaml:"maxOpenConns"`
 	MaxLifeTime  int    `yaml:"maxLifeTime"`
+}
+
+type Mail struct {
+	SmtpHost string `yaml:"smtpHost"`
+	SmtpPort int    `yaml:"smtpPort"`
+	From     string `yaml:"from"`
+	Password string `yaml:"password"`
 }
 
 type MFA struct {
