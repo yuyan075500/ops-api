@@ -105,8 +105,8 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 
 	// 获取用户列表
 	tx := global.MySQLClient.Model(&model.AuthUser{}).
-		Where("name like ?", "%"+name+"%"). // 实现过滤
-		Count(&total).                      // 获取总数
+		Where("name like ? OR username like ? OR phone_number like ? OR email like ?", "%"+name+"%", "%"+name+"%", "%"+name+"%", "%"+name+"%"). // 实现过滤
+		Count(&total).                                                                                                                          // 获取总数
 		Limit(limit).
 		Offset(startSet).
 		Find(&userList)
