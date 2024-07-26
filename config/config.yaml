@@ -16,7 +16,7 @@ jwt:
   secret: "swfqezjzoqssvjck"
   expires: 6
 mfa:
-  enable: false
+  enable: true
   issuer: "统一认证平台"
 oss:
   endpoint: "d-minio.50yc.cn"

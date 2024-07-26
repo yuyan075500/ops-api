@@ -51,6 +51,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 		GET("/api/v1/paths", Path.GetPathList).
 		GET("/api/v1/path/list", Path.GetPathListAll).
 		GET("/api/v1/audit/sms/list", Log.GetSMSRecordList).
+		GET("/api/v1/audit/login/list", Login.GetLoginRecordList).
 		POST("/api/v1/sms/callback", Log.SMSCallback).
 		GET("/api/v1/sites", Site.GetSiteList).
 		GET("/api/v1/site/guide", Site.GetSiteGuideList).

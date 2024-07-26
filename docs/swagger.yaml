@@ -208,6 +208,37 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/audit/login/list:
+    get:
+      description: 日志相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取用户登录列表
+      tags:
+      - 日志管理
   /api/v1/audit/sms/list:
     get:
       description: 日志相关接口

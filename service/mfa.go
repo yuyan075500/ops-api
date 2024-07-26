@@ -3,6 +3,7 @@ package service
 import (
 	"bytes"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp/totp"
 	"gorm.io/gorm"
 	"image/png"
@@ -10,7 +11,6 @@ import (
 	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/model"
-	"time"
 )
 
 var MFA mfa
@@ -61,7 +61,7 @@ func (m *mfa) GetGoogleQrcode(token string) (image []byte, err error) {
 }
 
 // GoogleQrcodeValidate Google MFA认证校验
-func (m *mfa) GoogleQrcodeValidate(username, token, code string) (jwtToken string, err error) {
+func (m *mfa) GoogleQrcodeValidate(username, token, code string, c *gin.Context) (jwtToken string, err error) {
 
 	var (
 		user   model.AuthUser
@@ -94,13 +94,35 @@ func (m *mfa) GoogleQrcodeValidate(username, token, code string) (jwtToken strin
 			return "", err
 		}
 
-		// 记录用户最后登录时间和绑定用户MFA
-		now := time.Now()
-		user.LastLoginAt = &now
+		// 开启事务
+		tx := global.MySQLClient.Begin()
+
+		// 更新用户最后登录时间
+		if err := User.UpdateUserLoginTime(tx, user); err != nil {
+			tx.Rollback()
+			return "", err
+		}
+
+		// 新增登录记录
+		if err := Login.AddLoginRecord(tx, 1, user.Username, "双因子", nil, c); err != nil {
+			tx.Rollback()
+			return "", err
+		}
+
+		// 更新用户MFA绑定信息
 		if user.MFACode == nil {
 			user.MFACode = &secret
+			if err := tx.Save(&user).Error; err != nil {
+				tx.Rollback()
+				return "", err
+			}
 		}
-		global.MySQLClient.Save(&user)
+
+		// 提交事务
+		if err := tx.Commit().Error; err != nil {
+			tx.Rollback()
+			return "", err
+		}
 
 		return jwtToken, nil
 	} else {

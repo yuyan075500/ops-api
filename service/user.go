@@ -3,7 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/dao"
 	"ops-api/global"
@@ -254,7 +256,7 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 }
 
 // Login 用户登录
-func (u *user) Login(params *UserLogin) (token string, redirect *string, err error) {
+func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect *string, err error) {
 
 	var user model.AuthUser
 
@@ -311,8 +313,26 @@ func (u *user) Login(params *UserLogin) (token string, redirect *string, err err
 		return "", nil, err
 	}
 
-	// 记录用户最后登录时间
-	global.MySQLClient.Model(&user).Where("id = ?", user.ID).Update("last_login_at", time.Now())
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 更新用户最后登录时间
+	if err := u.UpdateUserLoginTime(tx, user); err != nil {
+		tx.Rollback()
+		return "", nil, err
+	}
+
+	// 新增登录记录
+	if err := Login.AddLoginRecord(tx, 1, user.Username, "账号密码", nil, c); err != nil {
+		tx.Rollback()
+		return "", nil, err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return "", nil, err
+	}
 
 	return token, nil, nil
 }
@@ -341,5 +361,15 @@ func (u *user) UserSync() (err error) {
 	if err := dao.User.SyncUsers(usersList); err != nil {
 		return err
 	}
+	return nil
+}
+
+// UpdateUserLoginTime 更新用户最后登录时间
+func (u *user) UpdateUserLoginTime(tx *gorm.DB, user model.AuthUser) (err error) {
+
+	if err := tx.Model(&model.AuthUser{}).Where("id = ?", user.ID).Update("last_login_at", time.Now()).Error; err != nil {
+		return err
+	}
+
 	return nil
 }

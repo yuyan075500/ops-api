@@ -19,10 +19,15 @@ type LogSMS struct {
 // LogLogin 用户登录日志表
 type LogLogin struct {
 	gorm.Model
-	Username   string `json:"username"`
-	SourceIP   string `json:"source_ip"`
-	UserAgent  string `json:"user_agent"`
-	Status     string `json:"status"`
-	AuthMethod string `json:"auth_method"`
-	City       string `json:"city"`
+	Username     string `json:"username"`
+	SourceIP     string `json:"source_ip"`
+	UserAgent    string `json:"user_agent"`
+	Status       int    `json:"status"`
+	FailedReason string `json:"failed_reason"`
+	AuthMethod   string `json:"auth_method"`
+	City         string `json:"city"`
+}
+
+func (*LogLogin) TableName() (name string) {
+	return "log_login"
 }

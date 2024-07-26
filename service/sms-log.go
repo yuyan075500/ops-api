@@ -98,7 +98,7 @@ func (l *log) SMSSend(data *UserInfo, expirationTime string) (code string, err e
 	return strconv.Itoa(num), nil
 }
 
-// GetSMSRecordList 获取菜单列表
+// GetSMSRecordList 获取发送短信列表
 func (l *log) GetSMSRecordList(receiver string, page, limit int) (data *dao.SMSRecordList, err error) {
 	data, err = dao.Log.GetSMSRecordList(receiver, page, limit)
 	if err != nil {

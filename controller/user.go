@@ -42,8 +42,27 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, redirect, err := service.User.Login(params)
+	token, redirect, err := service.User.Login(params, c)
 	if err != nil {
+
+		// 开启事务
+		tx := global.MySQLClient.Begin()
+
+		// 新增登录记录
+		if err := service.Login.AddLoginRecord(tx, 2, params.Username, "账号密码", err, c); err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		// 提交事务
+		if err := tx.Commit().Error; err != nil {
+			tx.Rollback()
+			return
+		}
+
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
@@ -600,8 +619,27 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 	}
 
 	// MFA校验
-	token, err := service.MFA.GoogleQrcodeValidate(params.Username, params.Token, params.Code)
+	token, err := service.MFA.GoogleQrcodeValidate(params.Username, params.Token, params.Code, c)
 	if err != nil {
+
+		// 开启事务
+		tx := global.MySQLClient.Begin()
+
+		// 新增登录记录
+		if err := service.Login.AddLoginRecord(tx, 2, params.Username, "双因子", err, c); err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		// 提交事务
+		if err := tx.Commit().Error; err != nil {
+			tx.Rollback()
+			return
+		}
+
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
