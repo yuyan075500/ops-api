@@ -533,14 +533,14 @@ func (u *user) UpdateSelfPassword(c *gin.Context) {
 	})
 }
 
-// UserSync AD域用户同步
+// UserSyncAd AD域用户同步
 // @Summary AD域用户同步
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "msg": "同步成功"}"
-// @Router /api/v1/user/sync [post]
-func (u *user) UserSync(c *gin.Context) {
+// @Router /api/v1/user/sync/ad [post]
+func (u *user) UserSyncAd(c *gin.Context) {
 
 	// 同步用户
 	if err := service.User.UserSync(); err != nil {

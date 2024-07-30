@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	"ops-api/config"
-	"ops-api/controller"
+	"ops-api/controller/routers"
 	"ops-api/db"
 	"ops-api/middleware"
 )
@@ -43,7 +43,7 @@ func main() {
 
 	// 加载跨域中间件
 	r.Use(middleware.Cors())
-	// 加载登录中间件，其中IgnorePaths()方法可以忽略某些路由，支持前缀匹配
+	// 加载登录中间件，其中IgnorePaths()方法可以忽略不需要登录认证的路由，支持前缀匹配
 	r.Use(middleware.LoginBuilder().
 		IgnorePaths("/login").
 		IgnorePaths("/health").
@@ -58,7 +58,7 @@ func main() {
 	r.Use(middleware.PermissionCheck())
 
 	// 注册路由
-	controller.Router.InitRouter(r)
+	routers.Router.InitRouter(r)
 
 	// 启动服务
 	if err := r.Run(fmt.Sprintf("%v", config.Conf.Server)); err != nil {

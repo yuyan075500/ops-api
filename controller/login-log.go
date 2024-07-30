@@ -20,7 +20,7 @@ type login struct{}
 // @Param limit query int true "分页大小"
 // @Param username query string false "用户名"
 // @Success 200 {string} json "{"code": 0, "data": []}"
-// @Router /api/v1/audit/login/list [get]
+// @Router /api/v1/audit/login [get]
 func (l *login) GetLoginRecordList(c *gin.Context) {
 
 	params := new(struct {
