@@ -208,7 +208,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/audit/login/list:
+  /api/v1/audit/login:
     get:
       description: 日志相关接口
       parameters:
@@ -239,7 +239,7 @@ paths:
       summary: 获取用户登录列表
       tags:
       - 日志管理
-  /api/v1/audit/sms/list:
+  /api/v1/audit/sms:
     get:
       description: 日志相关接口
       parameters:
@@ -970,7 +970,7 @@ paths:
       summary: 密码更新
       tags:
       - 用户管理
-  /api/v1/user/sync:
+  /api/v1/user/sync/ad:
     post:
       description: 用户相关接口
       parameters:

@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/audit/login/list": {
+        "/api/v1/audit/login": {
             "get": {
                 "description": "日志相关接口",
                 "tags": [
@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/audit/sms/list": {
+        "/api/v1/audit/sms": {
             "get": {
                 "description": "日志相关接口",
                 "tags": [
@@ -1131,7 +1131,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/user/sync": {
+        "/api/v1/user/sync/ad": {
             "post": {
                 "description": "用户相关接口",
                 "tags": [
