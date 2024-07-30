@@ -11,10 +11,10 @@ var Menu menu
 
 type menu struct{}
 
-// GetMenuListAll 获取所有的菜单列表
-// @Summary 获取所有的菜单列表
-// @Description 菜单关接口
-// @Tags 菜单管理
+// GetMenuListAll 获取所菜单
+// @Summary 获取所菜单
+// @Description 组相关接口
+// @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/menu/list [get]

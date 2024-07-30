@@ -332,11 +332,11 @@ const docTemplate = `{
         },
         "/api/v1/menu/list": {
             "get": {
-                "description": "菜单关接口",
+                "description": "组相关接口",
                 "tags": [
-                    "菜单管理"
+                    "组管理"
                 ],
-                "summary": "获取所有的菜单列表",
+                "summary": "获取所菜单",
                 "parameters": [
                     {
                         "type": "string",
@@ -398,11 +398,11 @@ const docTemplate = `{
         },
         "/api/v1/path/list": {
             "get": {
-                "description": "接口相关接口",
+                "description": "组相关接口",
                 "tags": [
-                    "接口管理"
+                    "组管理"
                 ],
-                "summary": "获取所有接口（权限分配时选择）",
+                "summary": "获取所有接口",
                 "parameters": [
                     {
                         "type": "string",
@@ -959,7 +959,7 @@ const docTemplate = `{
         },
         "/api/v1/user/info": {
             "get": {
-                "description": "认证相关接口",
+                "description": "用户认证相关接口",
                 "tags": [
                     "用户认证"
                 ],
@@ -989,7 +989,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "获取所有的用户列表",
+                "summary": "获取用户列表（下拉框）",
                 "parameters": [
                     {
                         "type": "string",
@@ -1011,9 +1011,9 @@ const docTemplate = `{
         },
         "/api/v1/user/mfa_auth": {
             "post": {
-                "description": "个人信息管理相关接口",
+                "description": "用户认证相关接口",
                 "tags": [
-                    "个人信息管理"
+                    "用户认证"
                 ],
                 "summary": "MFA认证",
                 "parameters": [
@@ -1039,9 +1039,9 @@ const docTemplate = `{
         },
         "/api/v1/user/mfa_qrcode": {
             "get": {
-                "description": "个人信息管理相关接口",
+                "description": "用户认证相关接口",
                 "tags": [
-                    "个人信息管理"
+                    "用户认证"
                 ],
                 "summary": "获取MFA二维码",
                 "parameters": [
@@ -1238,7 +1238,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "认证相关接口",
+                "description": "用户认证相关接口",
                 "consumes": [
                     "application/json"
                 ],
@@ -1272,7 +1272,7 @@ const docTemplate = `{
         },
         "/logout": {
             "post": {
-                "description": "认证相关接口",
+                "description": "用户认证相关接口",
                 "tags": [
                     "用户认证"
                 ],

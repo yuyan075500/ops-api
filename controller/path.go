@@ -11,10 +11,10 @@ var Path path
 
 type path struct{}
 
-// GetPathListAll 获取所有接口（权限分配时选择）
-// @Summary 获取所有接口（权限分配时选择）
-// @Description 接口相关接口
-// @Tags 接口管理
+// GetPathListAll 获取所有接口
+// @Summary 获取所有接口
+// @Description 组相关接口
+// @Tags 组管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/path/list [get]

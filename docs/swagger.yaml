@@ -420,7 +420,7 @@ paths:
       - 组管理
   /api/v1/menu/list:
     get:
-      description: 菜单关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -432,9 +432,9 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取所有的菜单列表
+      summary: 获取所菜单
       tags:
-      - 菜单管理
+      - 组管理
   /api/v1/menus:
     get:
       description: 菜单关接口
@@ -464,7 +464,7 @@ paths:
       - 菜单管理
   /api/v1/path/list:
     get:
-      description: 接口相关接口
+      description: 组相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -476,9 +476,9 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取所有接口（权限分配时选择）
+      summary: 获取所有接口
       tags:
-      - 接口管理
+      - 组管理
   /api/v1/paths:
     get:
       description: 接口相关接口
@@ -858,7 +858,7 @@ paths:
       - 个人信息管理
   /api/v1/user/info:
     get:
-      description: 认证相关接口
+      description: 用户认证相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -887,12 +887,12 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取所有的用户列表
+      summary: 获取用户列表（下拉框）
       tags:
       - 用户管理
   /api/v1/user/mfa_auth:
     post:
-      description: 个人信息管理相关接口
+      description: 用户认证相关接口
       parameters:
       - description: MFA认证信息
         in: body
@@ -907,10 +907,10 @@ paths:
             type: string
       summary: MFA认证
       tags:
-      - 个人信息管理
+      - 用户认证
   /api/v1/user/mfa_qrcode:
     get:
-      description: 个人信息管理相关接口
+      description: 用户认证相关接口
       parameters:
       - description: 用户认证通过后的Token
         in: query
@@ -924,7 +924,7 @@ paths:
             type: string
       summary: 获取MFA二维码
       tags:
-      - 个人信息管理
+      - 用户认证
   /api/v1/user/reset_mfa/{id}:
     put:
       description: 用户相关接口
@@ -1022,7 +1022,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: 认证相关接口
+      description: 用户认证相关接口
       parameters:
       - description: 用户名密码
         in: body
@@ -1042,7 +1042,7 @@ paths:
       - 用户认证
   /logout:
     post:
-      description: 认证相关接口
+      description: 用户认证相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header

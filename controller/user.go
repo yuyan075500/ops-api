@@ -23,7 +23,7 @@ type user struct{}
 
 // Login 登录
 // @Summary 登录
-// @Description 认证相关接口
+// @Description 用户认证相关接口
 // @Tags 用户认证
 // @Accept application/json
 // @Produce application/json
@@ -88,7 +88,7 @@ func (u *user) Login(c *gin.Context) {
 
 // Logout 注销
 // @Summary 注销
-// @Description 认证相关接口
+// @Description 用户认证相关接口
 // @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": nil}"
@@ -174,7 +174,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 
 // GetUser 获取用户信息
 // @Summary 获取用户信息
-// @Description 认证相关接口
+// @Description 用户认证相关接口
 // @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": {}}"
@@ -199,8 +199,8 @@ func (u *user) GetUser(c *gin.Context) {
 	})
 }
 
-// GetUserListAll 获取所有的用户列表
-// @Summary 获取所有的用户列表
+// GetUserListAll 获取用户列表（下拉框）
+// @Summary 获取用户列表（下拉框）
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
@@ -560,8 +560,8 @@ func (u *user) UserSyncAd(c *gin.Context) {
 
 // GetGoogleQrcode 获取MFA二维码
 // @Summary 获取MFA二维码
-// @Description 个人信息管理相关接口
-// @Tags 个人信息管理
+// @Description 用户认证相关接口
+// @Tags 用户认证
 // @Param token query string true "用户认证通过后的Token"
 // @Success 200 {string} json "{"code": 0, "qrcode": ""}"
 // @Router /api/v1/user/mfa_qrcode [get]
@@ -599,8 +599,8 @@ func (u *user) GetGoogleQrcode(c *gin.Context) {
 
 // GoogleQrcodeValidate MFA认证
 // @Summary MFA认证
-// @Description 个人信息管理相关接口
-// @Tags 个人信息管理
+// @Description 用户认证相关接口
+// @Tags 用户认证
 // @Param user body service.MFAValidate true "MFA认证信息"
 // @Success 200 {string} json "{"code": 0, "token": "用户令牌"}"
 // @Router /api/v1/user/mfa_auth [post]
