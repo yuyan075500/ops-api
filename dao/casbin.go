@@ -106,3 +106,42 @@ func (c *casbin) DeleteRole(tx *gorm.DB, groupName string) (err error) {
 
 	return nil
 }
+
+// GetUserPermissions 获取用户拥有的权限，返回权限对应的中文名称列表
+func (c *casbin) GetUserPermissions(username string) (perm []string, err error) {
+	var permissions []string
+
+	// 获取用户所有角色
+	roles, err := global.CasBinServer.GetRolesForUser(username)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取角色对应的所有权限的中文名称
+	for _, role := range roles {
+
+		// 获取角色对应的权限
+		policies := global.CasBinServer.GetFilteredPolicy(0, role)
+
+		for _, policy := range policies {
+
+			var systemPath model.SystemPath
+
+			// 获取权限对应的中文名称
+			result := global.MySQLClient.Where("path = ? AND method = ?", policy[1], policy[2]).First(&systemPath)
+			if result.Error != nil {
+				// 有的权限是菜单权限，在SystemPath会找不到，需要跳过
+				if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+					continue
+				} else {
+					return nil, err
+				}
+			}
+
+			// 将权限对应的名称添加到列表
+			permissions = append(permissions, systemPath.Description)
+		}
+	}
+
+	return permissions, nil
+}

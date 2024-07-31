@@ -23,7 +23,9 @@ type UserList struct {
 // UserInfoWithMenu 用户信息结构体，用于用户登录后获取用户信息
 type UserInfoWithMenu struct {
 	UserInfo
-	Menus []*MenuItem `json:"menus"`
+	Menus       []*MenuItem `json:"menus"`
+	Roles       []string    `json:"roles"`
+	Permissions []string    `json:"permissions"`
 }
 
 // UserInfo 用户信息结构体
@@ -121,10 +123,15 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 }
 
 // GetUser 获取用户信息
-func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
+func (u *user) GetUser(userid uint) (userinfo *UserInfoWithMenu, err error) {
 
-	var userInfo *UserInfo
+	var (
+		userInfo *UserInfo
+		user     model.AuthUser
+		roles    []string
+	)
 
+	// 开启事务
 	tx := global.MySQLClient.Begin()
 
 	// 获取用户信息
@@ -145,9 +152,27 @@ func (u *user) GetUser(userid uint) (user *UserInfoWithMenu, err error) {
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
+
+	// 获取用户角色
+	err = tx.Preload("Groups", "is_role_group = ?", true).Where("username = ?", userInfo.Username).First(&user).Error
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	for _, group := range user.Groups {
+		roles = append(roles, group.Name)
+	}
+
+	// 获取用户接口权限
+	permissions, err := CasBin.GetUserPermissions(userInfo.Username)
+	if err != nil {
+		return nil, err
+	}
+
 	userInfoWithMenu := &UserInfoWithMenu{
-		UserInfo: *userInfo,
-		Menus:    menus,
+		UserInfo:    *userInfo,
+		Menus:       menus,
+		Roles:       roles,
+		Permissions: permissions,
 	}
 
 	return userInfoWithMenu, nil
