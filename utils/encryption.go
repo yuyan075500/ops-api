@@ -29,5 +29,5 @@ func Encrypt(str string) (string, error) {
 
 	// 根据公钥加密
 	encryptedData, err := rsa.EncryptPKCS1v15(rand.Reader, publicKey.(*rsa.PublicKey), []byte(str))
-	return base64.StdEncoding.EncodeToString(encryptedData), nil
+	return base64.RawURLEncoding.EncodeToString(encryptedData), nil
 }
