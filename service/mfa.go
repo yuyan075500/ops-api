@@ -17,11 +17,17 @@ var MFA mfa
 
 type mfa struct{}
 
-// MFAValidate MFA认证接口请求参数
+// MFAValidate MFA认证接口请求参数（支持CAS3.0和OAuth2.0）
 type MFAValidate struct {
-	Username string `json:"username" binding:"required"`
-	Code     string `json:"code" binding:"required"`
-	Token    string `json:"token" binding:"required"`
+	Username     string `json:"username" binding:"required"`
+	Code         string `json:"code" binding:"required"`
+	Token        string `json:"token" binding:"required"`
+	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
+	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
+	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
+	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
+	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
+	Service      string `json:"service"`       // CAS3.0客户端：回调地址
 }
 
 // GetGoogleQrcode 生成Google MFA认证二维码
@@ -61,7 +67,7 @@ func (m *mfa) GetGoogleQrcode(token string) (image []byte, err error) {
 }
 
 // GoogleQrcodeValidate Google MFA认证校验
-func (m *mfa) GoogleQrcodeValidate(username, token, code string, c *gin.Context) (jwtToken string, err error) {
+func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToken, redirectUri string, err error) {
 
 	var (
 		user   model.AuthUser
@@ -69,16 +75,16 @@ func (m *mfa) GoogleQrcodeValidate(username, token, code string, c *gin.Context)
 	)
 
 	// 获取登录用户信息
-	tx := global.MySQLClient.First(&user, "username = ?", username)
+	tx := global.MySQLClient.First(&user, "username = ?", params.Username)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-		return "", errors.New("用户不存在")
+		return "", "", errors.New("用户不存在")
 	}
 
 	// 获取Secret，如果用户还没有绑定MFA，则从Redis中获取Secret
 	if user.MFACode == nil {
-		srt, err := global.RedisClient.Get(token).Result()
+		srt, err := global.RedisClient.Get(params.Token).Result()
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		secret = srt
 	} else {
@@ -86,46 +92,39 @@ func (m *mfa) GoogleQrcodeValidate(username, token, code string, c *gin.Context)
 	}
 
 	// 校验MFA
-	valid := totp.Validate(code, secret)
-	if valid {
-		// 生成用户Token
-		jwtToken, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
-		if err != nil {
-			return "", err
-		}
-
-		// 开启事务
-		tx := global.MySQLClient.Begin()
-
-		// 更新用户最后登录时间
-		if err := User.UpdateUserLoginTime(tx, user); err != nil {
-			tx.Rollback()
-			return "", err
-		}
-
-		// 新增登录记录
-		if err := Login.AddLoginRecord(tx, 1, user.Username, "双因子", nil, c); err != nil {
-			tx.Rollback()
-			return "", err
-		}
-
-		// 更新用户MFA绑定信息
-		if user.MFACode == nil {
-			user.MFACode = &secret
-			if err := tx.Save(&user).Error; err != nil {
-				tx.Rollback()
-				return "", err
-			}
-		}
-
-		// 提交事务
-		if err := tx.Commit().Error; err != nil {
-			tx.Rollback()
-			return "", err
-		}
-
-		return jwtToken, nil
-	} else {
-		return "", errors.New("验证码错误")
+	valid := totp.Validate(params.Code, secret)
+	if !valid {
+		return "", "", errors.New("验证码错误")
 	}
+
+	// 生成用户Token
+	jwtToken, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 记录登录信息
+	if err := User.RecordLoginInfo(1, "双因子", user.Username, &user, nil, c); err != nil {
+		return "", "", err
+	}
+
+	// 更新用户MFA绑定信息
+	if user.MFACode == nil {
+		user.MFACode = &secret
+		if err := tx.Save(&user).Error; err != nil {
+			return "", "", err
+		}
+	}
+
+	// OAuth认证返回
+	if params.ClientId != "" {
+		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
+		if err != nil {
+			return "", "", err
+		}
+		return jwtToken, callbackUrl, nil
+	}
+
+	return jwtToken, "", nil
+
 }

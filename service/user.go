@@ -294,13 +294,13 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 	}
 
 	// 记录登录信息
-	if err := u.RecordLoginInfo(user, c); err != nil {
+	if err := u.RecordLoginInfo(1, "账号密码", user.Username, &user, nil, c); err != nil {
 		return "", "", nil, err
 	}
 
 	// OAuth认证返回
 	if params.ClientId != "" {
-		callbackUrl, err := handleOAuth(params, user.ID)
+		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
 		if err != nil {
 			return "", "", nil, err
 		}
@@ -375,20 +375,22 @@ func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
 	return nil
 }
 
-// RecordLoginInfo 记录用户登录登录
-func (u *user) RecordLoginInfo(user model.AuthUser, c *gin.Context) error {
+// RecordLoginInfo 记录用户登录信息
+func (u *user) RecordLoginInfo(status int, loginMethod, userName string, user *model.AuthUser, failedReason error, c *gin.Context) error {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
 	// 记录用户最后登录时间
-	if err := u.UpdateUserLoginTime(tx, user); err != nil {
-		tx.Rollback()
-		return err
+	if status == 1 {
+		if err := u.UpdateUserLoginTime(tx, *user); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	// 新增登录记录
-	if err := Login.AddLoginRecord(tx, 1, user.Username, "账号密码", nil, c); err != nil {
+	if err := Login.AddLoginRecord(tx, status, userName, loginMethod, failedReason, c); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -408,7 +410,7 @@ func handleMFA(user model.AuthUser) (string, *string, error) {
 	// 生成一个32位长度的随机字符串作为临时token
 	token := utils.GenerateRandomString(32)
 
-	// 将token写入Redis缓存，并设置有效期为2分钟
+	// 将token写入Redis缓存，并设置有效期为2分钟（这里的时间和前端配置的定时器保持一至）
 	if err := global.RedisClient.Set(token, user.Username, 2*time.Minute).Err(); err != nil {
 		return "", nil, err
 	}
@@ -425,13 +427,13 @@ func handleMFA(user model.AuthUser) (string, *string, error) {
 }
 
 // handleOAuth OAuth认证返回
-func handleOAuth(params *UserLogin, userID uint) (string, error) {
+func handleOAuth(clientID, redirectURI, responseType, scope, state string, userID uint) (string, error) {
 	data := &Authorize{
-		ClientId:     params.ClientId,
-		RedirectURI:  params.RedirectURI,
-		ResponseType: params.ResponseType,
-		Scope:        params.Scope,
-		State:        params.State,
+		ClientId:     clientID,
+		RedirectURI:  redirectURI,
+		ResponseType: responseType,
+		Scope:        scope,
+		State:        state,
 	}
 	return SSO.GetAuthorize(data, userID)
 }
