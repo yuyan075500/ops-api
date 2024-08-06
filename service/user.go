@@ -266,51 +266,25 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 
 	var user model.AuthUser
 
-	// 本地用户认证
-	if !params.LDAP {
-		// 根据用户名查询用户
-		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
-			return "", "", nil, errors.New("用户不存在")
-		}
-		if user.CheckPassword(params.Password) == false {
-			return "", "", nil, errors.New("用户密码错误")
-		}
-	}
-
-	// AD域用户认证
-	if params.LDAP {
-		// 根据用户名查询用户
-		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
-			return "", "", nil, errors.New("用户不存在")
-		}
-		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
-			return "", "", nil, errors.New("用户密码错误或系统错误")
-		}
+	// 用户认证
+	if err := u.AuthenticateUser(params, &user); err != nil {
+		return "", "", nil, err
 	}
 
 	// 判断用户是否禁用
-	if user.IsActive == false {
+	if !user.IsActive {
 		return "", "", nil, errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 判断系统是否启用MFA认证
-	if config.Conf.MFA.Enable == true {
-		// 生成一个32位长度的随机字符串，当用户进行MFA检验的时候判断用户否认证通过
-		token := utils.GenerateRandomString(32)
-
-		// 将token写入Redis缓存，设置有效期为2分钟
-		if err := global.RedisClient.Set(token, user.Username, 2*time.Minute).Err(); err != nil {
+	if config.Conf.MFA.Enable {
+		token, redirect, err := handleMFA(user)
+		if err != nil {
 			return "", "", nil, err
 		}
-
-		// 判断用户是否已经绑定MFA，为空则未绑定。redirect为前端跳转页面名称，如果用户未绑定MFA则跳转到MFA绑定页面，否则跳转MFA认证页面
-		redirect := "MFA_AUTH"
-		if user.MFACode == nil {
-			redirect = "MFA_ENABLE"
-			return token, "", &redirect, nil
+		if redirect != nil {
+			return token, "", redirect, nil
 		}
-
-		return token, "", &redirect, nil
 	}
 
 	// 生成用户Token
@@ -319,44 +293,19 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 		return "", "", nil, err
 	}
 
-	// 开启事务
-	tx := global.MySQLClient.Begin()
-
-	// 更新用户最后登录时间
-	if err := u.UpdateUserLoginTime(tx, user); err != nil {
-		tx.Rollback()
-		return "", "", nil, err
-	}
-
-	// 新增登录记录
-	if err := Login.AddLoginRecord(tx, 1, user.Username, "账号密码", nil, c); err != nil {
-		tx.Rollback()
-		return "", "", nil, err
-	}
-
-	// 提交事务
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
+	// 记录登录信息
+	if err := u.RecordLoginInfo(user, c); err != nil {
 		return "", "", nil, err
 	}
 
 	// OAuth认证返回
 	if params.ClientId != "" {
-		data := &Authorize{
-			ClientId:     params.ClientId,
-			RedirectURI:  params.RedirectURI,
-			ResponseType: params.ResponseType,
-			Scope:        params.Scope,
-			State:        params.State,
-		}
-		callbackUrl, err := SSO.GetAuthorize(data, user.ID)
+		callbackUrl, err := handleOAuth(params, user.ID)
 		if err != nil {
 			return "", "", nil, err
 		}
 		return token, callbackUrl, nil, nil
 	}
-
-	// CAS认证返回
 
 	return token, "", nil, nil
 }
@@ -396,4 +345,93 @@ func (u *user) UpdateUserLoginTime(tx *gorm.DB, user model.AuthUser) (err error)
 	}
 
 	return nil
+}
+
+// AuthenticateUser 用户认证
+func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
+
+	// 默认查找本地用户
+	userQuery := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "本地")
+
+	// 如果LDAP为true，则查找AD域用户
+	if params.LDAP {
+		userQuery = global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "AD域")
+	}
+
+	// 没有找到对应的用户
+	if err := userQuery.First(&user).Error; err != nil {
+		return errors.New("用户不存在")
+	}
+
+	if params.LDAP {
+		// AD用户认证
+		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
+			return errors.New("用户密码错误或系统错误")
+		}
+	} else if !user.CheckPassword(params.Password) {
+		return errors.New("用户密码错误")
+	}
+
+	return nil
+}
+
+// RecordLoginInfo 记录用户登录登录
+func (u *user) RecordLoginInfo(user model.AuthUser, c *gin.Context) error {
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 记录用户最后登录时间
+	if err := u.UpdateUserLoginTime(tx, user); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 新增登录记录
+	if err := Login.AddLoginRecord(tx, 1, user.Username, "账号密码", nil, c); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
+// handleMFA 双因素认证返回
+func handleMFA(user model.AuthUser) (string, *string, error) {
+
+	// 生成一个32位长度的随机字符串作为临时token
+	token := utils.GenerateRandomString(32)
+
+	// 将token写入Redis缓存，并设置有效期为2分钟
+	if err := global.RedisClient.Set(token, user.Username, 2*time.Minute).Err(); err != nil {
+		return "", nil, err
+	}
+
+	// 判断用户是否已经绑定MFA，为空则未绑定
+	// MFA_AUTH和MFA_ENABLE是在前端定义页面名称，认证通过后会根据redirect的值跳转到对应的页面
+	redirect := "MFA_AUTH"
+	if user.MFACode == nil {
+		redirect = "MFA_ENABLE"
+		return token, &redirect, nil
+	}
+
+	return token, &redirect, nil
+}
+
+// handleOAuth OAuth认证返回
+func handleOAuth(params *UserLogin, userID uint) (string, error) {
+	data := &Authorize{
+		ClientId:     params.ClientId,
+		RedirectURI:  params.RedirectURI,
+		ResponseType: params.ResponseType,
+		Scope:        params.Scope,
+		State:        params.State,
+	}
+	return SSO.GetAuthorize(data, userID)
 }

@@ -22,11 +22,12 @@ func (l *login) GetLoginRecordList(username string, page, limit int) (data *dao.
 
 // AddLoginRecord 新增登录记录
 func (l *login) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod string, failedReason error, c *gin.Context) (err error) {
-	// 获取登录客户端信息
+	// 获取客户端Agent
 	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
 	clientIP := c.ClientIP()
 
-	// 数据封闭，Status=1表示成功
+	// 数据封装，Status=1表示成功
 	loginRecord := &model.LogLogin{
 		Username:   username,
 		SourceIP:   clientIP,
@@ -35,7 +36,7 @@ func (l *login) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod st
 		AuthMethod: loginMethod,
 	}
 
-	// 记录登录失败原因
+	// 如果是登录失败，则记录登录失败原因
 	if status != 1 {
 		loginRecord.FailedReason = failedReason.Error()
 	}
