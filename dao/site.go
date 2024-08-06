@@ -40,17 +40,18 @@ type SiteGuideGroup struct {
 
 // SiteItem 站点（表格）
 type SiteItem struct {
-	ID           uint   `json:"id"`
-	Name         string `json:"name"`
-	Icon         string `json:"icon"`
-	Address      string `json:"address"`
-	AllOpen      bool   `json:"all_open"`
-	Description  string `json:"description"`
-	SSO          bool   `json:"sso"`
-	SSOType      uint   `json:"sso_type"`
-	ClientId     string `json:"client_id"`
-	ClientSecret string `json:"client_secret"`
-	CallbackUrl  string `json:"callback_url"`
+	ID           uint             `json:"id"`
+	Name         string           `json:"name"`
+	Icon         string           `json:"icon"`
+	Address      string           `json:"address"`
+	AllOpen      bool             `json:"all_open"`
+	Description  string           `json:"description"`
+	SSO          bool             `json:"sso"`
+	SSOType      uint             `json:"sso_type"`
+	ClientId     string           `json:"client_id"`
+	ClientSecret string           `json:"client_secret"`
+	CallbackUrl  string           `json:"callback_url"`
+	Users        []*UserBasicInfo `json:"users"`
 }
 
 // SiteGuideItem 站点（站点导航）
@@ -145,6 +146,7 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
 		Preload("Sites").                   // 预加载分组包含的站点
+		Preload("Sites.Users").             // 确保预加载站点用户
 		Where("name like ?", "%"+name+"%"). // 实现过滤
 		Count(&total).                      // 获取总数
 		Limit(limit).
@@ -190,6 +192,15 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 					siteItem.Icon = ""
 				} else {
 					siteItem.Icon = iconUrl.String()
+				}
+			}
+
+			// 处理用户信息
+			siteItem.Users = make([]*UserBasicInfo, len(s.Users))
+			for k, u := range s.Users {
+				siteItem.Users[k] = &UserBasicInfo{
+					ID:   u.ID,
+					Name: u.Name,
 				}
 			}
 
@@ -260,4 +271,53 @@ func (s *site) DeleteSite(site *model.Site) (err error) {
 		return errors.New(err.Error())
 	}
 	return nil
+}
+
+// GetSite 获取单个站点
+func (s *site) GetSite(clientId string) (data *model.Site, err error) {
+	var site *model.Site
+
+	if err := global.MySQLClient.Where("client_id = ?", clientId).First(&site).Error; err != nil {
+		return nil, err
+	}
+
+	return site, nil
+}
+
+// UpdateSiteUser 更新站点用户
+func (s *site) UpdateSiteUser(site *model.Site, users []model.AuthUser) (err error) {
+	if err := global.MySQLClient.Model(&site).Association("Users").Replace(users); err != nil {
+		return errors.New(err.Error())
+	}
+
+	return nil
+}
+
+// ClearSiteUser 清空站点用户
+func (s *site) ClearSiteUser(site *model.Site) (err error) {
+	if err := global.MySQLClient.Model(&site).Association("Users").Clear(); err != nil {
+		return errors.New(err.Error())
+	}
+
+	return nil
+}
+
+// IsUserInSite 判断用户是否在站点中
+func (s *site) IsUserInSite(userID uint) bool {
+
+	var site *model.Site
+
+	// 查询站点并预加载用户
+	if err := global.MySQLClient.Preload("Users", "id = ?", userID).First(&site).Error; err != nil {
+		return false
+	}
+
+	// 检查用户是否被预加载
+	for _, user := range site.Users {
+		if user.ID == userID {
+			return true
+		}
+	}
+
+	return false
 }

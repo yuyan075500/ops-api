@@ -21,11 +21,17 @@ var User user
 
 type user struct{}
 
-// UserLogin 用户登录结构体
+// UserLogin 用户登录结构体（支持CAS3.0和OAuth2.0）
 type UserLogin struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	LDAP     bool   `json:"ldap"`
+	Username     string `json:"username" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	LDAP         bool   `json:"ldap"`
+	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
+	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
+	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
+	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
+	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
+	Service      string `json:"service"`       // CAS3.0客户端：回调地址
 }
 
 // RestPassword 重置密码时用户信息绑定的结构体
@@ -255,8 +261,8 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 	return nil
 }
 
-// Login 用户登录
-func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect *string, err error) {
+// Login 用户登录（支持CAS3.0和OAuth2.0）
+func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri string, redirect *string, err error) {
 
 	var user model.AuthUser
 
@@ -264,10 +270,10 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect 
 	if !params.LDAP {
 		// 根据用户名查询用户
 		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "本地").First(&user).Error; err != nil {
-			return "", nil, errors.New("用户不存在")
+			return "", "", nil, errors.New("用户不存在")
 		}
 		if user.CheckPassword(params.Password) == false {
-			return "", nil, errors.New("用户密码错误")
+			return "", "", nil, errors.New("用户密码错误")
 		}
 	}
 
@@ -275,16 +281,16 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect 
 	if params.LDAP {
 		// 根据用户名查询用户
 		if err := global.MySQLClient.First(&user, "username = ? AND user_from = ?", params.Username, "AD域").First(&user).Error; err != nil {
-			return "", nil, errors.New("用户不存在")
+			return "", "", nil, errors.New("用户不存在")
 		}
 		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
-			return "", nil, errors.New("用户密码错误或系统错误")
+			return "", "", nil, errors.New("用户密码错误或系统错误")
 		}
 	}
 
 	// 判断用户是否禁用
 	if user.IsActive == false {
-		return "", nil, errors.New("拒绝登录，请联系管理员")
+		return "", "", nil, errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 判断系统是否启用MFA认证
@@ -294,23 +300,23 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect 
 
 		// 将token写入Redis缓存，设置有效期为2分钟
 		if err := global.RedisClient.Set(token, user.Username, 2*time.Minute).Err(); err != nil {
-			return "", nil, err
+			return "", "", nil, err
 		}
 
 		// 判断用户是否已经绑定MFA，为空则未绑定。redirect为前端跳转页面名称，如果用户未绑定MFA则跳转到MFA绑定页面，否则跳转MFA认证页面
 		redirect := "MFA_AUTH"
 		if user.MFACode == nil {
 			redirect = "MFA_ENABLE"
-			return token, &redirect, nil
+			return token, "", &redirect, nil
 		}
 
-		return token, &redirect, nil
+		return token, "", &redirect, nil
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", nil, err
+		return "", "", nil, err
 	}
 
 	// 开启事务
@@ -319,22 +325,40 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token string, redirect 
 	// 更新用户最后登录时间
 	if err := u.UpdateUserLoginTime(tx, user); err != nil {
 		tx.Rollback()
-		return "", nil, err
+		return "", "", nil, err
 	}
 
 	// 新增登录记录
 	if err := Login.AddLoginRecord(tx, 1, user.Username, "账号密码", nil, c); err != nil {
 		tx.Rollback()
-		return "", nil, err
+		return "", "", nil, err
 	}
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return "", nil, err
+		return "", "", nil, err
 	}
 
-	return token, nil, nil
+	// OAuth认证返回
+	if params.ClientId != "" {
+		data := &Authorize{
+			ClientId:     params.ClientId,
+			RedirectURI:  params.RedirectURI,
+			ResponseType: params.ResponseType,
+			Scope:        params.Scope,
+			State:        params.State,
+		}
+		callbackUrl, err := SSO.GetAuthorize(data, user.ID)
+		if err != nil {
+			return "", "", nil, err
+		}
+		return token, callbackUrl, nil, nil
+	}
+
+	// CAS认证返回
+
+	return token, "", nil, nil
 }
 
 // UserSync AD域用户同步

@@ -28,5 +28,7 @@ func initSiteRouters(router *gin.Engine) {
 		site.PUT("/group", controller.Site.UpdateGroup)
 		// 删除站点分组
 		site.DELETE("/group/:id", controller.Site.DeleteGroup)
+		// 修改站点用户
+		site.PUT("/users", controller.Site.UpdateSiteUser)
 	}
 }

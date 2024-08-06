@@ -46,55 +46,12 @@ func (l *Login) Build() gin.HandlerFunc {
 
 		// 获取Token
 		token := c.Request.Header.Get("Authorization")
-
-		// 未认证
-		if token == "" {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90514,
-				"msg":  "未认证",
-			})
-			c.Abort()
-			return
-		}
-
-		// Token校验
-		parts := strings.SplitN(token, " ", 2)
-		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90514,
-				"msg":  "Token无效",
-			})
-			c.Abort()
-			return
-		}
-
-		// Token解析
-		mc, err := ParseToken(parts[1])
+		mc, err := ValidateJWT(token)
 		if err != nil {
 			logger.Error("ERROR：", err)
 			c.JSON(http.StatusOK, gin.H{
 				"code": 90514,
 				"msg":  err.Error(),
-			})
-			c.Abort()
-			return
-		}
-
-		// 判断Token是否已注销
-		val, err := global.RedisClient.Exists(parts[1]).Result()
-		if err != nil {
-			logger.Error("ERROR：", err)
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90514,
-				"msg":  err.Error(),
-			})
-			c.Abort()
-			return
-		}
-		if val == 1 {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": 90514,
-				"msg":  "token无效",
 			})
 			c.Abort()
 			return
@@ -107,6 +64,37 @@ func (l *Login) Build() gin.HandlerFunc {
 		// 后续的处理函数可以用过c.Get("username")来获取当前请求的用户信息
 		c.Next()
 	}
+}
+
+// ValidateJWT 校验Token
+func ValidateJWT(token string) (mc *UserClaims, err error) {
+	// 如果Token为空，则表示未认证
+	if token == "" {
+		return nil, errors.New("未认证")
+	}
+
+	// Token校验
+	parts := strings.SplitN(token, " ", 2)
+	if !(len(parts) == 2 && parts[0] == "Bearer") {
+		return nil, errors.New("token无效")
+	}
+
+	// Token解析
+	mc, err = ParseToken(parts[1])
+	if err != nil {
+		return nil, err
+	}
+
+	// 判断Token是否已注销
+	val, err := global.RedisClient.Exists(parts[1]).Result()
+	if err != nil {
+		return nil, err
+	}
+	if val == 1 {
+		return nil, errors.New("token无效")
+	}
+
+	return mc, nil
 }
 
 // GenerateJWT 生成Token

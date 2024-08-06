@@ -43,6 +43,8 @@ func MySQLInit() error {
 		&model.SystemPath{},
 		&model.LogSMS{},
 		&model.LogLogin{},
+		&model.SsoOAuthTicket{},
+		&model.SsoCASTicket{},
 	)
 
 	// 设置数据库连接池

@@ -396,6 +396,95 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/oauth/authorize": {
+            "post": {
+                "description": "OAuth2.0认证相关接口",
+                "tags": [
+                    "OAuth2.0认证"
+                ],
+                "summary": "客户端授权",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.Authorize"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": 授权成功, \"redirect_uri\": redirect_uri}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/oauth/token": {
+            "post": {
+                "description": "OAuth2.0认证相关接口",
+                "tags": [
+                    "OAuth2.0认证"
+                ],
+                "summary": "客户端认证",
+                "parameters": [
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.Token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ResponseToken"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/oauth/userinfo": {
+            "get": {
+                "description": "OAuth2.0认证相关接口",
+                "tags": [
+                    "OAuth2.0认证"
+                ],
+                "summary": "获取用户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.ResponseUserinfo"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/path/list": {
             "get": {
                 "description": "组相关接口",
@@ -730,6 +819,41 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"path\": logoPath}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site/users": {
+            "put": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "更新站点用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.SiteUserUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -1402,6 +1526,30 @@ const docTemplate = `{
                 }
             }
         },
+        "service.Authorize": {
+            "type": "object",
+            "required": [
+                "client_id",
+                "response_type"
+            ],
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "redirect_uri": {
+                    "type": "string"
+                },
+                "response_type": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "service.GroupCreate": {
             "type": "object",
             "required": [
@@ -1494,6 +1642,46 @@ const docTemplate = `{
                 }
             }
         },
+        "service.ResponseToken": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "refresh_token": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.ResponseUserinfo": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "service.RestPassword": {
             "type": "object",
             "required": [
@@ -1579,6 +1767,44 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.SiteUserUpdate": {
+            "type": "object",
+            "required": [
+                "id",
+                "users"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "service.Token": {
+            "type": "object",
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "client_secret": {
+                    "type": "string"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "grant_type": {
+                    "type": "string"
+                },
+                "redirect_uri": {
                     "type": "string"
                 }
             }

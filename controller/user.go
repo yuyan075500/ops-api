@@ -42,13 +42,13 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, redirect, err := service.User.Login(params, c)
+	token, redirectUri, redirect, err := service.User.Login(params, c)
 	if err != nil {
 
 		// 开启事务
 		tx := global.MySQLClient.Begin()
 
-		// 新增登录记录
+		// 新增登录失败记录
 		if err := service.Login.AddLoginRecord(tx, 2, params.Username, "账号密码", err, c); err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code": 90500,
@@ -71,6 +71,7 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
+	// 如果开启MFA认证需要返回重定向的页面
 	if redirect != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":     0,
@@ -81,8 +82,9 @@ func (u *user) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code":  0,
-		"token": token,
+		"code":         0,
+		"token":        token,
+		"redirect_uri": redirectUri,
 	})
 }
 

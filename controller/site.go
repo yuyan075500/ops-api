@@ -370,3 +370,41 @@ func (s *site) UploadLogo(c *gin.Context) {
 		"msg":  "图片上传成功",
 	})
 }
+
+// UpdateSiteUser 更新站点用户
+// @Summary 更新站点用户
+// @Description 站点关接口
+// @Tags 站点管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param users body service.SiteUserUpdate true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/site/users [put]
+func (s *site) UpdateSiteUser(c *gin.Context) {
+	var data = &service.SiteUserUpdate{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	if err := service.Site.UpdateSiteUser(data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}

@@ -70,6 +70,22 @@ definitions:
     required:
     - id
     type: object
+  service.Authorize:
+    properties:
+      client_id:
+        type: string
+      redirect_uri:
+        type: string
+      response_type:
+        type: string
+      scope:
+        type: string
+      state:
+        type: string
+    required:
+    - client_id
+    - response_type
+    type: object
   service.GroupCreate:
     properties:
       is_role_group:
@@ -132,6 +148,32 @@ definitions:
     - token
     - username
     type: object
+  service.ResponseToken:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      scope:
+        type: string
+      token_type:
+        type: string
+    type: object
+  service.ResponseUserinfo:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      phone_number:
+        type: string
+      username:
+        type: string
+    type: object
   service.RestPassword:
     properties:
       code:
@@ -192,6 +234,31 @@ definitions:
     required:
     - id
     - name
+    type: object
+  service.SiteUserUpdate:
+    properties:
+      id:
+        type: integer
+      users:
+        items:
+          type: integer
+        type: array
+    required:
+    - id
+    - users
+    type: object
+  service.Token:
+    properties:
+      client_id:
+        type: string
+      client_secret:
+        type: string
+      code:
+        type: string
+      grant_type:
+        type: string
+      redirect_uri:
+        type: string
     type: object
   service.UserLogin:
     properties:
@@ -462,6 +529,64 @@ paths:
       summary: 获取菜单列表
       tags:
       - 菜单管理
+  /api/v1/oauth/authorize:
+    post:
+      description: OAuth2.0认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 授权请求参数
+        in: body
+        name: authorize
+        required: true
+        schema:
+          $ref: '#/definitions/service.Authorize'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}'
+          schema:
+            type: string
+      summary: 客户端授权
+      tags:
+      - OAuth2.0认证
+  /api/v1/oauth/token:
+    post:
+      description: OAuth2.0认证相关接口
+      parameters:
+      - description: 授权请求参数
+        in: body
+        name: authorize
+        required: true
+        schema:
+          $ref: '#/definitions/service.Token'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ResponseToken'
+      summary: 客户端认证
+      tags:
+      - OAuth2.0认证
+  /api/v1/oauth/userinfo:
+    get:
+      description: OAuth2.0认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ResponseUserinfo'
+      summary: 获取用户信息
+      tags:
+      - OAuth2.0认证
   /api/v1/path/list:
     get:
       description: 组相关接口
@@ -708,6 +833,29 @@ paths:
           schema:
             type: string
       summary: 站点图片上传
+      tags:
+      - 站点管理
+  /api/v1/site/users:
+    put:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/service.SiteUserUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新站点用户
       tags:
       - 站点管理
   /api/v1/sites:

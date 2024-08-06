@@ -53,6 +53,8 @@ func main() {
 		IgnorePaths("/api/v1/reset_password").
 		IgnorePaths("/api/v1/user/mfa_qrcode").
 		IgnorePaths("/api/v1/user/mfa_auth").
+		IgnorePaths("/api/v1/oauth/token").
+		IgnorePaths("/api/v1/oauth/userinfo").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

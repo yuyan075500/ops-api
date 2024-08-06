@@ -33,6 +33,12 @@ type SiteGroupUpdate struct {
 	Name string `json:"name" binding:"required"`
 }
 
+// SiteUserUpdate 更新站点用户构体
+type SiteUserUpdate struct {
+	ID    uint   `json:"id" binding:"required"`
+	Users []uint `json:"users" binding:"required"`
+}
+
 // GetSiteList 获取站点分组列表（表格）
 func (s *site) GetSiteList(name string, page, limit int) (data *dao.SiteList, err error) {
 	data, err = dao.Site.GetSiteList(name, page, limit)
@@ -145,6 +151,38 @@ func (s *site) DeleteSite(id int) (err error) {
 	// 删除分组
 	if err := dao.Site.DeleteSite(site); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// UpdateSiteUser 更新站点用户
+func (s *site) UpdateSiteUser(data *SiteUserUpdate) (err error) {
+
+	// 查询要修改的用户组
+	site := &model.Site{}
+	if err := global.MySQLClient.First(site, data.ID).Error; err != nil {
+		return err
+	}
+
+	// Users=0需要执行清空操作
+	if len(data.Users) == 0 {
+		// 清除站点内所有用户
+		if err := dao.Site.ClearSiteUser(site); err != nil {
+			return err
+		}
+	} else {
+
+		// 查询出要更新的所有用户
+		var users []model.AuthUser
+		if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
+			return err
+		}
+
+		// 更新组内用户信息
+		if err := dao.Site.UpdateSiteUser(site, users); err != nil {
+			return err
+		}
 	}
 
 	return nil

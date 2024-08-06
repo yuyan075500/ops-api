@@ -30,7 +30,7 @@ type Site struct {
 	ClientSecret string      `json:"client_secret"`
 	CallbackUrl  string      `json:"callback_url" gorm:"default:null"`
 	SiteGroupID  uint        `json:"site_group_id"`
-	Users        []*AuthUser `json:"users" gorm:"many2many:auth_user_sites"`
+	Users        []*AuthUser `json:"users" gorm:"many2many:site_users"`
 }
 
 func (*Site) TableName() (name string) {
