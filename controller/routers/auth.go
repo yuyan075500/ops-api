@@ -19,7 +19,7 @@ func initAuthRouters(router *gin.Engine) {
 	}
 
 	// 登录
-	router.POST("/login", controller.User.Login)
+	router.POST("/api/auth/login", controller.User.Login)
 	// 注销
-	router.POST("/logout", controller.User.Logout)
+	router.POST("/api/auth/logout", controller.User.Logout)
 }

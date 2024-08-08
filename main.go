@@ -45,7 +45,7 @@ func main() {
 	r.Use(middleware.Cors())
 	// 加载登录中间件，其中IgnorePaths()方法可以忽略不需要登录认证的路由，支持前缀匹配
 	r.Use(middleware.LoginBuilder().
-		IgnorePaths("/login").
+		IgnorePaths("/api/auth/login").
 		IgnorePaths("/health").
 		IgnorePaths("/swagger/").
 		IgnorePaths("/api/v1/sms/callback").

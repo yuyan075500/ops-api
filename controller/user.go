@@ -29,7 +29,7 @@ type user struct{}
 // @Produce application/json
 // @Param user body service.UserLogin true "用户名密码"
 // @Success 200 {string} json "{"code": 0, "token": "用户令牌"}"
-// @Router /login [post]
+// @Router /api/auth/login [post]
 func (u *user) Login(c *gin.Context) {
 	var params = &service.UserLogin{}
 
@@ -85,7 +85,7 @@ func (u *user) Login(c *gin.Context) {
 // @Tags 用户认证
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": nil}"
-// @Router /logout [post]
+// @Router /api/auth/logout [post]
 func (u *user) Logout(c *gin.Context) {
 	// 获取Token
 	token := c.Request.Header.Get("Authorization")

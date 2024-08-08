@@ -137,7 +137,25 @@ definitions:
     type: object
   service.MFAValidate:
     properties:
+      client_id:
+        description: OAuth2.0客户端：客户端ID
+        type: string
       code:
+        type: string
+      redirect_uri:
+        description: OAuth2.0客户端：重定向URL
+        type: string
+      response_type:
+        description: OAuth2.0客户端：授权类型，固定值：code
+        type: string
+      scope:
+        description: OAuth2.0客户端：申请权限范围
+        type: string
+      service:
+        description: CAS3.0客户端：回调地址
+        type: string
+      state:
+        description: OAuth2.0客户端：客户端状态码
         type: string
       token:
         type: string
@@ -262,9 +280,27 @@ definitions:
     type: object
   service.UserLogin:
     properties:
+      client_id:
+        description: OAuth2.0客户端：客户端ID
+        type: string
       ldap:
         type: boolean
       password:
+        type: string
+      redirect_uri:
+        description: OAuth2.0客户端：重定向URL
+        type: string
+      response_type:
+        description: OAuth2.0客户端：授权类型，固定值：code
+        type: string
+      scope:
+        description: OAuth2.0客户端：申请权限范围
+        type: string
+      service:
+        description: CAS3.0客户端：回调地址
+        type: string
+      state:
+        description: OAuth2.0客户端：客户端状态码
         type: string
       username:
         type: string
@@ -275,6 +311,45 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户认证相关接口
+      parameters:
+      - description: 用户名密码
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "token": "用户令牌"}'
+          schema:
+            type: string
+      summary: 登录
+      tags:
+      - 用户认证
+  /api/auth/logout:
+    post:
+      description: 用户认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": nil}'
+          schema:
+            type: string
+      summary: 注销
+      tags:
+      - 用户认证
   /api/v1/audit/login:
     get:
       description: 日志相关接口
@@ -1166,43 +1241,4 @@ paths:
       summary: 获取查询的用户列表
       tags:
       - 用户管理
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: 用户认证相关接口
-      parameters:
-      - description: 用户名密码
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/service.UserLogin'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: '{"code": 0, "token": "用户令牌"}'
-          schema:
-            type: string
-      summary: 登录
-      tags:
-      - 用户认证
-  /logout:
-    post:
-      description: 用户认证相关接口
-      parameters:
-      - description: Bearer 用户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      responses:
-        "200":
-          description: '{"code": 0, "data": nil}'
-          schema:
-            type: string
-      summary: 注销
-      tags:
-      - 用户认证
 swagger: "2.0"
