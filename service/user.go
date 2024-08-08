@@ -428,12 +428,12 @@ func handleMFA(user model.AuthUser) (string, *string, error) {
 
 // handleOAuth OAuth认证返回
 func handleOAuth(clientID, redirectURI, responseType, scope, state string, userID uint) (string, error) {
-	data := &Authorize{
+	data := &OAuthAuthorize{
 		ClientId:     clientID,
 		RedirectURI:  redirectURI,
 		ResponseType: responseType,
 		Scope:        scope,
 		State:        state,
 	}
-	return SSO.GetAuthorize(data, userID)
+	return SSO.GetOAuthAuthorize(data, userID)
 }

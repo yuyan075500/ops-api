@@ -12,17 +12,17 @@ var SSO sso
 
 type sso struct{}
 
-// Authorize 客户端授权
+// OAuthAuthorize 客户端授权
 // @Summary 客户端授权
 // @Description OAuth2.0认证相关接口
 // @Tags OAuth2.0认证
 // @Param Authorization header string true "Bearer 用户令牌"
-// @Param authorize body service.Authorize true "授权请求参数"
+// @Param authorize body service.OAuthAuthorize true "授权请求参数"
 // @Success 200 {string} json "{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}"
-// @Router /api/v1/oauth/authorize [post]
-func (s *sso) Authorize(c *gin.Context) {
+// @Router /api/v1/sso/oauth/authorize [post]
+func (s *sso) OAuthAuthorize(c *gin.Context) {
 
-	var data = &service.Authorize{}
+	var data = &service.OAuthAuthorize{}
 
 	// 请求参数绑定
 	if err := c.ShouldBind(&data); err != nil {
@@ -47,7 +47,7 @@ func (s *sso) Authorize(c *gin.Context) {
 	}
 
 	// 获取授权码
-	callbackUrl, err := service.SSO.GetAuthorize(data, mc.ID)
+	callbackUrl, err := service.SSO.GetOAuthAuthorize(data, mc.ID)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -133,4 +133,96 @@ func (s *sso) GetUserInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+// CASAuthorize 客户端授权
+// @Summary 客户端授权
+// @Description CAS3.0认证相关接口
+// @Tags CAS3.0认证
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param authorize body service.CASAuthorize true "授权请求参数"
+// @Success 200 {string} json "{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}"
+// @Router /api/v1/sso/cas/authorize [post]
+func (s *sso) CASAuthorize(c *gin.Context) {
+
+	var data = &service.CASAuthorize{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// Token校验
+	token := c.Request.Header.Get("Authorization")
+	mc, err := middleware.ValidateJWT(token)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取票据
+	callbackUrl, err := service.SSO.GetCASAuthorize(data, mc.ID, mc.Username)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 返回客户端回调地址
+	c.JSON(http.StatusOK, gin.H{
+		"code":         0,
+		"msg":          "授权成功",
+		"redirect_uri": callbackUrl,
+	})
+}
+
+// CASServiceValidate 票据校验
+// @Summary 票据校验
+// @Description CAS3.0认证相关接口
+// @Tags CAS3.0认证
+// @Param authorize body service.CASServiceValidate true "授权请求参数"
+// @Success 200 {string} json "{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}"
+// @Router /p3/serviceValidate [get]
+func (s *sso) CASServiceValidate(c *gin.Context) {
+
+	var data = &service.CASServiceValidate{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取票据
+	response, err := service.SSO.ServiceValidate(data)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 设置响应头为XML格式
+	c.Header("Content-Type", "application/xml")
+
+	// 返回客户端回调地址（使用c.XML返回）
+	c.XML(http.StatusOK, response)
 }

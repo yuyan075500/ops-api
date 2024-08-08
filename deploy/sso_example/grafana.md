@@ -1,6 +1,6 @@
 # 创建Grafana站点
 Grafana支持使用OAuth2进行单点登录，站点配置如下：
-![img.png](img/img.png)
+![img.png](img/grafana.png)
 注：Grafana的回调地址为：`<protocol>://<address>[:<port>]/login/generic_oauth`
 # 修改Grafana配置
 编辑`grafana.ini`配置文件，修改的配置如下：
@@ -31,7 +31,10 @@ client_id = tYOvydGyamAQUTcZ
 # client_secret，从统一认证中心获取
 client_secret = GXQzHtPSDAHIKRHuFHpSHarKQjDIIXmG
 scopes = openid
-auth_url = http://192.168.28.87:9528/login
-token_url = http://192.168.28.87:8000/api/v1/oauth/token
-api_url = http://192.168.28.87:8000/api/v1/oauth/userinfo
+auth_url = https://ops-test.50yc.cn/login
+token_url = https://ops-test.50yc.cn/api/v1/oauth/token
+api_url = https://ops-test.50yc.cn/api/v1/oauth/userinfo
 ```
+* auth_url：前端登录地址
+* token_url：获取Token接口
+* api_url：获取用户信息接口

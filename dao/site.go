@@ -273,11 +273,22 @@ func (s *site) DeleteSite(site *model.Site) (err error) {
 	return nil
 }
 
-// GetSite 获取单个站点
-func (s *site) GetSite(clientId string) (data *model.Site, err error) {
+// GetOAuthSite 获取单个使用OAuth2.0认证的站点
+func (s *site) GetOAuthSite(clientId string) (data *model.Site, err error) {
 	var site *model.Site
 
 	if err := global.MySQLClient.Where("client_id = ?", clientId).First(&site).Error; err != nil {
+		return nil, err
+	}
+
+	return site, nil
+}
+
+// GetCASSite 获取单个使用CAS3.0认证的站点
+func (s *site) GetCASSite(service string) (data *model.Site, err error) {
+	var site *model.Site
+
+	if err := global.MySQLClient.Where("callback_url = ?", service).First(&site).Error; err != nil {
 		return nil, err
 	}
 
@@ -303,9 +314,7 @@ func (s *site) ClearSiteUser(site *model.Site) (err error) {
 }
 
 // IsUserInSite 判断用户是否在站点中
-func (s *site) IsUserInSite(userID uint) bool {
-
-	var site *model.Site
+func (s *site) IsUserInSite(userID uint, site *model.Site) bool {
 
 	// 查询站点并预加载用户
 	if err := global.MySQLClient.Preload("Users", "id = ?", userID).First(&site).Error; err != nil {
