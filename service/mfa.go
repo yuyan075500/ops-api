@@ -117,8 +117,17 @@ func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToke
 	}
 
 	// OAuth认证返回
-	if params.ClientId != "" {
+	if params.ClientId != "" && params.Service == "" {
 		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
+		if err != nil {
+			return "", "", err
+		}
+		return jwtToken, callbackUrl, nil
+	}
+
+	// CAS认证返回
+	if params.Service != "" && params.ClientId == "" {
+		callbackUrl, err := handleCAS(params.Service, user.Username, user.ID)
 		if err != nil {
 			return "", "", err
 		}
