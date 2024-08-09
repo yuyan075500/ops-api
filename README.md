@@ -36,7 +36,65 @@
 # 项目部署
 在部署前需要确保项目依赖必须项已全部准备完成，如：MySQL、Redis、Minio。
 ## 项目配置文件
-项目配置文件路径为`config/config.yaml`。
+项目配置文件路径为`config/config.yaml`，如果没有则创建，配置说明如下：
+```yaml
+server: "0.0.0.0:8000"
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  db: "ops"
+  user: "root"
+  password: ""
+  maxIdleConns: 10
+  maxOpenConns: 100
+  maxLifeTime: 30
+redis:
+  host: "127.0.0.1:6379"
+  password: ""
+  db: 0
+jwt:
+  secret: "swfqezjzoqssvjck"
+  expires: 6
+mfa:
+  enable: false
+  issuer: "统一认证平台"
+oss:
+  endpoint: ""
+  accessKey: ""
+  secretKey: ""
+  bucketName: ""
+  ssl: true
+ldap:
+  host: ""
+  bindUserDN: ""
+  bindUserPassword: ""
+  searchDN: ""
+sms:
+  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
+  appKey: ""
+  appSecret: ""
+  callbackUrl: "https://ops-test.50yc.cn/api/v1/sms/callback"
+  verificationCode:
+    sender: ""
+    templateId: ""
+    signature: ""
+mail:
+  smtpHost: ""
+  smtpPort: 587
+  from: ""
+  password: ""
+swagger: true
+```
+* server：服务监听的地址和端口，必须
+* mysql：MySQL数据库相关配置，必须
+* redis：Redis相关配置，必须
+* jwt：JWT相关配置，注意：secret请务必更改，必须
+* mfa：双因素认证相关配置，issuer为APP扫码后显示的名称，必须
+* oss：Minio对象存储相关配置，主要存储用户头像和资产图片，必须
+* ldap：LDAP相关配置，用于AD域用户登录，可选
+* sms：短信相关配置，仅支持华为云，用户自主重置密码需要使用，可选
+* mail：邮件相关配置，用于用户自助密码重置，可选
+* swagger：是否开启Swagger，生产环境请忽开启，必须
 ## 导入初始化数据
 初始化数据SQL文件位于`deploy/data.sql`。
 ## 更新IP地址库文件
