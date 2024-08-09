@@ -299,8 +299,17 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 	}
 
 	// OAuth认证返回
-	if params.ClientId != "" {
+	if params.ClientId != "" || params.Service == "" {
 		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
+		if err != nil {
+			return "", "", nil, err
+		}
+		return token, callbackUrl, nil, nil
+	}
+
+	// CAS认证返回
+	if params.Service != "" || params.ClientId == "" {
+		callbackUrl, err := handleCAS(params.Service, user.Username, user.ID)
 		if err != nil {
 			return "", "", nil, err
 		}
@@ -436,4 +445,12 @@ func handleOAuth(clientID, redirectURI, responseType, scope, state string, userI
 		State:        state,
 	}
 	return SSO.GetOAuthAuthorize(data, userID)
+}
+
+// handleCAS CAS认证返回
+func handleCAS(service, username string, userID uint) (string, error) {
+	data := &CASAuthorize{
+		Service: service,
+	}
+	return SSO.GetCASAuthorize(data, userID, username)
 }
