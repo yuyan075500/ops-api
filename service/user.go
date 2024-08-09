@@ -25,7 +25,6 @@ type user struct{}
 type UserLogin struct {
 	Username     string `json:"username" binding:"required"`
 	Password     string `json:"password" binding:"required"`
-	LDAP         bool   `json:"ldap"`
 	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
 	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
 	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
@@ -299,7 +298,7 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 	}
 
 	// OAuth认证返回
-	if params.ClientId != "" || params.Service == "" {
+	if params.ClientId != "" && params.Service == "" {
 		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
 		if err != nil {
 			return "", "", nil, err
@@ -308,7 +307,7 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 	}
 
 	// CAS认证返回
-	if params.Service != "" || params.ClientId == "" {
+	if params.Service != "" && params.ClientId == "" {
 		callbackUrl, err := handleCAS(params.Service, user.Username, user.ID)
 		if err != nil {
 			return "", "", nil, err
@@ -359,20 +358,16 @@ func (u *user) UpdateUserLoginTime(tx *gorm.DB, user model.AuthUser) (err error)
 // AuthenticateUser 用户认证
 func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
 
-	// 默认查找本地用户
-	userQuery := global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "本地")
-
-	// 如果LDAP为true，则查找AD域用户
-	if params.LDAP {
-		userQuery = global.MySQLClient.Where("username = ? AND user_from = ?", params.Username, "AD域")
-	}
+	// 查找用户
+	userQuery := global.MySQLClient.Where("username = ?", params.Username)
 
 	// 没有找到对应的用户
 	if err := userQuery.First(&user).Error; err != nil {
 		return errors.New("用户不存在")
 	}
 
-	if params.LDAP {
+	// 用户密码检查
+	if user.UserFrom == "AD域" {
 		// AD用户认证
 		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
 			return errors.New("用户密码错误或系统错误")
