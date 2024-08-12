@@ -109,13 +109,15 @@ ${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保�
 ```
 需要确保模板中包含三个变量，分别代表用户名、校验码和校验码有效时间，其它文字可以自定义。
 ### 密钥
-密钥用于数据库敏感字段加密解密、生成SSO客户端票据，其存放路径为：
+密钥用于数据库敏感字段加密解密，其存放路径为：
 ```shell
 config/certs/
 ```
-项目部署时需要新生成一套密钥，在数据库敏感数据加密、SAML2 IDP认证都有用到，请确保重要信息不会泄露，生成密钥的方法为：
+项目部署时需要新生成一套密钥和证书，以确保重要信息不会泄露，生成方法为：
 ```shell
+# 生成公钥和证书
 openssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crtopenssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crt
+# 导出公钥
 openssl rsa -in private.key -pubout -out public.key
 ```
 * private.key：私钥
