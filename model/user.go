@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/wonderivan/logger"
 	"gorm.io/gorm"
 	"ops-api/utils"
 	"time"
@@ -42,6 +43,7 @@ func (u *AuthUser) CheckPassword(password string) bool {
 	// 对数据库中的密码解密
 	str, err := utils.Decrypt(u.Password)
 	if err != nil {
+		logger.Error(err.Error())
 		return false
 	}
 
