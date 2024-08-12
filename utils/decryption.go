@@ -23,8 +23,14 @@ func Decrypt(cipherText string) (string, error) {
 	block, _ := pem.Decode(privateKey)
 
 	// 解析私钥
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	privateKeyInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
+		return "", err
+	}
+
+	// 私钥转换
+	privateKey, ok := privateKeyInterface.(*rsa.PrivateKey)
+	if !ok {
 		return "", err
 	}
 

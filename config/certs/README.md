@@ -8,5 +8,5 @@ openssl rsa -in private.key -pubout -out public.key
 2. 将私钥和公钥转换为`PEM`格式。
 ```shell
 openssl rsa -in private.key -outform PEM -out private.pem
-openssl rsa -pubin -in public.key -outform PEM -out public.pem
+openssl rsa -pubin -in public.key -outform PEM -out public.key
 ```

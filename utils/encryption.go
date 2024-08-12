@@ -16,7 +16,7 @@ func readPublicKeyFile(file string) {
 
 // Encrypt 字符串加密
 func Encrypt(str string) (string, error) {
-	readPublicKeyFile("config/certs/public.pem")
+	readPublicKeyFile("config/certs/public.key")
 
 	// 解析公钥数据
 	block, _ := pem.Decode(publicKey)
