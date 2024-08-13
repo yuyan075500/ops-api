@@ -193,12 +193,17 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 	if err := global.MySQLClient.Transaction(func(tx *gorm.DB) error {
 		// 遍历用户列表，逐个插入，需要对数据库中相同用户名的用户进行特殊处理
 		for _, user := range users {
-
-			// 如果用户已存在则更新
-			if utils.IsDuplicateEntryError(tx.Error) {
-				// 仅更新来源为AD域的用户，则进行用户更新
-				if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
-					return errors.New(err.Error())
+			// 新增用户
+			err := tx.Create(user).Error
+			if err != nil {
+				// 如果用户已存在则更新
+				if utils.IsDuplicateEntryError(err) {
+					// 仅更新来源为AD域的用户，则进行用户更新
+					if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
+						return err
+					}
+				} else {
+					return err
 				}
 			} else {
 				continue
@@ -206,7 +211,7 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 		}
 		return nil
 	}); err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 	return nil
 }
