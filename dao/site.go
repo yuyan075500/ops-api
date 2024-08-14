@@ -51,6 +51,8 @@ type SiteItem struct {
 	ClientId     string           `json:"client_id"`
 	ClientSecret string           `json:"client_secret"`
 	CallbackUrl  string           `json:"callback_url"`
+	EntityId     string           `json:"entity_id"`
+	Certificate  string           `json:"certificate"`
 	Users        []*UserBasicInfo `json:"users"`
 }
 
@@ -72,7 +74,9 @@ type UpdateSite struct {
 	AllOpen     *bool   `json:"all_open"` // 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
 	SSOType     uint    `json:"sso_type"`
 	Icon        string  `json:"icon"`
-	CallbackUrl *string `json:"callback_url"` // 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
+	EntityId    *string `json:"entity_id"` // 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
+	CallbackUrl *string `json:"callback_url"`
+	Certificate *string `json:"certificate"`
 	Description string  `json:"description"`
 }
 
@@ -183,6 +187,8 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 				ClientId:     s.ClientId,
 				ClientSecret: s.ClientSecret,
 				CallbackUrl:  s.CallbackUrl,
+				EntityId:     s.EntityId,
+				Certificate:  s.Certificate,
 			}
 
 			// 对站点图标进行特殊处理，返回一个Minio中的临时URL链接
@@ -273,22 +279,33 @@ func (s *site) DeleteSite(site *model.Site) (err error) {
 	return nil
 }
 
-// GetOAuthSite 获取单个使用OAuth2.0认证的站点
-func (s *site) GetOAuthSite(clientId string) (data *model.Site, err error) {
+// GetCASSite 获取单个使用CAS3.0认证的站点
+func (s *site) GetCASSite(service string) (data *model.Site, err error) {
 	var site *model.Site
 
-	if err := global.MySQLClient.Where("client_id = ?", clientId).First(&site).Error; err != nil {
+	if err := global.MySQLClient.Where("callback_url = ? AND sso_type = 1", service).First(&site).Error; err != nil {
 		return nil, err
 	}
 
 	return site, nil
 }
 
-// GetCASSite 获取单个使用CAS3.0认证的站点
-func (s *site) GetCASSite(service string) (data *model.Site, err error) {
+// GetOAuthSite 获取单个使用OAuth2.0认证的站点
+func (s *site) GetOAuthSite(clientId string) (data *model.Site, err error) {
 	var site *model.Site
 
-	if err := global.MySQLClient.Where("callback_url = ?", service).First(&site).Error; err != nil {
+	if err := global.MySQLClient.Where("client_id = ? AND sso_type = 2", clientId).First(&site).Error; err != nil {
+		return nil, err
+	}
+
+	return site, nil
+}
+
+// GetSamlSite 获取单个使用SAML2认证的站点
+func (s *site) GetSamlSite(ACS string) (data *model.Site, err error) {
+	var site *model.Site
+
+	if err := global.MySQLClient.Where("callback_url = ? AND sso_type = 3", ACS).First(&site).Error; err != nil {
 		return nil, err
 	}
 

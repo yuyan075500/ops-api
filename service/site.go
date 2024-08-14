@@ -23,6 +23,8 @@ type SiteCreate struct {
 	SSOType     uint   `json:"sso_type"`
 	Icon        string `json:"icon"`
 	CallbackUrl string `json:"callback_url"`
+	EntityId    string `json:"entity_id"`
+	Certificate string `json:"certificate"`
 	Description string `json:"description" binding:"required"`
 	SiteGroupID uint   `json:"site_group_id" binding:"required"`
 }
@@ -84,6 +86,8 @@ func (s *site) AddSite(data *SiteCreate) (err error) {
 		CallbackUrl: data.CallbackUrl,
 		Description: data.Description,
 		SiteGroupID: data.SiteGroupID,
+		EntityId:    data.EntityId,
+		Certificate: data.Certificate,
 	}
 
 	// 创建数据库数据
