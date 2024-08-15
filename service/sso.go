@@ -3,10 +3,12 @@ package service
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"github.com/LoginRadius/go-saml"
 	"ops-api/dao"
 	"ops-api/middleware"
 	"ops-api/model"
@@ -48,6 +50,25 @@ type CASServiceValidate struct {
 	Ticket  string `form:"ticket" binding:"required"`
 }
 
+// SAMLRequest SAML2客户端授权请求参数
+type SAMLRequest struct {
+	SAMLRequest string `form:"SAMLRequest" binding:"required"` // SAMLRequest数据，通常该数据是DEFLATE压缩 + base64编码，获取此数据需要进行DEFLATE解压缩 + base64解码
+	RelayState  string `form:"RelayState"`                     // SP的状态信息，防止跨站请求伪造攻击，功能与OAuth2.0客户端的state功能相同
+	SigAlg      string `form:"SigAlg"`                         // 签名使用的算法
+	Signature   string `form:"Signature"`                      // 签名，用于验证SP的身份，但需要配置SP的公钥
+}
+
+// ParseSPMetadata 获取SP Metadata信息请求参数
+type ParseSPMetadata struct {
+	SPMetadataURL string `json:"sp_metadata_url" binding:"required"`
+}
+
+// SPMetadata 返回给前端的SP Metadata数据
+type SPMetadata struct {
+	EntityID    string `json:"entity_id"`
+	Certificate string `json:"certificate"`
+}
+
 // ResponseToken 返回给OAuth2.0客户端客户端的Token信息
 type ResponseToken struct {
 	AccessToken  string `json:"access_token"`
@@ -73,6 +94,27 @@ type Attributes struct {
 	Username    string `xml:"username"`
 	Email       string `xml:"email"`
 	PhoneNumber string `xml:"phone_number"`
+}
+
+// SAMLRequestData SAMLRequest数据绑定结构体
+type SAMLRequestData struct {
+	XMLName                     xml.Name     `xml:"urn:oasis:names:tc:SAML:2.0:protocol AuthnRequest"`
+	AssertionConsumerServiceURL string       `xml:"AssertionConsumerServiceURL,attr"`
+	Destination                 string       `xml:"Destination,attr"`
+	ID                          string       `xml:"ID,attr"`
+	IssueInstant                string       `xml:"IssueInstant,attr"`
+	ProtocolBinding             string       `xml:"ProtocolBinding,attr"`
+	Version                     string       `xml:"Version,attr"`
+	Issuer                      Issuer       `xml:"urn:oasis:names:tc:SAML:2.0:assertion Issuer"`
+	NameIDPolicy                NameIDPolicy `xml:"NameIDPolicy"`
+}
+type Issuer struct {
+	Value string `xml:",chardata"`
+}
+type NameIDPolicy struct {
+	AllowCreate     string `xml:"AllowCreate,attr"`
+	Format          string `xml:"Format,attr"`
+	SPNameQualifier string `xml:"SPNameQualifier,attr"`
 }
 
 // ResponseUserinfo 返回给客户端的用户信息
@@ -282,4 +324,133 @@ func (s *sso) GetUserinfo(token string) (user *ResponseUserinfo, err error) {
 	}
 
 	return user, err
+}
+
+// GetIdPMetadata 获取SAML2 IDP Metadata
+func (s *sso) GetIdPMetadata() (metadata string, err error) {
+
+	// 获取证书
+	cert, err := utils.LoadIdpCertificate()
+	if err != nil {
+		return "", err
+	}
+
+	// 创建IDP实例
+	idp := saml.IdentityProvider{
+		IsIdpInitiated:       false,                      // 是否是IdP Initiated模式，true：表示认证请求是通过IdP发起的，false：表示认证请求是客户端（SP）发起的
+		Issuer:               "https://ops-test.50yc.cn", // IDP实体，默认为当前服务器地址
+		IDPCert:              base64.StdEncoding.EncodeToString(cert.Raw),
+		NameIdentifierFormat: saml.AttributeFormatUnspecified,
+	}
+
+	// 添加单点登录接口信息
+	idp.AddSingleSignOnService(saml.MetadataBinding{
+		Binding:  saml.HTTPRedirectBinding,         // 由于IDP是前后端分离架构，所以这里使用HTTPRedirectBinding
+		Location: "https://ops-test.50yc.cn/login", // 单点登录接口地址
+	})
+
+	// 添加单点登出接口信息（不支持：如果支持单点登出则可以添加此信息到元数据中）
+	//idp.AddSingleSignOutService(saml.MetadataBinding{
+	//	Binding:  saml.HTTPPostBinding,
+	//	Location: "https://ops-test.50yc.cn/logout",
+	//}
+
+	// 添加IDP组件相关信息
+	idp.AddOrganization(saml.Organization{
+		OrganizationDisplayName: "运维平台", // 组织显示名称
+		OrganizationName:        "OPS",  // 组织正式名称
+		OrganizationURL:         "https://ops-test.50yc.cn",
+	})
+
+	// 添加主要联系人信息
+	idp.AddContactPerson(saml.ContactPerson{
+		ContactType:  "technical", // 联系人类型包含：technical（技术联系人）、support（支持联系人）、administrative（行政联系人）、billing（财务联系人）、other（其它）
+		EmailAddress: "zhangs@ops.cn",
+		GivenName:    "三",
+		SurName:      "张",
+	})
+
+	// 添加其它联系人信息
+	//persons := []saml.ContactPerson{
+	//	{
+	//		ContactType:  "support",
+	//		EmailAddress: "support@ops.cn",
+	//		GivenName:    "四",
+	//		SurName:      "李",
+	//	},
+	//}
+	//idp.AddContactPersons(persons...)
+
+	// 生成metadata元数据
+	metadata, msg := idp.MetaDataResponse()
+	if msg != nil {
+		return "", msg.Error
+	}
+
+	return metadata, nil
+}
+
+// ParseSPMetadata SP Metadata解析
+func (s *sso) ParseSPMetadata(metadataUrl string) (data *SPMetadata, err error) {
+
+	metadata, err := utils.ParseSPMetadata(metadataUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	// 提取IDP的签名证书
+	var signingCertData string
+	for _, keyDescriptor := range metadata.SPSSODescriptor.KeyDescriptors {
+		if keyDescriptor.Use == "signing" {
+			signingCertData = keyDescriptor.KeyInfo.X509Data.X509Certificate
+			break
+		}
+	}
+	if signingCertData == "" {
+		return nil, errors.New("未找到签名证书")
+	}
+
+	return &SPMetadata{
+		Certificate: signingCertData,
+		EntityID:    metadata.EntityID,
+	}, nil
+}
+
+// SPAuthorize SP授权
+func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (err error) {
+
+	var data *SAMLRequestData
+
+	// 获取SAMLRequest数据
+	samlRequestRaw, err := utils.ParseSAMLRequest(samlRequest.SAMLRequest)
+	if err != nil {
+		return err
+	}
+
+	// 将SAMLRequest数据到结构体
+	if err := xml.Unmarshal([]byte(samlRequestRaw.String()), &data); err != nil {
+		return err
+	}
+
+	// 获取SP应用
+	site, err := dao.Site.GetSamlSite(data.Issuer.Value)
+	if err != nil {
+		return err
+	}
+
+	// 判断用户是否有权限访问
+	if !site.AllOpen {
+		if !dao.Site.IsUserInSite(userId, site) {
+			return errors.New("您无权访问该应用")
+		}
+	}
+
+	// 签名验证
+	//if err := utils.VerifySignature(samlRequestRaw, site.Certificate, samlRequest.Signature, samlRequest.SigAlg); err != nil {
+	//	return err
+	//}
+
+	// 生成SAMLResponse
+
+	return nil
 }

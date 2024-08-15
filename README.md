@@ -116,7 +116,7 @@ config/certs/
 项目部署时需要新生成一套密钥和证书，以确保重要信息不会泄露，生成方法为：
 ```shell
 # 生成公钥和证书
-openssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crtopenssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crt
+openssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crt
 # 导出公钥
 openssl rsa -in private.key -pubout -out public.key
 ```

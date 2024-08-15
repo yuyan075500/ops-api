@@ -31,6 +31,7 @@ type UserLogin struct {
 	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
 	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
 	Service      string `json:"service"`       // CAS3.0客户端：回调地址
+	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
 }
 
 // RestPassword 重置密码时用户信息绑定的结构体

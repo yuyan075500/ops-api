@@ -70,6 +70,9 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/sso/token",               // OAuth2.0客户端认证
 			"/api/v1/sso/userinfo",            // OAuth2.0客户端获取用户信息
 			"/p3/serviceValidate",             // CAS3.0票据校验
+			"/api/v1/sso/saml/metadata",       // SAML2元数据
+			"/api/v1/sso/saml/authorize",      // SP授权
+			"/api/v1/sso/saml/metadata",       // SP元数据解析
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

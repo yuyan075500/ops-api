@@ -456,41 +456,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/oauth/authorize": {
-            "post": {
-                "description": "OAuth2.0认证相关接口",
-                "tags": [
-                    "OAuth2.0认证"
-                ],
-                "summary": "客户端授权",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer 用户令牌",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "授权请求参数",
-                        "name": "authorize",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/service.Authorize"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 0, \"msg\": 授权成功, \"redirect_uri\": redirect_uri}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/oauth/token": {
             "post": {
                 "description": "OAuth2.0认证相关接口",
@@ -1034,6 +999,93 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sso/cas/authorize": {
+            "post": {
+                "description": "CAS3.0认证相关接口",
+                "tags": [
+                    "CAS3.0认证"
+                ],
+                "summary": "客户端授权",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CASAuthorize"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": 授权成功, \"redirect_uri\": redirect_uri}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sso/oauth/authorize": {
+            "post": {
+                "description": "OAuth2.0认证相关接口",
+                "tags": [
+                    "OAuth2.0认证"
+                ],
+                "summary": "客户端授权",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.OAuthAuthorize"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": 授权成功, \"redirect_uri\": redirect_uri}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sso/saml/metadata": {
+            "get": {
+                "description": "SAML2认证相关接口",
+                "produces": [
+                    "text/xml"
+                ],
+                "tags": [
+                    "SAML2认证"
+                ],
+                "summary": "获取元数据",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/user": {
             "put": {
                 "description": "用户相关接口",
@@ -1419,6 +1471,34 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/p3/serviceValidate": {
+            "get": {
+                "description": "CAS3.0认证相关接口",
+                "produces": [
+                    "text/xml"
+                ],
+                "tags": [
+                    "CAS3.0认证"
+                ],
+                "summary": "票据校验",
+                "parameters": [
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CASServiceValidate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1526,26 +1606,28 @@ const docTemplate = `{
                 }
             }
         },
-        "service.Authorize": {
+        "service.CASAuthorize": {
             "type": "object",
             "required": [
-                "client_id",
-                "response_type"
+                "service"
             ],
             "properties": {
-                "client_id": {
+                "service": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.CASServiceValidate": {
+            "type": "object",
+            "required": [
+                "service",
+                "ticket"
+            ],
+            "properties": {
+                "service": {
                     "type": "string"
                 },
-                "redirect_uri": {
-                    "type": "string"
-                },
-                "response_type": {
-                    "type": "string"
-                },
-                "scope": {
-                    "type": "string"
-                },
-                "state": {
+                "ticket": {
                     "type": "string"
                 }
             }
@@ -1662,6 +1744,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.OAuthAuthorize": {
+            "type": "object",
+            "required": [
+                "client_id",
+                "response_type"
+            ],
+            "properties": {
+                "client_id": {
+                    "type": "string"
+                },
+                "redirect_uri": {
+                    "type": "string"
+                },
+                "response_type": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                },
+                "state": {
                     "type": "string"
                 }
             }
@@ -1843,9 +1949,6 @@ const docTemplate = `{
                 "client_id": {
                     "description": "OAuth2.0客户端：客户端ID",
                     "type": "string"
-                },
-                "ldap": {
-                    "type": "boolean"
                 },
                 "password": {
                     "type": "string"

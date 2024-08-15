@@ -283,7 +283,7 @@ func (s *site) DeleteSite(site *model.Site) (err error) {
 func (s *site) GetCASSite(service string) (data *model.Site, err error) {
 	var site *model.Site
 
-	if err := global.MySQLClient.Where("callback_url = ? AND sso_type = 1", service).First(&site).Error; err != nil {
+	if err := global.MySQLClient.Where("callback_url = ? AND sso = true AND sso_type = 1", service).First(&site).Error; err != nil {
 		return nil, err
 	}
 
@@ -294,7 +294,7 @@ func (s *site) GetCASSite(service string) (data *model.Site, err error) {
 func (s *site) GetOAuthSite(clientId string) (data *model.Site, err error) {
 	var site *model.Site
 
-	if err := global.MySQLClient.Where("client_id = ? AND sso_type = 2", clientId).First(&site).Error; err != nil {
+	if err := global.MySQLClient.Where("client_id = ? AND sso = true AND sso_type = 2", clientId).First(&site).Error; err != nil {
 		return nil, err
 	}
 
@@ -302,10 +302,10 @@ func (s *site) GetOAuthSite(clientId string) (data *model.Site, err error) {
 }
 
 // GetSamlSite 获取单个使用SAML2认证的站点
-func (s *site) GetSamlSite(ACS string) (data *model.Site, err error) {
+func (s *site) GetSamlSite(issuer string) (data *model.Site, err error) {
 	var site *model.Site
 
-	if err := global.MySQLClient.Where("callback_url = ? AND sso_type = 3", ACS).First(&site).Error; err != nil {
+	if err := global.MySQLClient.Where("entity_id = ? AND sso = true AND sso_type = 3", issuer).First(&site).Error; err != nil {
 		return nil, err
 	}
 

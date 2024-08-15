@@ -56,6 +56,8 @@ func main() {
 		IgnorePaths("/api/v1/sso/token").
 		IgnorePaths("/api/v1/sso/userinfo").
 		IgnorePaths("/p3/serviceValidate").
+		IgnorePaths("/api/v1/sso/saml/metadata").
+		IgnorePaths("/api/v1/sso/saml/authorize").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

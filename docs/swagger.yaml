@@ -70,21 +70,22 @@ definitions:
     required:
     - id
     type: object
-  service.Authorize:
+  service.CASAuthorize:
     properties:
-      client_id:
-        type: string
-      redirect_uri:
-        type: string
-      response_type:
-        type: string
-      scope:
-        type: string
-      state:
+      service:
         type: string
     required:
-    - client_id
-    - response_type
+    - service
+    type: object
+  service.CASServiceValidate:
+    properties:
+      service:
+        type: string
+      ticket:
+        type: string
+    required:
+    - service
+    - ticket
     type: object
   service.GroupCreate:
     properties:
@@ -165,6 +166,22 @@ definitions:
     - code
     - token
     - username
+    type: object
+  service.OAuthAuthorize:
+    properties:
+      client_id:
+        type: string
+      redirect_uri:
+        type: string
+      response_type:
+        type: string
+      scope:
+        type: string
+      state:
+        type: string
+    required:
+    - client_id
+    - response_type
     type: object
   service.ResponseToken:
     properties:
@@ -283,8 +300,6 @@ definitions:
       client_id:
         description: OAuth2.0客户端：客户端ID
         type: string
-      ldap:
-        type: boolean
       password:
         type: string
       redirect_uri:
@@ -604,29 +619,6 @@ paths:
       summary: 获取菜单列表
       tags:
       - 菜单管理
-  /api/v1/oauth/authorize:
-    post:
-      description: OAuth2.0认证相关接口
-      parameters:
-      - description: Bearer 用户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: 授权请求参数
-        in: body
-        name: authorize
-        required: true
-        schema:
-          $ref: '#/definitions/service.Authorize'
-      responses:
-        "200":
-          description: '{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}'
-          schema:
-            type: string
-      summary: 客户端授权
-      tags:
-      - OAuth2.0认证
   /api/v1/oauth/token:
     post:
       description: OAuth2.0认证相关接口
@@ -986,6 +978,63 @@ paths:
       summary: 获取验证码
       tags:
       - 个人信息管理
+  /api/v1/sso/cas/authorize:
+    post:
+      description: CAS3.0认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 授权请求参数
+        in: body
+        name: authorize
+        required: true
+        schema:
+          $ref: '#/definitions/service.CASAuthorize'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}'
+          schema:
+            type: string
+      summary: 客户端授权
+      tags:
+      - CAS3.0认证
+  /api/v1/sso/oauth/authorize:
+    post:
+      description: OAuth2.0认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 授权请求参数
+        in: body
+        name: authorize
+        required: true
+        schema:
+          $ref: '#/definitions/service.OAuthAuthorize'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}'
+          schema:
+            type: string
+      summary: 客户端授权
+      tags:
+      - OAuth2.0认证
+  /api/v1/sso/saml/metadata:
+    get:
+      description: SAML2认证相关接口
+      produces:
+      - text/xml
+      responses:
+        "200":
+          description: OK
+      summary: 获取元数据
+      tags:
+      - SAML2认证
   /api/v1/user:
     post:
       consumes:
@@ -1241,4 +1290,22 @@ paths:
       summary: 获取查询的用户列表
       tags:
       - 用户管理
+  /p3/serviceValidate:
+    get:
+      description: CAS3.0认证相关接口
+      parameters:
+      - description: 授权请求参数
+        in: body
+        name: authorize
+        required: true
+        schema:
+          $ref: '#/definitions/service.CASServiceValidate'
+      produces:
+      - text/xml
+      responses:
+        "200":
+          description: OK
+      summary: 票据校验
+      tags:
+      - CAS3.0认证
 swagger: "2.0"

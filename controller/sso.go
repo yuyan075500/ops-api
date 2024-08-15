@@ -193,7 +193,8 @@ func (s *sso) CASAuthorize(c *gin.Context) {
 // @Description CAS3.0认证相关接口
 // @Tags CAS3.0认证
 // @Param authorize body service.CASServiceValidate true "授权请求参数"
-// @Success 200 {string} json "{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}"
+// @Produce xml
+// @Success 200
 // @Router /p3/serviceValidate [get]
 func (s *sso) CASServiceValidate(c *gin.Context) {
 
@@ -225,4 +226,113 @@ func (s *sso) CASServiceValidate(c *gin.Context) {
 
 	// 返回客户端回调地址（使用c.XML返回）
 	c.XML(http.StatusOK, response)
+}
+
+// GetIdPMetadata 获取元数据
+// @Summary 获取元数据
+// @Description SAML2认证相关接口
+// @Tags SAML2认证
+// @Produce xml
+// @Success 200
+// @Router /api/v1/sso/saml/metadata [get]
+func (s *sso) GetIdPMetadata(c *gin.Context) {
+
+	// 获取票据
+	response, err := service.SSO.GetIdPMetadata()
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 设置响应头为XML格式
+	c.Header("Content-Type", "application/xml")
+
+	// 返回客户端回调地址（使用c.Data返回，因为response非结构体，如果使用c.XML返回，在最外层会嵌套<string></string>）
+	c.Data(http.StatusOK, response, []byte(response))
+}
+
+// SPAuthorize SP授权
+// @Summary SP授权
+// @Description SAML2认证相关接口
+// @Tags SAML2认证
+// @Success 200
+// @Router /api/v1/sso/saml/authorize [post]
+func (s *sso) SPAuthorize(c *gin.Context) {
+	var data = &service.SAMLRequest{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// Token校验
+	token := c.Request.Header.Get("Authorization")
+	mc, err := middleware.ValidateJWT(token)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// authnRequest校验
+	if err := service.SSO.SPAuthorize(data, mc.ID); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+}
+
+// ParseSPMetadata SP Metadata解析
+// @Summary SP Metadata解析
+// @Description SAML2认证相关接口
+// @Tags SAML2认证
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param url body service.ParseSPMetadata true "授权请求参数"
+// @Success 200 {string} json "{"code": 0, "msg": "解析成功", "data": nil}"
+// @Router /api/v1/sso/saml/metadata [post]
+func (s *site) ParseSPMetadata(c *gin.Context) {
+	var data = &service.ParseSPMetadata{}
+
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取SP Metadata信息
+	metadataInfo, err := service.SSO.ParseSPMetadata(data.SPMetadataURL)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "解析成功",
+		"data": metadataInfo,
+	})
 }

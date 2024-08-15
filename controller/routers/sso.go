@@ -18,6 +18,12 @@ func initSSORouters(router *gin.Engine) {
 		sso.POST("/token", controller.SSO.GetToken)
 		// 获取用户信息（OAuth2.0）
 		sso.GET("/userinfo", controller.SSO.GetUserInfo)
+		// 获取IDP元数据（SAML2）
+		sso.GET("/saml/metadata", controller.SSO.GetIdPMetadata)
+		// SP授权（SAML2）
+		sso.POST("/saml/authorize", controller.SSO.SPAuthorize)
+		// SP元数据解析
+		sso.POST("/saml/metadata", controller.Site.ParseSPMetadata)
 	}
 
 	// CAS3.0客户端票据校验
