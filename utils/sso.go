@@ -3,8 +3,6 @@ package utils
 import (
 	"bytes"
 	"compress/flate"
-	"crypto"
-	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -35,6 +33,28 @@ type X509Data struct {
 	X509Certificate string `xml:"X509Certificate"`
 }
 
+// AuthnRequest SAMLRequest数据绑定结构体
+type AuthnRequest struct {
+	XMLName                     xml.Name     `xml:"urn:oasis:names:tc:SAML:2.0:protocol AuthnRequest"`
+	AssertionConsumerServiceURL string       `xml:"AssertionConsumerServiceURL,attr"`
+	Destination                 string       `xml:"Destination,attr"`
+	ID                          string       `xml:"ID,attr"`
+	IssueInstant                string       `xml:"IssueInstant,attr"`
+	ProtocolBinding             string       `xml:"ProtocolBinding,attr"`
+	Version                     string       `xml:"Version,attr"`
+	Issuer                      Issuer       `xml:"urn:oasis:names:tc:SAML:2.0:assertion Issuer"`
+	NameIDPolicy                NameIDPolicy `xml:"NameIDPolicy"`
+	OriginalString              string       // 保存原始字符串,用于签名验证
+}
+type Issuer struct {
+	Value string `xml:",chardata"`
+}
+type NameIDPolicy struct {
+	AllowCreate     string `xml:"AllowCreate,attr"`
+	Format          string `xml:"Format,attr"`
+	SPNameQualifier string `xml:"SPNameQualifier,attr"`
+}
+
 // ParseSPMetadata SP Metadata数据解析
 func ParseSPMetadata(metadataUrl string) (*EntityDescriptor, error) {
 
@@ -61,64 +81,29 @@ func ParseSPMetadata(metadataUrl string) (*EntityDescriptor, error) {
 	return entityDescriptor, nil
 }
 
-// VerifySignature SP签名验证
-// 请求参数：
-//   - samlRequest：原始的SAMLRequest
-//   - certificate：base64编辑的证书
-//   - signature：签名
-//   - sigAlg：签名算法
-func VerifySignature(samlRequest bytes.Buffer, certificate, signature, sigAlg string) error {
-
-	// 证书解码（证书在SP Metadata中一般都是base64编码的，需要先解码）
-	certBytes, err := base64.StdEncoding.DecodeString(certificate)
-	if err != nil {
-		return err
-	}
-
-	// 证书解析
-	cert, err := x509.ParseCertificate(certBytes)
-	if err != nil {
-		return err
-	}
-
-	// 签名解码（签名在SP Metadata中一般都是base64编码的，需要先解码）
-	signatureBytes, err := base64.StdEncoding.DecodeString(signature)
-	if err != nil {
-		return err
-	}
-
-	// 选择签名算法
-	var h crypto.Hash
-	switch sigAlg {
-	case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha1":
-		h = crypto.SHA1
-	case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256":
-		h = crypto.SHA256
-	case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384":
-		h = crypto.SHA384
-	case "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512":
-		h = crypto.SHA512
-	default:
-		return errors.New("不支持的签名算法")
-	}
-
-	// 创建哈希对象
-	hashFunc := h.New()
-	hashFunc.Write(samlRequest.Bytes())
-	hashed := hashFunc.Sum(nil)
-
-	// 验证签名
-	rsaPublicKey, ok := cert.PublicKey.(*rsa.PublicKey)
-	if !ok {
-		return errors.New("证书不包含RAS公钥")
-	}
-
-	if err = rsa.VerifyPKCS1v15(rsaPublicKey, h, hashed, signatureBytes); err != nil {
-		return errors.New("签名验证失败")
-	}
-
-	return nil
-}
+// LoadIdpKey 获取IDP私钥
+//func LoadIdpKey() (interface{}, error) {
+//
+//	// 读取证书
+//	buf, err := os.ReadFile("config/certs/private.key")
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	// 解码PEM格式证书
+//	block, _ := pem.Decode(buf)
+//	if block == nil {
+//		return nil, errors.New("证书解码失败")
+//	}
+//
+//	// 解析证书
+//	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return privateKey, nil
+//}
 
 // LoadIdpCertificate 获取IDP证书
 func LoadIdpCertificate() (*x509.Certificate, error) {
@@ -144,60 +129,43 @@ func LoadIdpCertificate() (*x509.Certificate, error) {
 	return cert, nil
 }
 
-// LoadIdpPrivateKey 获取IDP私钥
-func LoadIdpPrivateKey() (string, error) {
-
-	// 读取私钥文件
-	privateKeyBytes, err := os.ReadFile("config/certs/private.key")
-	if err != nil {
-		return "", err
+// Decompress 解压缩
+func Decompress(in []byte) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	decompressor := flate.NewReader(bytes.NewReader(in))
+	if _, err := io.Copy(buf, decompressor); err != nil {
+		return nil, err
 	}
-
-	// 解码PEM格式证书
-	block, _ := pem.Decode(privateKeyBytes)
-	if block == nil {
-		return "", errors.New("私钥解码失败")
+	if err := decompressor.Close(); err != nil {
+		return nil, err
 	}
-
-	// 解析私钥
-	privateKeyInterface, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return "", err
-	}
-
-	// 私钥转换
-	privateKey, ok := privateKeyInterface.(*rsa.PrivateKey)
-	if !ok {
-		return "", err
-	}
-
-	// 将私钥编码为PEM格式的字符串
-	privateKeyPem := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
-	})
-
-	return string(privateKeyPem), nil
+	return buf.Bytes(), nil
 }
 
 // ParseSAMLRequest SP SAMLRequest请求解析
-func ParseSAMLRequest(samlRequest string) (data bytes.Buffer, err error) {
+func ParseSAMLRequest(samlRequest string) (data *AuthnRequest, err error) {
 
-	var decompressed bytes.Buffer
+	var authnRequest AuthnRequest
 
 	// Base64解码
-	decoded, err := base64.StdEncoding.DecodeString(samlRequest)
+	compressedXML, err := base64.StdEncoding.DecodeString(samlRequest)
 	if err != nil {
-		return decompressed, err
+		return nil, err
 	}
 
-	// DEFLATE解压缩，并读取里面的数据
-	reader := flate.NewReader(bytes.NewReader(decoded))
-
-	_, err = io.Copy(&decompressed, reader)
+	// 解压缩
+	bXML, err := Decompress(compressedXML)
 	if err != nil {
-		return decompressed, err
+		return nil, err
 	}
 
-	return decompressed, nil
+	// 数据保存
+	if err := xml.Unmarshal(bXML, &authnRequest); err != nil {
+		return nil, err
+	}
+
+	// 保留原始字符串用于签名验证
+	authnRequest.OriginalString = string(bXML)
+
+	return &authnRequest, nil
 }

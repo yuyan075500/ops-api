@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LoginRadius/go-saml"
+	"github.com/google/uuid"
+	"net/url"
 	"ops-api/dao"
 	"ops-api/middleware"
 	"ops-api/model"
@@ -96,27 +98,6 @@ type Attributes struct {
 	PhoneNumber string `xml:"phone_number"`
 }
 
-// SAMLRequestData SAMLRequest数据绑定结构体
-type SAMLRequestData struct {
-	XMLName                     xml.Name     `xml:"urn:oasis:names:tc:SAML:2.0:protocol AuthnRequest"`
-	AssertionConsumerServiceURL string       `xml:"AssertionConsumerServiceURL,attr"`
-	Destination                 string       `xml:"Destination,attr"`
-	ID                          string       `xml:"ID,attr"`
-	IssueInstant                string       `xml:"IssueInstant,attr"`
-	ProtocolBinding             string       `xml:"ProtocolBinding,attr"`
-	Version                     string       `xml:"Version,attr"`
-	Issuer                      Issuer       `xml:"urn:oasis:names:tc:SAML:2.0:assertion Issuer"`
-	NameIDPolicy                NameIDPolicy `xml:"NameIDPolicy"`
-}
-type Issuer struct {
-	Value string `xml:",chardata"`
-}
-type NameIDPolicy struct {
-	AllowCreate     string `xml:"AllowCreate,attr"`
-	Format          string `xml:"Format,attr"`
-	SPNameQualifier string `xml:"SPNameQualifier,attr"`
-}
-
 // ResponseUserinfo 返回给客户端的用户信息
 type ResponseUserinfo struct {
 	Id          uint   `json:"id"`
@@ -132,7 +113,7 @@ func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) 
 	// 获取客户端应用
 	site, err := dao.Site.GetCASSite(data.Service)
 	if err != nil {
-		return "", err
+		return "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
@@ -173,7 +154,7 @@ func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl 
 	// 获取客户端应用
 	site, err := dao.Site.GetOAuthSite(data.ClientId)
 	if err != nil {
-		return "", err
+		return "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
@@ -416,41 +397,100 @@ func (s *sso) ParseSPMetadata(metadataUrl string) (data *SPMetadata, err error) 
 	}, nil
 }
 
-// SPAuthorize SP授权
-func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (err error) {
+// GetSampleAuthnRequest 获取简单SAMLRequest数据
+func (s *sso) GetSampleAuthnRequest(samlRequest *SAMLRequest) url.Values {
+	payload := url.Values{}
+	payload.Add("RelayState", samlRequest.RelayState)
+	payload.Add("SAMLRequest", samlRequest.SAMLRequest)
+	payload.Add("sigAlg", samlRequest.SigAlg)
+	payload.Add("signature", samlRequest.Signature)
+	return payload
+}
 
-	var data *SAMLRequestData
+// SPAuthorize SP授权
+func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, err error) {
 
 	// 获取SAMLRequest数据
-	samlRequestRaw, err := utils.ParseSAMLRequest(samlRequest.SAMLRequest)
+	requestData, err := utils.ParseSAMLRequest(samlRequest.SAMLRequest)
 	if err != nil {
-		return err
-	}
-
-	// 将SAMLRequest数据到结构体
-	if err := xml.Unmarshal([]byte(samlRequestRaw.String()), &data); err != nil {
-		return err
+		return "", err
 	}
 
 	// 获取SP应用
-	site, err := dao.Site.GetSamlSite(data.Issuer.Value)
+	site, err := dao.Site.GetSamlSite(requestData.Issuer.Value)
 	if err != nil {
-		return err
+		return "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
 	if !site.AllOpen {
 		if !dao.Site.IsUserInSite(userId, site) {
-			return errors.New("您无权访问该应用")
+			return "", errors.New("您无权访问该应用")
 		}
 	}
 
-	// 签名验证
-	//if err := utils.VerifySignature(samlRequestRaw, site.Certificate, samlRequest.Signature, samlRequest.SigAlg); err != nil {
-	//	return err
-	//}
+	// 获取IDP私钥
+	IDPKey, err := utils.ReadFileString("config/certs/private.key")
+	if err != nil {
+		return "", err
+	}
 
-	// 生成SAMLResponse
+	// 获取IDP证书
+	IDPCert, err := utils.ReadFileString("config/certs/certificate.crt")
+	if err != nil {
+		return "", err
+	}
 
-	return nil
+	// 获取SP证书（给证书加上头尾）
+	SPCert := fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n", site.Certificate)
+
+	// 获取用户信息
+	userinfo, err := dao.User.GetUser(userId)
+	if err != nil {
+		return "", err
+	}
+
+	// 初始化IDP实（注：也可以在结构体中使用IDPCertFilePath和IDPKeyFilePath从指定路径中读取IDP的证书和私钥，但经测试有Bug）
+	idp := saml.IdentityProvider{
+		IsIdpInitiated:       false,                                   // 是否为IDP发起认证
+		Issuer:               "https://ops-test.50yc.cn",              // IDP实体
+		Audiences:            []string{requestData.Issuer.Value},      // SP实体
+		IDPKey:               IDPKey,                                  // IDP私钥
+		IDPCert:              IDPCert,                                 // IDP证书
+		SPCert:               SPCert,                                  // SP证书
+		NameIdentifier:       userinfo.Username,                       // 用户的唯一标识符
+		NameIdentifierFormat: saml.NameIdFormatUnspecified,            // 用户唯一标识符格式
+		ACSLocation:          requestData.AssertionConsumerServiceURL, // SP回调地址
+		ACSBinging:           saml.HTTPPostBinding,                    // 将SAMLResponse发送到SP的方法
+		SessionIndex:         uuid.New().String(),                     // 会话唯一标识符,常用用于会议跟踪
+	}
+
+	// 添加其它用户属性
+	idp.AddAttribute("name", userinfo.Name, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)
+
+	// 设置认证请求有效期
+	idp.AuthnRequestTTL(time.Minute * 10)
+
+	// SAMLRequest请求校验,由于IDP的Metadata元数据中指定的SP Binding方法为HTTPRedirectBinding, 所以这里传入的时候是GET方法
+	_, validationError := idp.ValidateAuthnRequest("GET", s.GetSampleAuthnRequest(samlRequest), url.Values{})
+	if validationError != nil {
+		return "", validationError.Error
+	}
+
+	// 生成签名后XML数据
+	signedXML, signedXMLErr := idp.NewSignedLoginResponse()
+	if signedXMLErr != nil {
+		return "", signedXMLErr.Error
+	}
+
+	// 生成HTML响应
+	html, htmlErr := idp.ResponseHtml(signedXML, "Response")
+	if err != nil {
+		return "", htmlErr.Error
+	}
+
+	return html, nil
 }

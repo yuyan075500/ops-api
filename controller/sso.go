@@ -287,7 +287,8 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 	}
 
 	// authnRequest校验
-	if err := service.SSO.SPAuthorize(data, mc.ID); err != nil {
+	html, err := service.SSO.SPAuthorize(data, mc.ID)
+	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
 			"code": 90500,
@@ -295,6 +296,8 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 		})
 		return
 	}
+
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
 }
 
 // ParseSPMetadata SP Metadata解析

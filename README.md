@@ -113,14 +113,7 @@ ${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保�
 ```shell
 config/certs/
 ```
-项目部署时需要新生成一套密钥和证书，以确保重要信息不会泄露，生成方法为：
-```shell
-# 生成公钥和证书
-openssl req -nodes -new -x509 -newkey rsa:2048 -days 3650 -keyout private.key -out certificate.crt
-# 导出公钥
-openssl rsa -in private.key -pubout -out public.key
-```
+项目部署时需要新生成相关密钥、证书，以确保重要信息不会泄露，可以使用[在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html, "在线生成工具")。建议证书有效期设置为10年，不设置私钥密码（不支持），证书生成完成后需要下载CRT证书、公钥和私钥并按以下名称命名：
 * private.key：私钥
 * public.key：公钥
-* certificate.crt：证书  
-注意：请确保公钥格式为：`PKCS#8`
+* certificate.crt：证书
