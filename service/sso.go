@@ -482,12 +482,12 @@ func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, e
 	}
 
 	// 添加其它用户属性
-	idp.AddAttribute("name", userinfo.Username, saml.AttributeFormatUnspecified)
-	//idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)
-	//idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)
-	//idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("name", userinfo.Name, saml.AttributeFormatUnspecified)                                                                           // 用户姓名
+	idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)                                                                   // 用户名
+	idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)                                                                         // 邮箱地址
+	idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)                                                            // 电话号码
 	idp.AddAttribute("IAM_SAML_Attributes_xUserId", userinfo.Username, saml.AttributeFormatUnspecified)                                                // 华为云相关
-	idp.AddAttribute("IAM_SAML_Attributes_redirect_url", "https://console.huaweicloud.com/console/?region=cn-east-3", saml.AttributeFormatUnspecified) // 华为云相关
+	idp.AddAttribute("IAM_SAML_Attributes_redirect_url", "https://console.huaweicloud.com/console/?region=cn-east-3", saml.AttributeFormatUnspecified) // 华为云相关（登录后跳转的地址）
 	idp.AddAttribute("IAM_SAML_Attributes_domain_id", "0adc17dfaa80f4c20fabc01b14da6f20", saml.AttributeFormatUnspecified)                             // 华为云相关
 	idp.AddAttribute("IAM_SAML_Attributes_idp_id", "WLYD-OPS", saml.AttributeFormatUnspecified)                                                        // 华为云相关
 
