@@ -27,6 +27,9 @@ type SiteCreate struct {
 	Certificate string `json:"certificate"`
 	Description string `json:"description" binding:"required"`
 	SiteGroupID uint   `json:"site_group_id" binding:"required"`
+	DomainId    string `json:"domain_id"`
+	RedirectUrl string `json:"redirect_url"`
+	IDPName     string `json:"idp_name"`
 }
 
 // SiteGroupUpdate 更新分组名称构体
@@ -88,6 +91,9 @@ func (s *site) AddSite(data *SiteCreate) (err error) {
 		SiteGroupID: data.SiteGroupID,
 		EntityId:    data.EntityId,
 		Certificate: data.Certificate,
+		DomainId:    data.DomainId,
+		RedirectUrl: data.RedirectUrl,
+		IDPName:     data.IDPName,
 	}
 
 	// 创建数据库数据

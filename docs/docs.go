@@ -1069,6 +1069,23 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sso/saml/authorize": {
+            "post": {
+                "description": "SAML2认证相关接口",
+                "tags": [
+                    "SAML2认证"
+                ],
+                "summary": "SP授权",
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/sso/saml/metadata": {
             "get": {
                 "description": "SAML2认证相关接口",
@@ -1082,6 +1099,45 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "description": "SAML2认证相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SAML2认证"
+                ],
+                "summary": "SP Metadata解析",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "授权请求参数",
+                        "name": "url",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.ParseSPMetadata"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -1513,10 +1569,16 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "callback_url": {
-                    "description": "指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功",
+                    "type": "string"
+                },
+                "certificate": {
                     "type": "string"
                 },
                 "description": {
+                    "type": "string"
+                },
+                "entity_id": {
+                    "description": "指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功",
                     "type": "string"
                 },
                 "icon": {
@@ -1772,6 +1834,17 @@ const docTemplate = `{
                 }
             }
         },
+        "service.ParseSPMetadata": {
+            "type": "object",
+            "required": [
+                "sp_metadata_url"
+            ],
+            "properties": {
+                "sp_metadata_url": {
+                    "type": "string"
+                }
+            }
+        },
         "service.ResponseToken": {
             "type": "object",
             "properties": {
@@ -1855,13 +1928,28 @@ const docTemplate = `{
                 "callback_url": {
                     "type": "string"
                 },
+                "certificate": {
+                    "type": "string"
+                },
                 "description": {
+                    "type": "string"
+                },
+                "domain_id": {
+                    "type": "string"
+                },
+                "entity_id": {
                     "type": "string"
                 },
                 "icon": {
                     "type": "string"
                 },
+                "idp_name": {
+                    "type": "string"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "redirect_url": {
                     "type": "string"
                 },
                 "site_group_id": {
@@ -1946,6 +2034,10 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "SAMLRequest": {
+                    "description": "SAML2客户端：SAMLRequest",
+                    "type": "string"
+                },
                 "client_id": {
                     "description": "OAuth2.0客户端：客户端ID",
                     "type": "string"

@@ -261,6 +261,7 @@ func (s *sso) GetIdPMetadata(c *gin.Context) {
 // @Tags SAML2认证
 // @Success 200
 // @Router /api/v1/sso/saml/authorize [post]
+// @Success 200 {string} json "{"code": 0, "data": nil}"
 func (s *sso) SPAuthorize(c *gin.Context) {
 	var data = &service.SAMLRequest{}
 
@@ -300,7 +301,6 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 	// 返回客户端授权信息
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
-		"msg":  "授权成功",
 		"data": html,
 	})
 }
@@ -313,7 +313,7 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 // @Produce application/json
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param url body service.ParseSPMetadata true "授权请求参数"
-// @Success 200 {string} json "{"code": 0, "msg": "解析成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "data": nil}"
 // @Router /api/v1/sso/saml/metadata [post]
 func (s *site) ParseSPMetadata(c *gin.Context) {
 	var data = &service.ParseSPMetadata{}
@@ -340,7 +340,6 @@ func (s *site) ParseSPMetadata(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"code": 0,
-		"msg":  "解析成功",
 		"data": metadataInfo,
 	})
 }

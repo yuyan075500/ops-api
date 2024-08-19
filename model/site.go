@@ -31,6 +31,9 @@ type Site struct {
 	CallbackUrl  string      `json:"callback_url" gorm:"default:null"`          // OAuth2.0 And CAS3.0 Client CallbackUrl
 	EntityId     string      `json:"entity_id" gorm:"default:null"`             // SAML2.0 SP EntityID
 	Certificate  string      `json:"certificate" gorm:"default:null;type:text"` // SAML2.0 SP Certificate
+	DomainId     string      `json:"domain_id" gorm:"default:null"`             // SAML2.0 SP 华为云相关
+	RedirectUrl  string      `json:"redirect_url" gorm:"default:null"`          // SAML2.0 SP 华为云相关
+	IDPName      string      `json:"idp_name" gorm:"default:null"`              // SAML2.0 SP 华为云相关
 	SiteGroupID  uint        `json:"site_group_id"`
 	Users        []*AuthUser `json:"users" gorm:"many2many:site_users"`
 }

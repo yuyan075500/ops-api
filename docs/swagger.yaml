@@ -7,9 +7,13 @@ definitions:
         description: 指针类型，可以确保使用Updates方法更新时，如果值为false时也能更新成功
         type: boolean
       callback_url:
-        description: 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
+        type: string
+      certificate:
         type: string
       description:
+        type: string
+      entity_id:
+        description: 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
         type: string
       icon:
         type: string
@@ -183,6 +187,13 @@ definitions:
     - client_id
     - response_type
     type: object
+  service.ParseSPMetadata:
+    properties:
+      sp_metadata_url:
+        type: string
+    required:
+    - sp_metadata_url
+    type: object
   service.ResponseToken:
     properties:
       access_token:
@@ -234,11 +245,21 @@ definitions:
         type: string
       callback_url:
         type: string
+      certificate:
+        type: string
       description:
+        type: string
+      domain_id:
+        type: string
+      entity_id:
         type: string
       icon:
         type: string
+      idp_name:
+        type: string
       name:
+        type: string
+      redirect_url:
         type: string
       site_group_id:
         type: integer
@@ -297,6 +318,9 @@ definitions:
     type: object
   service.UserLogin:
     properties:
+      SAMLRequest:
+        description: SAML2客户端：SAMLRequest
+        type: string
       client_id:
         description: OAuth2.0客户端：客户端ID
         type: string
@@ -1024,6 +1048,17 @@ paths:
       summary: 客户端授权
       tags:
       - OAuth2.0认证
+  /api/v1/sso/saml/authorize:
+    post:
+      description: SAML2认证相关接口
+      responses:
+        "200":
+          description: '{"code": 0, "data": nil}'
+          schema:
+            type: string
+      summary: SP授权
+      tags:
+      - SAML2认证
   /api/v1/sso/saml/metadata:
     get:
       description: SAML2认证相关接口
@@ -1033,6 +1068,32 @@ paths:
         "200":
           description: OK
       summary: 获取元数据
+      tags:
+      - SAML2认证
+    post:
+      consumes:
+      - application/json
+      description: SAML2认证相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 授权请求参数
+        in: body
+        name: url
+        required: true
+        schema:
+          $ref: '#/definitions/service.ParseSPMetadata'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "data": nil}'
+          schema:
+            type: string
+      summary: SP Metadata解析
       tags:
       - SAML2认证
   /api/v1/user:

@@ -53,6 +53,9 @@ type SiteItem struct {
 	CallbackUrl  string           `json:"callback_url"`
 	EntityId     string           `json:"entity_id"`
 	Certificate  string           `json:"certificate"`
+	DomainId     string           `json:"domain_id"`
+	RedirectUrl  string           `json:"redirect_url"`
+	IDPName      string           `json:"idp_name"`
 	Users        []*UserBasicInfo `json:"users"`
 }
 
@@ -189,6 +192,9 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 				CallbackUrl:  s.CallbackUrl,
 				EntityId:     s.EntityId,
 				Certificate:  s.Certificate,
+				DomainId:     s.DomainId,
+				RedirectUrl:  s.RedirectUrl,
+				IDPName:      s.IDPName,
 			}
 
 			// 对站点图标进行特殊处理，返回一个Minio中的临时URL链接
