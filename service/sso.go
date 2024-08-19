@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
@@ -10,6 +11,7 @@ import (
 	"fmt"
 	"github.com/LoginRadius/go-saml"
 	"github.com/google/uuid"
+
 	"net/url"
 	"ops-api/dao"
 	"ops-api/middleware"
@@ -22,6 +24,8 @@ import (
 var SSO sso
 
 type sso struct{}
+
+var samlPostFormTemplate = utils.GenerateSAMLResponsePostForm()
 
 // OAuthAuthorize OAuth2.0客户端获取授权请求参数
 type OAuthAuthorize struct {
@@ -69,6 +73,13 @@ type ParseSPMetadata struct {
 type SPMetadata struct {
 	EntityID    string `json:"entity_id"`
 	Certificate string `json:"certificate"`
+}
+
+// SAMLResponse IDP返回给浏览器的SAMLResponse数据
+type SAMLResponse struct {
+	URL          string
+	SAMLResponse string
+	RelayState   string
 }
 
 // ResponseToken 返回给OAuth2.0客户端客户端的Token信息
@@ -410,6 +421,8 @@ func (s *sso) GetSampleAuthnRequest(samlRequest *SAMLRequest) url.Values {
 // SPAuthorize SP授权
 func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, err error) {
 
+	var b bytes.Buffer
+
 	// 获取SAMLRequest数据
 	requestData, err := utils.ParseSAMLRequest(samlRequest.SAMLRequest)
 	if err != nil {
@@ -442,7 +455,10 @@ func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, e
 	}
 
 	// 获取SP证书（给证书加上头尾）
-	SPCert := fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n", site.Certificate)
+	SPCert := site.Certificate
+	if !strings.HasPrefix(SPCert, "-----BEGIN CERTIFICATE-----") && !strings.HasSuffix(SPCert, "-----END CERTIFICATE-----") {
+		SPCert = fmt.Sprintf("-----BEGIN CERTIFICATE-----\n%s\n-----END CERTIFICATE-----\n", site.Certificate)
+	}
 
 	// 获取用户信息
 	userinfo, err := dao.User.GetUser(userId)
@@ -466,10 +482,14 @@ func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, e
 	}
 
 	// 添加其它用户属性
-	idp.AddAttribute("name", userinfo.Name, saml.AttributeFormatUnspecified)
-	idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)
-	idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)
-	idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("name", userinfo.Username, saml.AttributeFormatUnspecified)
+	//idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)
+	//idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)
+	//idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("IAM_SAML_Attributes_xUserId", userinfo.Username, saml.AttributeFormatUnspecified)                                                // 华为云相关
+	idp.AddAttribute("IAM_SAML_Attributes_redirect_url", "https://console.huaweicloud.com/console/?region=cn-east-3", saml.AttributeFormatUnspecified) // 华为云相关
+	idp.AddAttribute("IAM_SAML_Attributes_domain_id", "0adc17dfaa80f4c20fabc01b14da6f20", saml.AttributeFormatUnspecified)                             // 华为云相关
+	idp.AddAttribute("IAM_SAML_Attributes_idp_id", "WLYD-OPS", saml.AttributeFormatUnspecified)                                                        // 华为云相关
 
 	// 设置认证请求有效期
 	idp.AuthnRequestTTL(time.Minute * 10)
@@ -487,10 +507,14 @@ func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, e
 	}
 
 	// 生成HTML响应
-	html, htmlErr := idp.ResponseHtml(signedXML, "Response")
-	if err != nil {
-		return "", htmlErr.Error
+	var htmlData = SAMLResponse{
+		URL:          idp.ACSLocation,
+		SAMLResponse: base64.StdEncoding.EncodeToString([]byte(signedXML)),
+		RelayState:   idp.RelayState,
+	}
+	if err := samlPostFormTemplate.Execute(&b, htmlData); err != nil {
+		return "", err
 	}
 
-	return html, nil
+	return b.String(), nil
 }

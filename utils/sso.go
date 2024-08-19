@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"encoding/xml"
 	"errors"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -81,29 +82,29 @@ func ParseSPMetadata(metadataUrl string) (*EntityDescriptor, error) {
 	return entityDescriptor, nil
 }
 
-// LoadIdpKey 获取IDP私钥
-//func LoadIdpKey() (interface{}, error) {
-//
-//	// 读取证书
-//	buf, err := os.ReadFile("config/certs/private.key")
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	// 解码PEM格式证书
-//	block, _ := pem.Decode(buf)
-//	if block == nil {
-//		return nil, errors.New("证书解码失败")
-//	}
-//
-//	// 解析证书
-//	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return privateKey, nil
-//}
+// GenerateSAMLResponsePostForm 生成SAMLResponsePostForm表单
+func GenerateSAMLResponsePostForm() *template.Template {
+	return template.Must(template.New("saml-response-form").Parse(
+		`<!DOCTYPE html>` +
+			`<html lang="en">` +
+			`<body onload="document.getElementById('saml').submit()">` +
+			`<noscript>` +
+			`<p>` +
+			`<strong>Note:</strong> Since your browser does not support JavaScript, you must press the Continue button once to proceed.` +
+			`</p>` +
+			`</noscript>` +
+			`<form method="post" action="{{.URL}}" id="saml">` +
+			`<input type="hidden" name="SAMLResponse" value="{{.SAMLResponse}}" />` +
+			`<input type="hidden" name="RelayState" value="{{.RelayState}}" />` +
+			`<noscript>` +
+			`<div>` +
+			`<input type="submit" value="Continue" />` +
+			`</div>` +
+			`</noscript>` +
+			`</form>` +
+			`</body>` +
+			`</html>`))
+}
 
 // LoadIdpCertificate 获取IDP证书
 func LoadIdpCertificate() (*x509.Certificate, error) {
