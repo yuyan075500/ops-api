@@ -297,7 +297,12 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 		return
 	}
 
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(html))
+	// 返回客户端授权信息
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "授权成功",
+		"data": html,
+	})
 }
 
 // ParseSPMetadata SP Metadata解析
