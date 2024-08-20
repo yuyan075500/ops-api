@@ -288,7 +288,7 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 	}
 
 	// authnRequest校验
-	html, err := service.SSO.SPAuthorize(data, mc.ID)
+	html, err := service.SSO.GetSPAuthorize(data, mc.ID)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{

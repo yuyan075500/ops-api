@@ -32,6 +32,9 @@ type UserLogin struct {
 	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
 	Service      string `json:"service"`       // CAS3.0客户端：回调地址
 	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
+	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
+	SigAlg       string `json:"SigAlg"`        // SAML2客户端：签名算法
+	Signature    string `json:"Signature"`     // SAML2客户端：签名
 }
 
 // RestPassword 重置密码时用户信息绑定的结构体
@@ -298,22 +301,13 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 		return "", "", nil, err
 	}
 
-	// OAuth认证返回
-	if params.ClientId != "" && params.Service == "" {
-		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		callbackData, err := SSO.Login(params, user)
 		if err != nil {
 			return "", "", nil, err
 		}
-		return token, callbackUrl, nil, nil
-	}
-
-	// CAS认证返回
-	if params.Service != "" && params.ClientId == "" {
-		callbackUrl, err := handleCAS(params.Service, user.Username, user.ID)
-		if err != nil {
-			return "", "", nil, err
-		}
-		return token, callbackUrl, nil, nil
+		return token, callbackData, nil, nil
 	}
 
 	return token, "", nil, nil
@@ -429,24 +423,4 @@ func handleMFA(user model.AuthUser) (string, *string, error) {
 	}
 
 	return token, &redirect, nil
-}
-
-// handleOAuth OAuth认证返回
-func handleOAuth(clientID, redirectURI, responseType, scope, state string, userID uint) (string, error) {
-	data := &OAuthAuthorize{
-		ClientId:     clientID,
-		RedirectURI:  redirectURI,
-		ResponseType: responseType,
-		Scope:        scope,
-		State:        state,
-	}
-	return SSO.GetOAuthAuthorize(data, userID)
-}
-
-// handleCAS CAS认证返回
-func handleCAS(service, username string, userID uint) (string, error) {
-	data := &CASAuthorize{
-		Service: service,
-	}
-	return SSO.GetCASAuthorize(data, userID, username)
 }

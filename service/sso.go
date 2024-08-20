@@ -418,8 +418,8 @@ func (s *sso) GetSampleAuthnRequest(samlRequest *SAMLRequest) url.Values {
 	return payload
 }
 
-// SPAuthorize SP授权
-func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, err error) {
+// GetSPAuthorize SP授权
+func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, err error) {
 
 	var b bytes.Buffer
 
@@ -517,4 +517,51 @@ func (s *sso) SPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, e
 	}
 
 	return b.String(), nil
+}
+
+// Login 单点登录
+func (s *sso) Login(queryParams *UserLogin, user model.AuthUser) (callbackData string, err error) {
+
+	var data string
+
+	if queryParams.ResponseType != "" && queryParams.ClientId != "" && queryParams.RedirectURI != "" {
+		// OAuth认证返回
+		params := &OAuthAuthorize{
+			ClientId:     queryParams.ClientId,
+			RedirectURI:  queryParams.RedirectURI,
+			ResponseType: queryParams.ResponseType,
+			Scope:        queryParams.Scope,
+			State:        queryParams.State,
+		}
+		callbackUrl, err := s.GetOAuthAuthorize(params, user.ID)
+		if err != nil {
+			return "", err
+		}
+		data = callbackUrl
+	} else if queryParams.Service != "" {
+		// CAS认证返回
+		params := &CASAuthorize{
+			Service: queryParams.Service,
+		}
+		callbackUrl, err := s.GetCASAuthorize(params, user.ID, user.Username)
+		if err != nil {
+			return "", err
+		}
+		data = callbackUrl
+	} else if queryParams.SAMLRequest != "" {
+		// SAML2认证返回
+		params := &SAMLRequest{
+			SAMLRequest: queryParams.SAMLRequest,
+			RelayState:  queryParams.RelayState,
+			SigAlg:      queryParams.SigAlg,
+			Signature:   queryParams.Signature,
+		}
+		html, err := s.GetSPAuthorize(params, user.ID)
+		if err != nil {
+			return "", err
+		}
+		data = html
+	}
+
+	return data, nil
 }

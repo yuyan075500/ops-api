@@ -28,6 +28,10 @@ type MFAValidate struct {
 	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
 	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
 	Service      string `json:"service"`       // CAS3.0客户端：回调地址
+	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
+	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
+	SigAlg       string `json:"SigAlg"`        // SAML2客户端：签名算法
+	Signature    string `json:"Signature"`     // SAML2客户端：签名
 }
 
 // GetGoogleQrcode 生成Google MFA认证二维码
@@ -116,22 +120,26 @@ func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToke
 		}
 	}
 
-	// OAuth认证返回
-	if params.ClientId != "" && params.Service == "" {
-		callbackUrl, err := handleOAuth(params.ClientId, params.RedirectURI, params.ResponseType, params.Scope, params.State, user.ID)
-		if err != nil {
-			return "", "", err
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		loginParams := &UserLogin{
+			ResponseType: params.ResponseType,
+			ClientId:     params.ClientId,
+			RedirectURI:  params.RedirectURI,
+			State:        params.State,
+			Scope:        params.Scope,
+			Service:      params.Service,
+			SAMLRequest:  params.SAMLRequest,
+			RelayState:   params.RelayState,
+			SigAlg:       params.SigAlg,
+			Signature:    params.Signature,
 		}
-		return jwtToken, callbackUrl, nil
-	}
 
-	// CAS认证返回
-	if params.Service != "" && params.ClientId == "" {
-		callbackUrl, err := handleCAS(params.Service, user.Username, user.ID)
+		callbackData, err := SSO.Login(loginParams, user)
 		if err != nil {
 			return "", "", err
 		}
-		return jwtToken, callbackUrl, nil
+		return jwtToken, callbackData, nil
 	}
 
 	return jwtToken, "", nil
