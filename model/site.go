@@ -26,14 +26,14 @@ type Site struct {
 	Description  string      `json:"description"`
 	SSO          bool        `json:"sso"`
 	SSOType      uint        `json:"sso_type" gorm:"default:null"`
-	ClientId     string      `json:"client_id"`                                 // OAuth2.0 ClientID
-	ClientSecret string      `json:"client_secret"`                             // OAuth2.0 ClientSecret
-	CallbackUrl  string      `json:"callback_url" gorm:"default:null"`          // OAuth2.0 And CAS3.0 Client CallbackUrl
-	EntityId     string      `json:"entity_id" gorm:"default:null"`             // SAML2.0 SP EntityID
-	Certificate  string      `json:"certificate" gorm:"default:null;type:text"` // SAML2.0 SP Certificate
-	DomainId     string      `json:"domain_id" gorm:"default:null"`             // SAML2.0 SP 华为云相关
-	RedirectUrl  string      `json:"redirect_url" gorm:"default:null"`          // SAML2.0 SP 华为云相关
-	IDPName      string      `json:"idp_name" gorm:"default:null"`              // SAML2.0 SP 华为云相关
+	ClientId     string      `json:"client_id"`                                    // OAuth2.0 ClientID
+	ClientSecret string      `json:"client_secret"`                                // OAuth2.0 ClientSecret
+	CallbackUrl  string      `json:"callback_url" gorm:"default:null"`             // OAuth2.0 And CAS3.0 Client CallbackUrl
+	EntityId     string      `json:"entity_id" gorm:"default:null"`                // SAML2.0 SP EntityID
+	Certificate  string      `json:"certificate" gorm:"default:null;type:text"`    // SAML2.0 SP Certificate
+	DomainId     string      `json:"domain_id" gorm:"default:null"`                // SAML2.0 SP 华为云相关
+	RedirectUrl  string      `json:"redirect_url" gorm:"default:null"`             // SAML2.0 SP 华为云相关
+	IDPName      string      `json:"idp_name" gorm:"default:null;column:idp_name"` // SAML2.0 SP 华为云相关
 	SiteGroupID  uint        `json:"site_group_id"`
 	Users        []*AuthUser `json:"users" gorm:"many2many:site_users"`
 }
