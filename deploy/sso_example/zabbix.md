@@ -4,7 +4,7 @@
 1. **创建密钥和证书**：可以使用[在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具")。建议证书有效期设置为10年，不设置私钥密码，生成完成后需要下载CRT证书和私钥并按以下名称命名：
    * sp.key：私钥。
    * sp.crt：证书。
-2. **获取IDP证书**：IDP的证书的存放路径为项目的`config/certs/certificate.crt`，需要将此证书下载并保存为`idp.crt`
+2. **获取IDP证书**：IDP的证书的存放路径为项目的`config/certs/certificate.crt`，需要将此证书下载并保存为`idp.crt`。
 3. **上传密钥和证书**：将`sp.key`、`sp.crt`、`idp.crt`上传到Zabbix站点的`ui/conf/certs/`目录下，除非`zabbix.conf.php`中提供了自定义路径，否则Zabbix默认在刚才的路径中查找文件。
 4. **Zabbix单点登录配置**：登录到Zabbix，进入【认证】配置界面，如下图所示：
 ![img.png](img/zabbix-config.jpg)
