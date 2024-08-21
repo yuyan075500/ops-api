@@ -9,7 +9,7 @@
    * 状态：启用。
 2. **身份提供商配置**：创建完身份提供商后点击【修改】进行配置，如下所示：
 ![img.png](img/huawei-idp-config.jpg)
-   在这里要上传IDP（身份提供商）的元数据文件，IDP的元数据文件可以访问平台`<protocol>://<address>[:<port>]/api/v1/sso/saml/metadata`获取，将网页中的内容保存到本地`xml`格式的文件中上传即可。  
+   IDP的元数据文件可以访问平台`<protocol>://<address>[:<port>]/api/v1/sso/saml/metadata`获取，将网页中的内容保存到本地`xml`格式的文件中上传即可。  
    
    > 注意：在此页面中的登录连接将用于后续单点登录使用。
 4. **创建IAM用户**：进入【统一身份认证】-【用户】-【创建用户】，如下图所示：
