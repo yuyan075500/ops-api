@@ -4,8 +4,10 @@
 # SAML2客户端配置
 # OIDC客户端配置
 # 已测试通过的客户端
-针对CAS、OAuth2.0、SAML2、OIDC等协议，目前支持的SSO客户端如下：
+针对CAS、OAuth2.0、SAML2、OIDC等协议，目前已测试的SSO客户端如下：
 | 客户端名称    | 协议名称     | 参考文档        |
-| :---        |    :----:   |          ---: |
-| Header      | Title       | Here's this   |
-| Paragraph   | Text        | And more      |
+| :---        |    :----   |          --- |
+| Grafana      | OAuth2.0       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/grafana.md "参考文档")   |
+| Jenkins   | CAS3.0        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jenkins.md "参考文档")      |
+| Zabbix   | SAML2        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/zabbix.md "参考文档")      |
+| 华为云   | SAML2        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/huawei_cloud.md "参考文档")      |
