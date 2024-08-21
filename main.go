@@ -53,11 +53,12 @@ func main() {
 		IgnorePaths("/api/v1/reset_password").
 		IgnorePaths("/api/v1/user/mfa_qrcode").
 		IgnorePaths("/api/v1/user/mfa_auth").
-		IgnorePaths("/api/v1/sso/token").
-		IgnorePaths("/api/v1/sso/userinfo").
+		IgnorePaths("/api/v1/sso/oauth/token").
+		IgnorePaths("/api/v1/sso/oauth/userinfo").
 		IgnorePaths("/p3/serviceValidate").
 		IgnorePaths("/api/v1/sso/saml/metadata").
 		IgnorePaths("/api/v1/sso/saml/authorize").
+		IgnorePaths("/.well-known/openid-configuration").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

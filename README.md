@@ -39,6 +39,8 @@
 项目配置文件路径为`config/config.yaml`，如果没有则创建，配置说明如下：
 ```yaml
 server: "0.0.0.0:8000"
+accessUrl: ""
+secret: "swfqezjzoqssvjck"
 mysql:
   host: "127.0.0.1"
   port: 3306
@@ -85,10 +87,12 @@ mail:
   password: ""
 swagger: true
 ```
-* server：服务监听的地址和端口，必须
+* server：服务端监听的地址和端口，必须
+* accessUrl：平台访问地址，如`<protocol>://<address>[:<port>]`，必须
+* secret: CAS票据签名字符串，必须
 * mysql：MySQL数据库相关配置，必须
 * redis：Redis相关配置，必须
-* jwt：JWT相关配置，注意：secret请务必更改，必须
+* jwt：JWT相关配置，必须
 * mfa：双因素认证相关配置，issuer为APP扫码后显示的名称，必须
 * oss：Minio对象存储相关配置，主要存储用户头像和资产图片，必须
 * ldap：LDAP相关配置，用于AD域用户登录，可选

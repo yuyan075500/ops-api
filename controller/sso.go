@@ -228,6 +228,29 @@ func (s *sso) CASServiceValidate(c *gin.Context) {
 	c.XML(http.StatusOK, response)
 }
 
+// GetOIDCConfig 获取配置
+// @Summary 获取配置
+// @Description OIDC认证相关接口
+// @Tags OIDC认证
+// @Produce json
+// @Success 200
+// @Router /.well-known/openid-configuration [get]
+func (s *sso) GetOIDCConfig(c *gin.Context) {
+
+	// 获取票据
+	config, err := service.SSO.GetOIDCConfig()
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, config)
+}
+
 // GetIdPMetadata 获取元数据
 // @Summary 获取元数据
 // @Description SAML2认证相关接口

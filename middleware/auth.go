@@ -2,12 +2,14 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/config"
 	"ops-api/global"
+	"os"
 	"strings"
 	"time"
 )
@@ -111,23 +113,57 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 	}
 
 	// 使用HS256签名算法生成Token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	//token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// 返回Token字符串
-	return token.SignedString([]byte(config.Conf.JWT.Secret))
+	//return token.SignedString([]byte(config.Conf.JWT.Secret))
+
+	// 使用RS256签名算法生成Token
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	// 读取私钥
+	privateKeyData, err := os.ReadFile("config/certs/private.key")
+	if err != nil {
+		return "", err
+	}
+
+	// 解析私钥
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyData)
+	if err != nil {
+		return "", err
+	}
+
+	// 返回Token字符串（使用密钥签名）
+	return token.SignedString(privateKey)
 }
 
 // ParseToken 解析Token
 func ParseToken(tokenString string) (*UserClaims, error) {
 	var mc = new(UserClaims)
+
+	// 读取公钥
+	publicKeyData, err := os.ReadFile("config/certs/public.key")
+	if err != nil {
+		return nil, err
+	}
+
+	// 解析公钥
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyData)
+	if err != nil {
+		return nil, err
+	}
+
 	token, err := jwt.ParseWithClaims(tokenString, mc, func(token *jwt.Token) (i interface{}, err error) {
-		return []byte(config.Conf.JWT.Secret), nil
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New(fmt.Sprintf("unexpected signing method: %v", token.Header["alg"]))
+		}
+		return publicKey, nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	// 对token对象中的Claim进行类型断言， 校验Token
+	// 对token对象中的Claim进行类型断言，校验Token
 	if token.Valid {
 		return mc, nil
 	}

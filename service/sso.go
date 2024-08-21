@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"github.com/LoginRadius/go-saml"
 	"github.com/google/uuid"
-
 	"net/url"
+	config2 "ops-api/config"
 	"ops-api/dao"
 	"ops-api/middleware"
 	"ops-api/model"
@@ -84,6 +84,7 @@ type SAMLResponse struct {
 
 // ResponseToken 返回给OAuth2.0客户端客户端的Token信息
 type ResponseToken struct {
+	IdToken      string `json:"id_token"`
 	AccessToken  string `json:"access_token"`
 	TokenType    string `json:"token_type"`
 	ExpiresIn    int    `json:"expires_in"`
@@ -112,10 +113,41 @@ type Attributes struct {
 // ResponseUserinfo 返回给客户端的用户信息
 type ResponseUserinfo struct {
 	Id          uint   `json:"id"`
-	Name        string `json:"name"`
-	Username    string `json:"username"`
-	Email       string `json:"email"`
-	PhoneNumber string `json:"phone_number"`
+	Name        string `json:"name"`         // 用户姓名
+	Username    string `json:"username"`     // 用户名
+	Email       string `json:"email"`        // 邮箱地址
+	PhoneNumber string `json:"phone_number"` // 电话号码
+}
+
+// OIDCConfig 返回给前端的OIDC配置信息
+type OIDCConfig struct {
+	Issuer                           string   `json:"issuer"`
+	AuthorizationEndpoint            string   `json:"authorization_endpoint"`
+	TokenEndpoint                    string   `json:"token_endpoint"`
+	UserInfoEndpoint                 string   `json:"userinfo_endpoint"`
+	JwksURI                          string   `json:"jwks_uri"`
+	ScopesSupported                  []string `json:"scopes_supported"`
+	ResponseTypesSupported           []string `json:"response_types_supported"`
+	GrantTypesSupported              []string `json:"grant_types_supported"`
+	SubjectTypesSupported            []string `json:"subject_types_supported"`
+	IDTokenSigningAlgValuesSupported []string `json:"id_token_signing_alg_values_supported"`
+}
+
+// GetOIDCConfig 获取OIDC配置信息
+func (s *sso) GetOIDCConfig() (configuration *OIDCConfig, err error) {
+	var config = &OIDCConfig{
+		Issuer:                           config2.Conf.AccessUrl,
+		AuthorizationEndpoint:            config2.Conf.AccessUrl + "/login",
+		TokenEndpoint:                    config2.Conf.AccessUrl + "/api/v1/sso/oauth/token",
+		UserInfoEndpoint:                 config2.Conf.AccessUrl + "/api/v1/sso/oauth/userinfo",
+		ScopesSupported:                  []string{"openid"},
+		ResponseTypesSupported:           []string{"code"},
+		GrantTypesSupported:              []string{"authorization_code"},
+		SubjectTypesSupported:            []string{"public"},
+		IDTokenSigningAlgValuesSupported: []string{"HS256"},
+	}
+
+	return config, nil
 }
 
 // GetCASAuthorize CAS3.0客户端授权
@@ -137,8 +169,8 @@ func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) 
 	// 生成票据（固定格式）
 	st := fmt.Sprintf("ST-%d-%s", time.Now().Unix(), username)
 
-	// 使用HMAC SHA-256对票据进行签名（使用的是JWT的Secret）
-	mac := hmac.New(sha256.New, []byte("config.Conf.JWT.Secret"))
+	// 使用HMAC SHA-256对票据进行签名
+	mac := hmac.New(sha256.New, []byte(config2.Conf.Secret))
 	mac.Write([]byte(st))
 	signature := hex.EncodeToString(mac.Sum(nil))
 
@@ -157,6 +189,64 @@ func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) 
 	// 返回票据
 	redirectURI := fmt.Sprintf("%s?ticket=%s", site.CallbackUrl, st)
 	return redirectURI, nil
+}
+
+// ServiceValidate CAS3.0客户端票据校验
+func (s *sso) ServiceValidate(param *CASServiceValidate) (data *CASServiceResponse, err error) {
+	// 客户端验证
+	_, err = dao.Site.GetCASSite(param.Service)
+	if err != nil {
+		return nil, errors.New("service string is invalid")
+	}
+
+	// 获取票据（如果有数据则表明：1、Code存在，2、在有效期内，3、未使用）
+	ticketInfo, err := dao.SSO.GetAuthorizeTicket(param.Ticket)
+	if err != nil {
+		return nil, errors.New("ticket string is invalid")
+	}
+
+	// 分离票据
+	parts := strings.Split(param.Ticket, "-")
+
+	// 票据验证：结构验证
+	if len(parts) != 4 {
+		return nil, errors.New("ticket string is invalid")
+	}
+
+	// 获取票据本体
+	ticket := fmt.Sprintf("%s-%s-%s", parts[0], parts[1], parts[2])
+	// 获取票据签名
+	signature := parts[3]
+
+	// 生成新的签名
+	mac := hmac.New(sha256.New, []byte(config2.Conf.Secret))
+	mac.Write([]byte(ticket))
+	newSignature := hex.EncodeToString(mac.Sum(nil))
+
+	// 票据验证：比较签名
+	if !hmac.Equal([]byte(newSignature), []byte(signature)) {
+		return nil, errors.New("ticket string is invalid")
+	}
+
+	// 获取用户信息
+	user, err := dao.User.GetUser(ticketInfo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CASServiceResponse{
+		Xmlns: "http://www.yale.edu/tp/cas",
+		AuthenticationSuccess: &AuthenticationSuccess{
+			User: user.Name,
+			Attributes: Attributes{
+				Id:          uint(user.ID),
+				Email:       user.Email,
+				Name:        user.Name,
+				PhoneNumber: user.PhoneNumber,
+				Username:    user.Username,
+			},
+		},
+	}, nil
 }
 
 // GetOAuthAuthorize OAuth2.0客户端授权
@@ -214,21 +304,22 @@ func (s *sso) GetToken(param *Token) (token *ResponseToken, err error) {
 	}
 
 	// 获取Code（如果有数据则表明：1、Code存在，2、在有效期内，3、未使用）
-	str, _ := utils.Decrypt(param.Code)
-	ticket, err := dao.SSO.GetAuthorizeCode(str)
+	code, _ := utils.Decrypt(param.Code)
+	ticket, err := dao.SSO.GetAuthorizeCode(code)
 	if err != nil {
 		return nil, errors.New("code string is invalid")
 	}
 
-	// 生成access_token（使用JWT生成，方便后续对Token进行校验）
+	// 生成token供access_token和id_token使用（OIDC认证使用的id_token，OAuth认证使用的access_token）
 	user, err = dao.User.GetUser(ticket.UserID)
-	accessToken, err := middleware.GenerateJWT(uint(user.ID), user.Name, user.Username)
+	idToken, err := middleware.GenerateJWT(uint(user.ID), user.Name, user.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	token = &ResponseToken{
-		AccessToken: accessToken,
+		IdToken:     idToken,
+		AccessToken: idToken,
 		TokenType:   "bearer", // 固定值
 		ExpiresIn:   3600,     // Token过期时间，这里和配置文件中的JWT过期时间保持一致，也可以独立配置
 		Scope:       "openid", // 固定值
@@ -237,67 +328,8 @@ func (s *sso) GetToken(param *Token) (token *ResponseToken, err error) {
 	return token, err
 }
 
-// ServiceValidate CAS3.0客户端票据校验
-func (s *sso) ServiceValidate(param *CASServiceValidate) (data *CASServiceResponse, err error) {
-	// 客户端验证
-	_, err = dao.Site.GetCASSite(param.Service)
-	if err != nil {
-		return nil, errors.New("service string is invalid")
-	}
-
-	// 获取票据（如果有数据则表明：1、Code存在，2、在有效期内，3、未使用）
-	ticketInfo, err := dao.SSO.GetAuthorizeTicket(param.Ticket)
-	if err != nil {
-		return nil, errors.New("ticket string is invalid")
-	}
-
-	// 分离票据
-	parts := strings.Split(param.Ticket, "-")
-
-	// 票据验证：结构验证
-	if len(parts) != 4 {
-		return nil, errors.New("ticket string is invalid")
-	}
-
-	// 获取票据本体
-	ticket := fmt.Sprintf("%s-%s-%s", parts[0], parts[1], parts[2])
-	// 获取票据签名
-	signature := parts[3]
-
-	// 生成新的签名
-	mac := hmac.New(sha256.New, []byte("config.Conf.JWT.Secret"))
-	mac.Write([]byte(ticket))
-	newSignature := hex.EncodeToString(mac.Sum(nil))
-
-	// 票据验证：比较签名
-	if !hmac.Equal([]byte(newSignature), []byte(signature)) {
-		return nil, errors.New("ticket string is invalid")
-	}
-
-	// 获取用户信息
-	user, err := dao.User.GetUser(ticketInfo.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	return &CASServiceResponse{
-		Xmlns: "http://www.yale.edu/tp/cas",
-		AuthenticationSuccess: &AuthenticationSuccess{
-			User: user.Name,
-			Attributes: Attributes{
-				Id:          uint(user.ID),
-				Email:       user.Email,
-				Name:        user.Name,
-				PhoneNumber: user.PhoneNumber,
-				Username:    user.Username,
-			},
-		},
-	}, nil
-}
-
 // GetUserinfo 客户端获取用户信息
 func (s *sso) GetUserinfo(token string) (user *ResponseUserinfo, err error) {
-
 	// 验证Token
 	mc, err := middleware.ValidateJWT(token)
 	if err != nil {
@@ -329,29 +361,29 @@ func (s *sso) GetIdPMetadata() (metadata string, err error) {
 
 	// 创建IDP实例
 	idp := saml.IdentityProvider{
-		IsIdpInitiated:       false,                      // 是否是IdP Initiated模式，true：表示认证请求是通过IdP发起的，false：表示认证请求是客户端（SP）发起的
-		Issuer:               "https://ops-test.50yc.cn", // IDP实体，默认为当前服务器地址
+		IsIdpInitiated:       false,                  // 是否是IdP Initiated模式，true：表示认证请求是通过IdP发起的，false：表示认证请求是客户端（SP）发起的
+		Issuer:               config2.Conf.AccessUrl, // IDP实体，默认为当前服务器地址
 		IDPCert:              base64.StdEncoding.EncodeToString(cert.Raw),
 		NameIdentifierFormat: saml.AttributeFormatUnspecified,
 	}
 
 	// 添加单点登录接口信息
 	idp.AddSingleSignOnService(saml.MetadataBinding{
-		Binding:  saml.HTTPRedirectBinding,         // 由于IDP是前后端分离架构，所以这里使用HTTPRedirectBinding
-		Location: "https://ops-test.50yc.cn/login", // 单点登录接口地址
+		Binding:  saml.HTTPRedirectBinding,          // 由于IDP是前后端分离架构，所以这里使用HTTPRedirectBinding
+		Location: config2.Conf.AccessUrl + "/login", // 单点登录接口地址
 	})
 
 	// 添加单点登出接口信息（不支持：如果支持单点登出则可以添加此信息到元数据中）
 	//idp.AddSingleSignOutService(saml.MetadataBinding{
 	//	Binding:  saml.HTTPPostBinding,
-	//	Location: "https://ops-test.50yc.cn/logout",
+	//	Location: config2.Conf.AccessUrl + "/logout",
 	//}
 
 	// 添加IDP组件相关信息
 	idp.AddOrganization(saml.Organization{
 		OrganizationDisplayName: "运维平台", // 组织显示名称
 		OrganizationName:        "OPS",  // 组织正式名称
-		OrganizationURL:         "https://ops-test.50yc.cn",
+		OrganizationURL:         config2.Conf.AccessUrl,
 	})
 
 	// 添加主要联系人信息
@@ -469,7 +501,7 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	// 初始化IDP实（注：也可以在结构体中使用IDPCertFilePath和IDPKeyFilePath从指定路径中读取IDP的证书和私钥，但经测试有Bug）
 	idp := saml.IdentityProvider{
 		IsIdpInitiated:       false,                                   // 是否为IDP发起认证
-		Issuer:               "https://ops-test.50yc.cn",              // IDP实体
+		Issuer:               config2.Conf.AccessUrl,                  // IDP实体
 		Audiences:            []string{requestData.Issuer.Value},      // SP实体
 		IDPKey:               IDPKey,                                  // IDP私钥
 		IDPCert:              IDPCert,                                 // IDP证书

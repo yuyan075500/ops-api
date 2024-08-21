@@ -41,7 +41,7 @@
     # OAuth2认证登录登录地址
     auth_url = <protocol>://<address>[:<port>]/login
     # OAuth2认证获取Token接口
-    token_url = <protocol>://<address>[:<port>]/api/v1/oauth/token
+    token_url = <protocol>://<address>[:<port>]/api/v1/sso/oauth/token
     # OAuth2认证获取用户信息接口
-    api_url = <protocol>://<address>[:<port>]/api/v1/oauth/userinfo
+    api_url = <protocol>://<address>[:<port>]/api/v1/sso/oauth/userinfo
     ```

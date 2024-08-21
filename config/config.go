@@ -10,16 +10,18 @@ var Conf *Config
 
 // Config 配置文件结构体, 与YAML文件对应
 type Config struct {
-	Server  string `yaml:"server"`
-	MFA     MFA    `yaml:"mfa"`
-	MySQL   MySQL  `yaml:"mysql"`
-	JWT     JWT    `yaml:"jwt"`
-	Redis   Redis  `yaml:"redis"`
-	OSS     OSS    `yaml:"oss"`
-	LDAP    LDAP   `yaml:"ldap"`
-	SMS     SMS    `yaml:"sms"`
-	Mail    Mail   `yaml:"mail"`
-	Swagger bool   `yaml:"swagger"`
+	Server    string `yaml:"server"`
+	AccessUrl string `yaml:"accessUrl"`
+	Secret    string `yaml:"secret"`
+	MFA       MFA    `yaml:"mfa"`
+	MySQL     MySQL  `yaml:"mysql"`
+	JWT       JWT    `yaml:"jwt"`
+	Redis     Redis  `yaml:"redis"`
+	OSS       OSS    `yaml:"oss"`
+	LDAP      LDAP   `yaml:"ldap"`
+	SMS       SMS    `yaml:"sms"`
+	Mail      Mail   `yaml:"mail"`
+	Swagger   bool   `yaml:"swagger"`
 }
 
 type MySQL struct {
@@ -81,8 +83,7 @@ type VerificationCode struct {
 }
 
 type JWT struct {
-	Secret  string `yaml:"secret"`
-	Expires int    `yaml:"expires"`
+	Expires int `yaml:"expires"`
 }
 
 // Init 配置文件初始化
