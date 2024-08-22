@@ -15,6 +15,23 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/.well-known/openid-configuration": {
+            "get": {
+                "description": "OIDC认证相关接口",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OIDC认证"
+                ],
+                "summary": "获取配置",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "用户认证相关接口",
@@ -1069,6 +1086,23 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sso/oidc/jwks": {
+            "get": {
+                "description": "OIDC认证相关接口",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "OIDC认证"
+                ],
+                "summary": "获取jwks",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/sso/saml/authorize": {
             "post": {
                 "description": "SAML2认证相关接口",
@@ -1775,6 +1809,22 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "RelayState": {
+                    "description": "SAML2客户端：客户端状态码",
+                    "type": "string"
+                },
+                "SAMLRequest": {
+                    "description": "SAML2客户端：SAMLRequest",
+                    "type": "string"
+                },
+                "SigAlg": {
+                    "description": "SAML2客户端：签名算法",
+                    "type": "string"
+                },
+                "Signature": {
+                    "description": "SAML2客户端：签名",
+                    "type": "string"
+                },
                 "client_id": {
                     "description": "OAuth2.0客户端：客户端ID",
                     "type": "string"
@@ -1854,6 +1904,9 @@ const docTemplate = `{
                 "expires_in": {
                     "type": "integer"
                 },
+                "id_token": {
+                    "type": "string"
+                },
                 "refresh_token": {
                     "type": "string"
                 },
@@ -1869,18 +1922,22 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
+                    "description": "邮箱地址",
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "name": {
+                    "description": "用户姓名",
                     "type": "string"
                 },
                 "phone_number": {
+                    "description": "电话号码",
                     "type": "string"
                 },
                 "username": {
+                    "description": "用户名",
                     "type": "string"
                 }
             }
@@ -2034,8 +2091,20 @@ const docTemplate = `{
                 "username"
             ],
             "properties": {
+                "RelayState": {
+                    "description": "SAML2客户端：客户端状态码",
+                    "type": "string"
+                },
                 "SAMLRequest": {
                     "description": "SAML2客户端：SAMLRequest",
+                    "type": "string"
+                },
+                "SigAlg": {
+                    "description": "SAML2客户端：签名算法",
+                    "type": "string"
+                },
+                "Signature": {
+                    "description": "SAML2客户端：签名",
                     "type": "string"
                 },
                 "client_id": {
