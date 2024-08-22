@@ -4,7 +4,7 @@
 # SAML2客户端配置
 # OIDC客户端配置
 # 已测试通过的客户端
-针对CAS、OAuth2.0、SAML2、OIDC等协议，目前已测试的SSO客户端如下：
+针对CAS3.0、OAuth2.0、SAML2、OIDC协议，目前已测试的SSO客户端如下：
 | 客户端名称    | 协议名称     | 参考文档                                                                                                       |
 | :---        |    :----    |          ---                                                                                                 |
 | Grafana     | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/grafana.md "参考文档")           |
@@ -12,8 +12,8 @@
 | Zabbix      | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/zabbix.md "参考文档")            |
 | 华为云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/huawei_cloud.md "参考文档")      |
 | JumpServer  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jumpserver.md "参考文档")        |
-| Jira        | OAuth2.0    | 未完成      |
-| Confluence  | OAuth2.0    | 未完成      |
+| Jira        | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jira.md "参考文档")              |
+| Confluence  | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/confluence.md "参考文档")        |
 | KubePi      | SAML2       | 未完成      |
 | 阿里云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")            |
 | GitLab      | CAS3.0      | 未完成      |
