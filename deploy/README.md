@@ -12,8 +12,8 @@
 | Zabbix      | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/zabbix.md "参考文档")            |
 | 华为云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/huawei_cloud.md "参考文档")      |
 | JumpServer  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jumpserver.md "参考文档")        |
-| Jira        | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jira.md "参考文档")              |
-| Confluence  | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/confluence.md "参考文档")        |
+| Jira        | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jira.md "参考文档")              |
+| Confluence  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/confluence.md "参考文档")        |
 | KubePi      | SAML2       | 未完成      |
 | 阿里云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")            |
 | GitLab      | CAS3.0      | 未完成      |
