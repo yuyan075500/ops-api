@@ -4,13 +4,16 @@ import (
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
 	"github.com/LoginRadius/go-saml"
 	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/jwk"
 	"net/url"
 	config2 "ops-api/config"
 	"ops-api/dao"
@@ -348,6 +351,49 @@ func (s *sso) GetUserinfo(token string) (user *ResponseUserinfo, err error) {
 	}
 
 	return user, err
+}
+
+// GetJwks OIDC客户端获取Jwks
+func (s *sso) GetJwks() ([]byte, error) {
+
+	// 读取公钥文件
+	pubKey, err := utils.LoadPublicKey()
+	if err != nil {
+		return nil, err
+	}
+
+	// 转换公钥为JWK
+	jwkKey, err := jwk.New(pubKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// 将公钥转换为PKIX格式的字节
+	pubKeyBytes, err := x509.MarshalPKIXPublicKey(pubKey)
+	if err != nil {
+		return nil, err
+	}
+
+	// 基于公钥内容生成kid
+	hash := sha256.Sum256(pubKeyBytes)
+	kid := base64.URLEncoding.EncodeToString(hash[:])
+
+	// 设置其它参数
+	_ = jwkKey.Set(jwk.KeyIDKey, kid)
+	_ = jwkKey.Set(jwk.AlgorithmKey, "RS256")
+	_ = jwkKey.Set("use", "sig")
+
+	// 创建JWK Set
+	jwkSet := jwk.NewSet()
+	jwkSet.Add(jwkKey)
+
+	// 将JWK Set序列化为JSON
+	jwksJSON, err := json.Marshal(jwkSet)
+	if err != nil {
+		return nil, err
+	}
+
+	return jwksJSON, nil
 }
 
 // GetIdPMetadata 获取SAML2 IDP Metadata

@@ -251,6 +251,31 @@ func (s *sso) GetOIDCConfig(c *gin.Context) {
 	c.JSON(http.StatusOK, config)
 }
 
+// GetJwksConfig 获取jwks
+// @Summary 获取jwks
+// @Description OIDC认证相关接口
+// @Tags OIDC认证
+// @Produce json
+// @Success 200
+// @Router /api/v1/sso/oidc/jwks [get]
+func (s *sso) GetJwksConfig(c *gin.Context) {
+
+	jwks, err := service.SSO.GetJwks()
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 设置响应头
+	c.Header("Content-Type", "application/json")
+
+	c.String(http.StatusOK, string(jwks))
+}
+
 // GetIdPMetadata 获取元数据
 // @Summary 获取元数据
 // @Description SAML2认证相关接口

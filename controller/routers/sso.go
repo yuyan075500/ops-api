@@ -16,6 +16,8 @@ func initSSORouters(router *gin.Engine) {
 		sso.POST("/oauth/token", controller.SSO.GetToken)
 		// 获取用户信息（OAuth2.0）
 		sso.GET("/oauth/userinfo", controller.SSO.GetUserInfo)
+		// 获取Jwks配置
+		sso.GET("/oidc/jwks", controller.SSO.GetJwksConfig)
 		// 获取授权（CAS3.0）
 		sso.POST("/cas/authorize", controller.SSO.CASAuthorize)
 		// 获取IDP元数据（SAML2）
@@ -28,7 +30,6 @@ func initSSORouters(router *gin.Engine) {
 
 	// CAS3.0客户端票据校验
 	router.GET("/p3/serviceValidate", controller.SSO.CASServiceValidate)
-
 	// 获取OIDC配置
 	router.GET("/.well-known/openid-configuration", controller.SSO.GetOIDCConfig)
 }

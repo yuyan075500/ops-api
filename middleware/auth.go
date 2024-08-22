@@ -76,8 +76,9 @@ func ValidateJWT(token string) (mc *UserClaims, err error) {
 	}
 
 	// Token校验
+	// parts[0] == "token" 为了满足JumpServer进行OAuth2认证
 	parts := strings.SplitN(token, " ", 2)
-	if !(len(parts) == 2 && parts[0] == "Bearer") {
+	if !(len(parts) == 2 && (parts[0] == "Bearer" || parts[0] == "token")) {
 		return nil, errors.New("token无效")
 	}
 
@@ -109,6 +110,9 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                                                         // 签发时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                                                         // 生效时间
+			Issuer:    config.Conf.AccessUrl,                                                                  // 签发者
+			Audience:  []string{"all"},                                                                        // 令牌的受众，服务端未对此进行校验，所以可以填写任意字符串
+			//Subject:   fmt.Sprintf("user-%d", id),                                                             // 令牌主题，通常是用户的唯一标识符
 		},
 	}
 
