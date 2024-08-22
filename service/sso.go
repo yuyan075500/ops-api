@@ -565,14 +565,16 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	}
 
 	// 添加其它用户属性
-	idp.AddAttribute("name", userinfo.Name, saml.AttributeFormatUnspecified)                                // 用户姓名
-	idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)                        // 用户名
-	idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)                              // 邮箱地址
-	idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified)                 // 电话号码
-	idp.AddAttribute("IAM_SAML_Attributes_xUserId", userinfo.Username, saml.AttributeFormatUnspecified)     // 华为云相关配置
-	idp.AddAttribute("IAM_SAML_Attributes_redirect_url", site.RedirectUrl, saml.AttributeFormatUnspecified) // 华为云相关配置（登录后跳转的地址）
-	idp.AddAttribute("IAM_SAML_Attributes_domain_id", site.DomainId, saml.AttributeFormatUnspecified)       // 华为云相关配置
-	idp.AddAttribute("IAM_SAML_Attributes_idp_id", site.IDPName, saml.AttributeFormatUnspecified)           // 华为云相关配置                                                   // 华为云相关
+	idp.AddAttribute("name", userinfo.Name, saml.AttributeFormatUnspecified)                // 用户姓名
+	idp.AddAttribute("username", userinfo.Username, saml.AttributeFormatUnspecified)        // 用户名
+	idp.AddAttribute("email", userinfo.Email, saml.AttributeFormatUnspecified)              // 邮箱地址
+	idp.AddAttribute("phone_number", userinfo.PhoneNumber, saml.AttributeFormatUnspecified) // 电话号码
+
+	// 华为云相关配置
+	idp.AddAttribute("IAM_SAML_Attributes_xUserId", userinfo.Username, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("IAM_SAML_Attributes_redirect_url", site.RedirectUrl, saml.AttributeFormatUnspecified) // 登录后跳转的地址
+	idp.AddAttribute("IAM_SAML_Attributes_domain_id", site.DomainId, saml.AttributeFormatUnspecified)
+	idp.AddAttribute("IAM_SAML_Attributes_idp_id", site.IDPName, saml.AttributeFormatUnspecified)
 
 	// 设置认证请求有效期
 	idp.AuthnRequestTTL(time.Minute * 10)
