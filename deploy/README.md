@@ -11,7 +11,7 @@
 | Jenkins   | CAS3.0        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jenkins.md "参考文档")      |
 | Zabbix   | SAML2        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/zabbix.md "参考文档")      |
 | 华为云   | SAML2        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/huawei_cloud.md "参考文档")      |
-| JumpServer   | OAuth2.0        | 未完成      |
+| JumpServer   | OAuth2.0        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jumpserver.md "参考文档")      |
 | Jira   | OAuth2.0        | 未完成      |
 | Confluence   | OAuth2.0        | 未完成      |
 | KubePi   | SAML2        | 未完成      |
