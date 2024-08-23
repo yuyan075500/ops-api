@@ -30,10 +30,11 @@
    * User Info Endpoint：`<protocol>://<address>[:<port>]/api/v1/sso/oauth/userinfo`  
    配置完成后点击【Save】保存即可。
    > **提示**：在此页面显示了Jira正确的`Callback URL`，可以将此地址复制到平台的站点配置中覆盖之前的回调地址，以确保平台配置正确。
-5. **用户配置**：接上步，点击左侧的【User Profile】，需要进行用户属于配置，按如下图所示：
+4. **用户配置**：接上步，点击左侧的【User Profile】，需要进行用户属于配置，按如下图所示：
 ![img.png](img/jira-app-config5.jpg)
    * Username Attribute：`username`
    * Email Attribute：`email`
    * Full Name Attribute：`name`
-6. **高级设置**：接上步，点击左侧的【Advanced Settings】找到`Send Parameters in Token Endpoint`，将值更改为`Http Body`，如下图所示：
+   > **提示**：建议将`User Profile Mapping`选项开启，可以更新用户信息到已存在的用户。
+5. **高级设置**：接上步，点击左侧的【Advanced Settings】找到`Send Parameters in Token Endpoint`，将值更改为`Http Body`，如下图所示：
 ![img.png](img/jira-app-config4.jpg)
