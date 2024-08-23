@@ -16,4 +16,5 @@
 | Confluence  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/confluence.md "参考文档")        |
 | KubePi      | SAML2       | 未完成      |
 | 阿里云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")            |
+| 腾讯云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/tencent.md "参考文档")           |
 | GitLab      | CAS3.0      | 未完成      |
