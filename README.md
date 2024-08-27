@@ -9,9 +9,9 @@
 * middleware：中间件层，全局逻辑处理，如跨域、JWT认证、权限校验等。
 * utils：常用工具，如Token解析，文件操作等。
 # 项目依赖
-* MySQL
-* Redis
-* Minio
+* [x] MySQL
+* [x] Redis
+* [x] Minio
 # 后端返回状态码说明
 * 0：请求成功
 * 90400：请求参数错误
@@ -88,18 +88,18 @@ mail:
   password: ""
 swagger: true
 ```
-* server：服务端监听的地址和端口，必须
-* accessUrl：平台访问地址，如`<protocol>://<address>[:<port>]`，必须
-* secret: CAS票据签名字符串，必须
-* mysql：MySQL数据库相关配置，必须
-* redis：Redis相关配置，必须
-* jwt：JWT相关配置，必须
-* mfa：双因素认证相关配置，issuer为APP扫码后显示的名称，必须
-* oss：Minio对象存储相关配置，主要存储用户头像和资产图片，必须
-* ldap：LDAP相关配置，用于AD域用户登录，可选
-* sms：短信相关配置，仅支持华为云，用户自主重置密码需要使用，可选
-* mail：邮件相关配置，用于用户自助密码重置，可选
-* swagger：是否开启Swagger，生产环境请忽开启，必须
+* [x] server：服务端监听的地址和端口。
+* [x] accessUrl：平台访问地址，如`<protocol>://<address>[:<port>]`。
+* [x] secret: CAS票据签名字符串。
+* [x] mysql：MySQL数据库相关配置。
+* [x] redis：Redis相关配置。
+* [x] jwt：JWT相关配置。
+* [x] mfa：双因素认证相关配置，issuer为APP扫码后显示的名称。
+* [x] oss：Minio对象存储相关配置，主要存储用户头像和资产图片。
+* [ ] ldap：LDAP相关配置，用于AD域用户登录，可选
+* [ ] sms：短信相关配置，仅支持华为云，用户自主重置密码需要使用，可选
+* [ ] mail：邮件相关配置，用于用户自助密码重置，可选
+* [x] swagger：是否开启Swagger，生产环境请忽开启，必须
 ## 导入初始化数据
 初始化数据SQL文件位于`deploy/data.sql`。
 ## 更新IP地址库文件
