@@ -1,6 +1,11 @@
 package utils
 
-import "math/rand"
+import (
+	"errors"
+	"math/rand"
+	"net"
+	"strings"
+)
 
 // Contains 查询字符串在一个列表中是否存在
 func Contains(slice []string, value string) bool {
@@ -37,4 +42,24 @@ func GenerateRandomString(n int) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	return string(b)
+}
+
+// GetSubdomain 获取二级域名
+func GetSubdomain(host string) (string, error) {
+
+	// 检查是否为IP地址或localhost
+	if net.ParseIP(host) != nil || host == "localhost" {
+		return host, nil
+	}
+
+	// 拆分主机名
+	parts := strings.Split(host, ".")
+
+	// 检查是否是有效的域名
+	if len(parts) < 2 {
+		return "", errors.New("无效的域名")
+	}
+
+	// 返回最后两部分作为二级域名
+	return strings.Join(parts[len(parts)-2:], "."), nil
 }

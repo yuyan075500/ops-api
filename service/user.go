@@ -23,18 +23,19 @@ type user struct{}
 
 // UserLogin 用户登录结构体（支持CAS3.0和OAuth2.0）
 type UserLogin struct {
-	Username     string `json:"username" binding:"required"`
-	Password     string `json:"password" binding:"required"`
-	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
-	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
-	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
-	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
-	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
-	Service      string `json:"service"`       // CAS3.0客户端：回调地址
-	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
-	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
-	SigAlg       string `json:"SigAlg"`        // SAML2客户端：签名算法
-	Signature    string `json:"Signature"`     // SAML2客户端：签名
+	Username         string `json:"username" binding:"required"`
+	Password         string `json:"password" binding:"required"`
+	ResponseType     string `json:"response_type"`      // OAuth2.0客户端：授权类型，固定值：code
+	ClientId         string `json:"client_id"`          // OAuth2.0客户端：客户端ID
+	RedirectURI      string `json:"redirect_uri"`       // OAuth2.0客户端：重定向URL
+	State            string `json:"state"`              // OAuth2.0客户端：客户端状态码
+	Scope            string `json:"scope"`              // OAuth2.0客户端：申请权限范围
+	Service          string `json:"service"`            // CAS3.0客户端：回调地址
+	SAMLRequest      string `json:"SAMLRequest"`        // SAML2客户端：SAMLRequest
+	RelayState       string `json:"RelayState"`         // SAML2客户端：客户端状态码
+	SigAlg           string `json:"SigAlg"`             // SAML2客户端：签名算法
+	Signature        string `json:"Signature"`          // SAML2客户端：签名
+	NginxRedirectURI string `json:"nginx_redirect_uri"` // Nginx代理客户端：回调地址
 }
 
 // RestPassword 重置密码时用户信息绑定的结构体
@@ -307,6 +308,7 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 		if err != nil {
 			return "", "", nil, err
 		}
+		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
 		return token, callbackData, nil, nil
 	}
 

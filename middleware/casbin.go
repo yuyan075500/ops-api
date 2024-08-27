@@ -75,6 +75,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/sso/saml/metadata",         // SP元数据解析
 			"/.well-known/openid-configuration", // OIDC配置
 			"/api/v1/sso/oidc/jwks",             // OIDC JWKS配置
+			"/api/v1/sso/cookie/auth",           // Cookie认证
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

@@ -12,6 +12,40 @@ var SSO sso
 
 type sso struct{}
 
+// CookieAuth Cookie认证
+// @Summary Cookie认证
+// @Description Cookie认证相关接口
+// @Tags Cookie认证
+// @Success 200
+// @Router /api/v1/sso/cookie/auth [get]
+func (s *sso) CookieAuth(c *gin.Context) {
+
+	// 获取Token
+	token, err := c.Cookie("auth_token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code": 90401,
+			"msg":  "未找到Token",
+		})
+	}
+
+	// Token校验
+	_, err = middleware.ParseToken(token)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"msg":  "认证成功",
+	})
+}
+
 // OAuthAuthorize 客户端授权
 // @Summary 客户端授权
 // @Description OAuth2.0认证相关接口
