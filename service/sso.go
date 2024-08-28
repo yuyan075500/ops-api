@@ -143,11 +143,12 @@ func (s *sso) GetOIDCConfig() (configuration *OIDCConfig, err error) {
 		AuthorizationEndpoint:            config2.Conf.AccessUrl + "/login",
 		TokenEndpoint:                    config2.Conf.AccessUrl + "/api/v1/sso/oauth/token",
 		UserInfoEndpoint:                 config2.Conf.AccessUrl + "/api/v1/sso/oauth/userinfo",
+		JwksURI:                          config2.Conf.AccessUrl + "/api/v1/sso/oidc/jwks",
 		ScopesSupported:                  []string{"openid"},
 		ResponseTypesSupported:           []string{"code"},
 		GrantTypesSupported:              []string{"authorization_code"},
 		SubjectTypesSupported:            []string{"public"},
-		IDTokenSigningAlgValuesSupported: []string{"HS256"},
+		IDTokenSigningAlgValuesSupported: []string{"RS256"},
 	}
 
 	return config, nil

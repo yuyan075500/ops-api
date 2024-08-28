@@ -11,6 +11,8 @@
 1. 客户端的所在域必须与SSO平台所在的二级域一致，假如平台的访问域名为：`test.ops.cn`，则客户端的所在域必须为`xxx.ops.cn`。
 2. 不支持非域名访问的客户端。如：`127.0.0.1`、`localhost`、`192.168.1.10`等。 
 3. 不支持非HTTPS应用。
+## 认证流程
+![img.png](sso_example/img/nginx.jpg)
 ## 认证规则
 假设有A、B、C三个客户端应用都使用Nginx进行代理鉴权，鉴权规则如下：
 * 如果用户未登录平台，当访问A、B、C三个客户端应用中的任何一个都将跳转至登录界面。
@@ -43,7 +45,7 @@ server {
 	}
 }
 ```
-在上面的示例中对`/`根路径进么了鉴权，如果需要对其它路径进行鉴权可以添加其它location，并配置`auth_request`和`error_page`。
+在上面的示例中对`/`根路径进行了鉴权，如果需要对其它路径进行鉴权可以添加其它location，并配置`auth_request`和`error_page`。
 ## Kubernetes Ingress配置
 ```yaml
 kind: Ingress
