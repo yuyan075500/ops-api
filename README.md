@@ -1,4 +1,5 @@
 # 项目介绍
+该项目采用前后端分离式开发，[前端项目](https://github.com/yuyan075500/ops-web "前端项目")基于[Vue Admin Template](https://github.com/PanJiaChen/vue-admin-template "Vue Admin Template")进行二次开发，后端项目使用Golang、Gin、Gorm、CasBin进行开发。项目将主要解决项目运维过程中的**统一用户管理**和**统一系统认证**，以提高工作效能。
 # 目录说明
 * config：全局配置。
 * controller：路由规则和业务接口的入参与响应。
@@ -8,10 +9,6 @@
 * db：数据库、缓存、对象存储客户端初始化。
 * middleware：中间件层，全局逻辑处理，如跨域、JWT认证、权限校验等。
 * utils：常用工具，如Token解析，文件操作等。
-# 项目依赖
-* [x] MySQL
-* [x] Redis
-* [x] Minio
 # 后端返回状态码说明
 * 0：请求成功
 * 90400：请求参数错误
@@ -21,31 +18,10 @@
 * 90500：其它错误
 * 90514：Token过期或无效
 # 功能概览
-## 基础功能
-* RBAC权限管理（基于CasBin实现）
-* 统一站点管理（SSO认证）
 ## 认证相关
-* 双因素认证（支持Google Authenticator、华为云、阿里云）
-* 单点登录（支持CAS 3.0、OAuth 2.0和SAML2）
-* 钉钉扫码登录（需要配置钉钉应用）
-* AD认证
+* **SSO客户端**：基于CAS 3.0、OAuth 2.0和SAML2的单点登录，可以参考[单点登录配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md "配置指南")和[测试通过的客户端配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
+* **用户认证**：钉钉扫码登录、AD认证、本地账号密码认证。
+* **双因素认证**：支持Google Authenticator、阿里云APP和华为云APP。
 ## 其它
-* 短信验证码（仅支持华为云）
 * Swagger接口文档
 * 用户密码自助更改
-* 前端水印
-# 项目部署
-在部署前需要确保项目依赖必须项已全部准备完成，如：MySQL、Redis、Minio。
-## 导入初始化数据
-初始化数据SQL文件位于`deploy/data.sql`。
-## 更新IP地址库文件
-地址库文件用于分析用户登录城市，文件位于`config/GeoLite2-City.mmdb`，本地址库截止更新日志为2024-07-23，如果有需要可从官方获取最新文件替换即可。
-## 创建管理员账号
-管理员账号需要项目运行后创建，具体操作步骤如下：
-## 项目其它配置
-### 短信
-短信功能用于用户自助密码重置，目前仅支持华为云，使用的模板格式如下：
-```
-${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保管好校验码，请勿泄漏！
-```
-需要确保模板中包含三个变量，分别代表用户名、校验码和校验码有效时间，其它文字可以自定义。

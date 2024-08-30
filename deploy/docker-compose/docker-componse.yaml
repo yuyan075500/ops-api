@@ -12,7 +12,7 @@ services:
     volumes:
       - ./data/redis:/data
   mysql:
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/mysql:8.4.2
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/mysql:8.4.2-CST
     container_name: ops-mysql
     restart: always
     networks:
@@ -56,6 +56,9 @@ services:
       - ops_network
     volumes:
       - ./conf/config.yaml:/app/config/config.yaml
+      - ./certs/certificate.crt:/app/certs/certificate.crt
+      - ./certs/private.key:/app/certs/private.key
+      - ./certs/public.key:/app/certs/public.key
   ops-web:
     image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:${OPS_WEB_VERSION}
     container_name: ops-web
@@ -63,7 +66,7 @@ services:
     networks:
       - ops_network
   gateway:
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/nginx:1.27
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/nginx:1.27-CST
     container_name: ops-gateway
     restart: always
     networks:
