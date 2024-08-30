@@ -25,3 +25,5 @@
 ## 其它
 * Swagger接口文档
 * 用户密码自助更改
+# 项目部署
+参考[Docker Compose一键部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署")和[Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
