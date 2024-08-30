@@ -1,0 +1,47 @@
+server: "0.0.0.0:8000"
+externalUrl: "http://192.168.200.21"
+secret: "swfqezjzoqssvjck"
+mysql:
+  host: "mysql"
+  port: 3306
+  db: "ops-api"
+  user: "root"
+  password: "X3UhzF9F"
+  maxIdleConns: 10
+  maxOpenConns: 100
+  maxLifeTime: 30
+redis:
+  host: "redis:6379"
+  password: "o0qYcTrt"
+  db: 0
+jwt:
+  expires: 6
+mfa:
+  enable: false
+  issuer: "统一认证中心"
+oss:
+  endpoint: "minio:9000"
+  accessKey: "mXBbXV8nhjmLs8Ho"
+  secretKey: "Zicc4ifKsX8dGwZHwro1"
+  bucketName: "ops-api"
+  ssl: false
+ldap:
+  host: ""
+  bindUserDN: ""
+  bindUserPassword: ""
+  searchDN: ""
+sms:
+  url: ""
+  appKey: ""
+  appSecret: ""
+  callbackUrl: ""
+  verificationCode:
+    sender: ""
+    templateId: ""
+    signature: ""
+mail:
+  smtpHost: ""
+  smtpPort: 587
+  from: ""
+  password: ""
+swagger: false

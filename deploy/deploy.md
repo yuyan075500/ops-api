@@ -1,0 +1,98 @@
+# 项目部署
+项目支持使用[Docker Compose一键部署](#docker-compose部署)和[Kubernetes部署](#Kubernetes部署)。
+## Docker Compose部署
+如果你想快速拥有一个简易的环境用于测试、演示，并且对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
+1. 准备部署环境。
+* [x] Docker。
+* [x] Docker Compose。
+* [ ] MySQL 8.0。
+* [ ] Redis 5.x。
+* [ ] MinIO。  
+`Docker`和`Docker Compose`是环境必须的，其它的都可以使用项目自带的，也可以使用独立的`MySQL`、`Redis`、`MinIO`的。
+    > 说明：如果使用了独立的`MySQL`、`Redis`和`MinIO`，在执行部署的时候也会部署自带的版本。如果你不想部署自带的版本，删除`docker-compose.yaml`文件中相关的配置即可。`
+2. 将`deploy/docker-compose`整个目录打包上传至部署服务器中。
+3. 修改`.env`文件中的相关配置，如果你使用了独立的`MySQL`、`Redis`、`MinIO`，那么可以跳过此步骤。
+4. 修改`conf/config.yaml`配置文件。  
+配置文件默认使用的`MySQL`、`Redis`、`MinIO`都是自带的，如果使用了独立的`MySQL`、`Redis`、`MinIO`，那么需要修改配置文件中的相关连接信息，请参考[配置说明](#配置文件说明)。
+5. 创建[项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。你也可以跳过此步骤使用项目自带的证书，但在生成环境中不推荐如此使用。
+6. 手动创建Minio数据目录，并更改权限为`1001:1001`。
+    ```shell
+    mkdir -p data/minio
+    chown -R 1001:1001 data/minio
+    ```
+7. 执行部署。
+    ```shell
+    docker-compose up -d
+    ```
+8. 创建超级用户。
+## Kubernetes部署
+加急编写中...
+# 配置文件说明
+```yaml
+server: "0.0.0.0:8000"
+externalUrl: ""
+secret: "swfqezjzoqssvjck"
+mysql:
+  host: "127.0.0.1"
+  port: 3306
+  db: "ops"
+  user: "root"
+  password: ""
+  maxIdleConns: 10
+  maxOpenConns: 100
+  maxLifeTime: 30
+redis:
+  host: "127.0.0.1:6379"
+  password: ""
+  db: 0
+jwt:
+  secret: "swfqezjzoqssvjck"
+  expires: 6
+mfa:
+  enable: false
+  issuer: "统一认证平台"
+oss:
+  endpoint: ""
+  accessKey: ""
+  secretKey: ""
+  bucketName: ""
+  ssl: true
+ldap:
+  host: ""
+  bindUserDN: ""
+  bindUserPassword: ""
+  searchDN: ""
+sms:
+  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
+  appKey: ""
+  appSecret: ""
+  callbackUrl: "<externalUrl>/api/v1/sms/callback"
+  verificationCode:
+    sender: ""
+    templateId: ""
+    signature: ""
+mail:
+  smtpHost: ""
+  smtpPort: 587
+  from: ""
+  password: ""
+swagger: true
+```
+* [x] server：服务监听的地址和端口。
+* [x] externalUrl：对外提供的访问地址，格式为：`<protocol>://<address>[:<port>]`。
+* [x] secret: `CAS3.0`票据签名字符串。
+* [x] mysql：`MySQL`数据库相关配置。
+* [x] redis：`Redis`相关配置。
+* [x] jwt：`JWT`相关配置。
+* [x] mfa：双因素认证相关配置，`issuer`为手机APP扫码后显示的名称。
+* [x] oss：`Minio`对象存储相关配置。
+* [ ] ldap：`AD`相关配置，可选。
+* [ ] sms：短信相关配置，目前仅支持华为云，可选。
+* [ ] mail：邮件相关配置，可选。
+* [x] swagger：Swagger接口，如果是生产环境不建议开启。
+    > 注意： `externalUrl`地址一经固定，切忽随意更改，如果有使用SSO的相关功能，那么客户端可能会受此影响无法登录，你需要重置进行配置。
+# 项目证书
+为确保重要信息不会泄露，在项目部署时建议生成一套全新的证书，推荐使用[证书在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具")创建。建议将证书有效期设置为10年，证书生成完成后需要下载CRT证书文件、证书公钥和证书私钥并严格按以下名称命名：
+* private.key：私钥
+* public.key：公钥
+* certificate.crt：证书
