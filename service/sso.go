@@ -139,11 +139,11 @@ type OIDCConfig struct {
 // GetOIDCConfig 获取OIDC配置信息
 func (s *sso) GetOIDCConfig() (configuration *OIDCConfig, err error) {
 	var config = &OIDCConfig{
-		Issuer:                           config2.Conf.AccessUrl,
-		AuthorizationEndpoint:            config2.Conf.AccessUrl + "/login",
-		TokenEndpoint:                    config2.Conf.AccessUrl + "/api/v1/sso/oauth/token",
-		UserInfoEndpoint:                 config2.Conf.AccessUrl + "/api/v1/sso/oauth/userinfo",
-		JwksURI:                          config2.Conf.AccessUrl + "/api/v1/sso/oidc/jwks",
+		Issuer:                           config2.Conf.ExternalUrl,
+		AuthorizationEndpoint:            config2.Conf.ExternalUrl + "/login",
+		TokenEndpoint:                    config2.Conf.ExternalUrl + "/api/v1/sso/oauth/token",
+		UserInfoEndpoint:                 config2.Conf.ExternalUrl + "/api/v1/sso/oauth/userinfo",
+		JwksURI:                          config2.Conf.ExternalUrl + "/api/v1/sso/oidc/jwks",
 		ScopesSupported:                  []string{"openid"},
 		ResponseTypesSupported:           []string{"code"},
 		GrantTypesSupported:              []string{"authorization_code"},
@@ -408,16 +408,16 @@ func (s *sso) GetIdPMetadata() (metadata string, err error) {
 
 	// 创建IDP实例
 	idp := saml.IdentityProvider{
-		IsIdpInitiated:       false,                  // 是否是IdP Initiated模式，true：表示认证请求是通过IdP发起的，false：表示认证请求是客户端（SP）发起的
-		Issuer:               config2.Conf.AccessUrl, // IDP实体，默认为当前服务器地址
+		IsIdpInitiated:       false,                    // 是否是IdP Initiated模式，true：表示认证请求是通过IdP发起的，false：表示认证请求是客户端（SP）发起的
+		Issuer:               config2.Conf.ExternalUrl, // IDP实体，默认为当前服务器地址
 		IDPCert:              base64.StdEncoding.EncodeToString(cert.Raw),
 		NameIdentifierFormat: saml.AttributeFormatUnspecified,
 	}
 
 	// 添加单点登录接口信息
 	idp.AddSingleSignOnService(saml.MetadataBinding{
-		Binding:  saml.HTTPRedirectBinding,          // 由于IDP是前后端分离架构，所以这里使用HTTPRedirectBinding
-		Location: config2.Conf.AccessUrl + "/login", // 单点登录接口地址
+		Binding:  saml.HTTPRedirectBinding,            // 由于IDP是前后端分离架构，所以这里使用HTTPRedirectBinding
+		Location: config2.Conf.ExternalUrl + "/login", // 单点登录接口地址
 	})
 
 	// 添加单点登出接口信息（不支持：如果支持单点登出则可以添加此信息到元数据中）
@@ -430,7 +430,7 @@ func (s *sso) GetIdPMetadata() (metadata string, err error) {
 	idp.AddOrganization(saml.Organization{
 		OrganizationDisplayName: "运维平台", // 组织显示名称
 		OrganizationName:        "OPS",  // 组织正式名称
-		OrganizationURL:         config2.Conf.AccessUrl,
+		OrganizationURL:         config2.Conf.ExternalUrl,
 	})
 
 	// 添加主要联系人信息
@@ -548,7 +548,7 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	// 初始化IDP实（注：也可以在结构体中使用IDPCertFilePath和IDPKeyFilePath从指定路径中读取IDP的证书和私钥，但经测试有Bug）
 	idp := saml.IdentityProvider{
 		IsIdpInitiated:       false,                                   // 是否为IDP发起认证
-		Issuer:               config2.Conf.AccessUrl,                  // IDP实体
+		Issuer:               config2.Conf.ExternalUrl,                // IDP实体
 		Audiences:            []string{requestData.Issuer.Value},      // SP实体
 		IDPKey:               IDPKey,                                  // IDP私钥
 		IDPCert:              IDPCert,                                 // IDP证书
