@@ -19,11 +19,11 @@
 * 90514：Token过期或无效
 # 功能概览
 ## 认证相关
-* **SSO客户端**：基于CAS 3.0、OAuth 2.0和SAML2的单点登录，可以参考[单点登录配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md "配置指南")和[测试通过的客户端配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
-* **用户认证**：钉钉扫码登录、AD认证、本地账号密码认证。
-* **双因素认证**：支持Google Authenticator、阿里云APP和华为云APP。
+* **SSO单点登录**：支持基于CAS 3.0、OAuth 2.0和SAML2的客户端单点登录，可以参考[单点登录配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md "配置指南")和[已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/SSO.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
+* **用户认证**：支持~~钉钉扫码登录~~、AD用户认证和本地账号密码认证。
+* **双因素**：支持Google Authenticator、阿里云APP和华为云APP。
 ## 其它
-* Swagger接口文档
-* 用户密码自助更改
+* 支持Swagger接口文档：访问地址：`/swagger/index.html`
+* 支持用户密码自助更改：访问地址：`/reset_password`
 # 项目部署
-参考[Docker Compose一键部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署")和[Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
+参考[Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署")和[Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
