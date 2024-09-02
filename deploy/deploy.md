@@ -22,7 +22,7 @@
     ```
 7. **执行部署**：
     ```shell
-    docker-compose up -d
+    docker-componse -f docker-componse.yaml up -d
     ```
 8. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 9. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受CasBin权限控制。用户名为：`admin`，密码为：`admin@123...`。
