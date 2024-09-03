@@ -1,9 +1,34 @@
 # SSO介绍
-该平台提供了SSO单点登录功能，支持CAS3.0、OAuth2.0、SAML2和OIDC协议对接，支持多种客户端。本文档中提供了[已通过测试的客户端列表](#已测试通过的客户端)，以及各个客户端的配置说明。
+该平台提供了SSO单点登录功能，支持CAS3.0、OAuth2.0、SAML2和OIDC协议对接，支持多种客户端。本指南提供了客户端的对接方法，使用到的接口和返回的数据相关信息。另外也提供了[已通过测试的客户端列表](#已测试通过的客户端)，和配置说明以供参考。  
+<br>
+**注：所有协议都不支持单点注销，不支持Token刷新功能。项目采用前后端分离开发，为确保单点登录功能通常，必须使用Nginx（或其他反向代理软件如Apache等）进行动态分离式部署。**
 # CAS3.0客户端配置
+1. **用户登录**: `https://<平台域名>/login`。  
+用户登录成功后会携带票据信息跳转至客户端指定回调地址。
+2. **票据校验**: `https://<平台域名>/p3/serviceValidate`。  
+票据校验通过后平台将以XML形式返回用户ID、邮箱、姓名、电话和用户名，对应字段为：`id`、`email`、`name`、`phone_number`和`username`。
 # OAuth2.0客户端配置
-# SAML2客户端配置
+OAuth2.0登录协议仅支持授权码模式。
+1. **用户登录**: `https://<平台域名>/login`。  
+用户登录成功后会携带授权码和状态码跳转至客户端指定回调地址。
+2. **获取Token**: `https://<平台域名>/api/v1/sso/oauth/token`。  
+获取Token仅支持使用`POST`请求，需要携带授权码、客户端ID、客户端密钥、回调地址等参数，授权成功后将返回Token信息如下：
+    ```json
+    {
+        "id_token": "",
+        "access_token": "",
+        "token_type": "bearer",
+        "expires_in": 3600,
+        "scope": "openid"
+    }
+    ```
+    `id_token`和`access_token`都是为 JWT 格式的 Token。
+3. **获取用户信息**: `https://<平台域名>/api/v1/sso/oauth/userinfo`。  
+获取用户信息接口为`GET`请求，需要在请求头中按`token_type`的要求，在请求头中携带`Authorization`字段，值为`Bearer <access_token>`。该接口以JSON格式返回用户ID、邮箱、姓名、电话和用户名，对应字段为：`id`、`email`、`name`、`phone_number`和`username`。
 # OIDC客户端配置
+OIDC的配置信息接口地址为：`https://<平台域名>/.well-known/openid-configuration`，关于接口具体请求和返回可以参考[OAuth2.0客户端配置](#OAuth2.0客户端配置)。
+# SAML2客户端配置
+**IDP的元数据接口**地址为：`https://<平台域名>/api/v1/sso/saml/metadata`，元数据返回的组织和联系人信息可以直接修改接口对应的方法进行自定义。
 # Nginx代理鉴权
 对于一些客户端可以在没有账号密码的情况下进行访问，如：Kibana、Consul Server UI等，为了实现这类客户端的认证，可以使用Nginx对这类客户端进行代理，跳转至本平台进行认证。
 <br>

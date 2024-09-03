@@ -27,3 +27,6 @@
 * 支持用户密码自助更改：访问地址：`/reset_password`
 # 项目部署
 参考[Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署")和[Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
+# 项目交流
+如果你对此项目感兴趣，欢迎扫描下方二维码加入微信交流群  
+<img src="deploy/sso_example/img/wechat.png" alt="img" width="200" height="200"/>

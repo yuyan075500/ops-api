@@ -428,15 +428,15 @@ func (s *sso) GetIdPMetadata() (metadata string, err error) {
 
 	// 添加IDP组件相关信息
 	idp.AddOrganization(saml.Organization{
-		OrganizationDisplayName: "运维平台", // 组织显示名称
-		OrganizationName:        "OPS",  // 组织正式名称
+		OrganizationDisplayName: "统一认证平台", // 组织显示名称
+		OrganizationName:        "OAuth",  // 组织正式名称
 		OrganizationURL:         config2.Conf.ExternalUrl,
 	})
 
 	// 添加主要联系人信息
 	idp.AddContactPerson(saml.ContactPerson{
 		ContactType:  "technical", // 联系人类型包含：technical（技术联系人）、support（支持联系人）、administrative（行政联系人）、billing（财务联系人）、other（其它）
-		EmailAddress: "zhangs@ops.cn",
+		EmailAddress: "zhangs@oauth.cn",
 		GivenName:    "三",
 		SurName:      "张",
 	})
