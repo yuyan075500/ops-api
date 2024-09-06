@@ -10,24 +10,45 @@
 * [ ] MinIO。  
 `Docker`和`Docker Compose`是环境必须的，其它的都可以使用配置文件自带的，也可以使用独立的`MySQL`、`Redis`、`MinIO`的。
 > 说明：如果使用了独立的`MySQL`、`Redis`和`MinIO`，在执行部署的时候也会部署自带的版本。如果你不想部署自带的版本，删除`docker-compose.yaml`文件中相关的配置即可。`
-2. **上传部署文件**：将`deploy/docker-compose`整个目录上传至部署服务器中。
-3. **修改环境变量**：修改`.env`文件中的相关配置，如果你使用了独立的`MySQL`、`Redis`、`MinIO`，那么可以跳过此步骤。
-4. **修改项目配置**：修改`conf/config.yaml`配置文件，配置文件默认使用的`MySQL`、`Redis`、`MinIO`都是配置文件自带的，如果使用了独立的`MySQL`、`Redis`、`MinIO`，那么需要修改该配置文件中的相关连接信息，请参考[配置说明](#配置文件说明)。
+2. **克隆项目**：将项目克隆到服务器中。
+    ```shell
+    git clone https://github.com/yuyan075500/ops-api.git
+    ```
+3. **进入部署目录**：切换至`Docker Compose`部署目录。
+    ```shell
+    cd ops-api/deploy/docker-compose
+    ```
+4. **修改环境变量**：修改`.env`文件中的相关配置，如果你使用了独立的`MySQL`、`Redis`、`MinIO`，那么可以跳过此步骤。
+5. **修改项目配置**：修改`conf/config.yaml`配置文件，配置文件默认使用的`MySQL`、`Redis`、`MinIO`都是配置文件自带的，如果使用了独立的`MySQL`、`Redis`、`MinIO`，那么需要修改该配置文件中的相关连接信息，请参考[配置说明](#配置文件说明)。
 > 注意：配置文件中`secret`项需要更改成随机的字符串，用于CAS3.0票据签名。
-5. **创建证书**：创建[项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书，但在生产环境中不推荐如此使用。
-6. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
+6. **创建证书**：创建[项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书，但在生产环境中不推荐如此使用。
+7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
     mkdir -p data/minio
     chown -R 1001:1001 data/minio
     ```
-7. **执行部署**：
+8. **执行部署**：
     ```shell
     docker-compose up -d
     ```
-8. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
-9. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受CasBin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
+10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受CasBin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
-加急编写中...
+在Kubernetes中部署，需要用到Helm，请确保已安成[Helm安装](https://helm.sh/docs/intro/install/#from-the-binary-releases "Helm安装")。
+### 运行环境准备
+在Kubernetes中需要独立准备系统的额外运行所需资源，包含：
+* [x] MySQL 8.0。
+* [x] Redis 5.x。
+* [x] MinIO。
+### 部署
+1. **克隆项目**：将项目克隆到服务器中。
+    ```shell
+    git clone https://github.com/yuyan075500/ops-api.git
+    ```
+2. **进入部署目录**：切换至`Docker Compose`部署目录。
+    ```shell
+    cd ops-api/deploy/kubernetes
+    ```
 # 配置文件说明
 ```yaml
 server: "0.0.0.0:8000"
