@@ -33,6 +33,7 @@
     ```
 9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受CasBin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+> 注意：部署完成后在系统中上传文件到Minio如果返回`The Access Key Id you provided does not exist in our records.`错误，有可能`.env`文件中定义的`MINIO_SERVER_ACCESS_KEY`和`MINIO_SERVER_SECRET_KEY`没有创建，请自行登录到Minio控制台创建。
 ## Kubernetes部署
 在Kubernetes中部署，需要用到Helm，请确保已安成[Helm安装](https://helm.sh/docs/intro/install/#from-the-binary-releases "Helm安装")。
 ### 运行环境准备
