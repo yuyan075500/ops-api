@@ -32,12 +32,12 @@
     docker-compose up -d
     ```
 9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
-10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受CasBin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 > 注意：部署完成后在系统中上传文件到Minio如果返回`The Access Key Id you provided does not exist in our records.`错误，有可能`.env`文件中定义的`MINIO_SERVER_ACCESS_KEY`和`MINIO_SERVER_SECRET_KEY`没有创建，请自行登录到Minio控制台创建。
-## Kubernetes部署
+## Kubernetes部署（生环境环境推荐）
 在Kubernetes中部署，需要用到Helm，请确保已安成[Helm安装](https://helm.sh/docs/intro/install/#from-the-binary-releases "Helm安装")。
 ### 运行环境准备
-在Kubernetes中需要独立准备系统的额外运行所需资源，包含：
+在Kubernetes中部署需要独立准备额外的资源，包含：
 * [x] MySQL 8.0。
 * [x] Redis 5.x。
 * [x] MinIO。
@@ -50,6 +50,17 @@
     ```shell
     cd ops-api/deploy/kubernetes
     ```
+3. **创建证书**：创建[项目证书](#项目证书)，证书创建完成后使用新的证书替换`templates/configmap.yaml`文件中对应的配置项。
+4. **修改项目配置**：修改`templates/configmap.yaml`文件中`config.yaml`的相关配置，请参考[配置说明](#配置文件说明)。
+5. **部署**：  
+如果你需要同步创建`ingress`资源，那么需要在执行`helm`命令部署前修改`values.yaml`文件中的对应的配置项，**推荐同步创建**。  
+<br>
+如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
+   ```shell
+   helm install <自定义应用名> --namespace <名称空间> .
+   ```
+7. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
+8. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 # 配置文件说明
 ```yaml
 server: "0.0.0.0:8000"

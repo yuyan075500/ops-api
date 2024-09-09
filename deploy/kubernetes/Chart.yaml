@@ -1,0 +1,5 @@
+apiVersion: v2
+name: OAuthCenter
+version: 2024.9.6
+type: application
+description: 统一认证中心

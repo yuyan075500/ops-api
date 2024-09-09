@@ -1,0 +1,38 @@
+##################################################
+############ 镜像相关配置 ##########################
+##################################################
+image:
+  backend: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:20240902
+  frontend: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:20240902
+
+
+##################################################
+############ Service 相关配置 #####################
+##################################################
+service:
+  # 设置service的type，ClusterIP or NodePort
+  type: ClusterIP
+
+
+##################################################
+############ Ingress 相关配置 #####################
+##################################################
+ingress:
+  # 如果设置为`true`，则启用Ingress将平台暴露到外部
+  # @type: boolean
+  enabled: true
+
+  # 设置ingressClassName
+  ingressClassName: ""
+
+  # 指定外部访问域名
+  domainName: ""
+
+  # TLS相关配置
+  # ```yaml
+  # tls:
+  #   hosts: "example.com"
+  #   secretName: testsecret-tls
+  # ```
+  # @type: map
+  tls: {}

@@ -1,0 +1,74 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ops-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ops-api
+  template:
+    metadata:
+      labels:
+        app: ops-api
+    spec:
+      volumes:
+        - name: config
+            configMap:
+              name: ops-api
+      containers:
+        - name: ops-api
+          image: {{ .Values.image.backend }}
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+                mountPath: /app/config/config.yaml
+                subPath: config.yaml
+            - name: config
+                mountPath: /app/config/certs/private.key
+                subPath: private.key
+            - name: config
+                mountPath: /app/config/certs/public.key
+                subPath: public.key
+            - name: config
+                mountPath: /app/config/certs/certificate.crt
+                subPath: certificate.crt
+          imagePullPolicy: Always
+      restartPolicy: Always
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: ops-web
+  labels:
+    app: ops-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ops-web
+  template:
+    metadata:
+      labels:
+        app: ops-web
+    spec:
+      containers:
+        - name: ops-web
+          image: {{ .Values.image.frontend }}
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          imagePullPolicy: Always
+      restartPolicy: Always

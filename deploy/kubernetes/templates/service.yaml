@@ -1,0 +1,27 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ops-api
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  selector:
+    app: ops-api
+  type: {{ .Values.service.type }}
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: ops-web
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  selector:
+    app: ops-web
+  type: {{ .Values.service.type }}
