@@ -52,10 +52,7 @@
     ```
 3. **创建证书**：创建[项目证书](#项目证书)，证书创建完成后使用新的证书替换`templates/configmap.yaml`文件中对应的配置项。
 4. **修改项目配置**：修改`templates/configmap.yaml`文件中`config.yaml`的相关配置，请参考[配置说明](#配置文件说明)。
-5. **部署**：  
-如果你需要同步创建`ingress`资源，那么需要在执行`helm`命令部署前修改`values.yaml`文件中的对应的配置项，**推荐同步创建**。  
-<br>
-如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
+5. **部署**：如果你需要同步创建`ingress`资源，那么需要在执行`helm`命令部署前修改`values.yaml`文件中的对应的配置项，**推荐同步创建**。如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
    ```shell
    helm install <自定义应用名> --namespace <名称空间> .
    ```
