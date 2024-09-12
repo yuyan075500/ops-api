@@ -14,8 +14,8 @@ spec:
     spec:
       volumes:
         - name: config
-            configMap:
-              name: ops-api
+          configMap:
+            name: ops-api
       containers:
         - name: ops-api
           image: {{ .Values.image.backend }}
@@ -28,17 +28,17 @@ spec:
               memory: 512Mi
           volumeMounts:
             - name: config
-                mountPath: /app/config/config.yaml
-                subPath: config.yaml
+              mountPath: /app/config/config.yaml
+              subPath: config.yaml
             - name: config
-                mountPath: /app/config/certs/private.key
-                subPath: private.key
+              mountPath: /app/config/certs/private.key
+              subPath: private.key
             - name: config
-                mountPath: /app/config/certs/public.key
-                subPath: public.key
+              mountPath: /app/config/certs/public.key
+              subPath: public.key
             - name: config
-                mountPath: /app/config/certs/certificate.crt
-                subPath: certificate.crt
+              mountPath: /app/config/certs/certificate.crt
+              subPath: certificate.crt
           imagePullPolicy: Always
       restartPolicy: Always
 
