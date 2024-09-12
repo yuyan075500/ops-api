@@ -19,8 +19,8 @@
     cd ops-api/deploy/docker-compose
     ```
 4. **修改环境变量**：修改`.env`文件中的相关配置，如果你使用了独立的`MySQL`、`Redis`、`MinIO`，那么可以跳过此步骤。
-5. **修改项目配置**：修改`conf/config.yaml`配置文件，配置文件默认使用的`MySQL`、`Redis`、`MinIO`都是配置文件自带的，如果使用了独立的`MySQL`、`Redis`、`MinIO`，那么需要修改该配置文件中的相关连接信息，请参考[配置说明](#配置文件说明)。
-> 注意：配置文件中`secret`项需要更改成随机的字符串，用于CAS3.0票据签名。
+5. **修改项目配置**：修改`conf/config.yaml`配置文件，如果使用了独立的`MySQL`、`Redis`、`MinIO`，请确保配置文件中的相关连接信息正确，参考[配置说明](#配置文件说明)。
+> 注意：配置文件中`secret`项需要更改成随机的字符串，用于CAS3.0票据签名。`OSS`的`accessKey`和`secretKey`可以先随机生成，在第Minio部署完成后登录后创建即可。
 6. **创建证书**：创建[项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书，但在生产环境中不推荐如此使用。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
@@ -33,7 +33,6 @@
     ```
 9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
-> 注意：部署完成后在系统中上传文件到Minio如果返回`The Access Key Id you provided does not exist in our records.`错误，有可能`.env`文件中定义的`MINIO_SERVER_ACCESS_KEY`和`MINIO_SERVER_SECRET_KEY`没有创建，请自行登录到Minio控制台创建。
 ## Kubernetes部署（生环境环境推荐）
 在Kubernetes中部署，需要用到Helm，请确保已安成[Helm安装](https://helm.sh/docs/intro/install/#from-the-binary-releases "Helm安装")。
 ### 运行环境准备
