@@ -3,7 +3,7 @@ apiVersion: apps/v1
 metadata:
   name: ops-api
 spec:
-  replicas: 1
+  replicas: {{ .Values.application.backend.replicas }}
   selector:
     matchLabels:
       app: ops-api
@@ -12,7 +12,6 @@ spec:
       labels:
         app: ops-api
     spec:
-      replicas: {{ .Values.application.backend.replicas }}
       volumes:
         - name: config
           configMap:
@@ -52,7 +51,7 @@ metadata:
   labels:
     app: ops-web
 spec:
-  replicas: 1
+  replicas: {{ .Values.application.frontend.replicas }}
   selector:
     matchLabels:
       app: ops-web
@@ -61,7 +60,6 @@ spec:
       labels:
         app: ops-web
     spec:
-      replicas: {{ .Values.application.frontend.replicas }}
       containers:
         - name: ops-web
           image: {{ .Values.application.frontend.image }}
