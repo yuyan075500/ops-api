@@ -1,9 +1,13 @@
 ##################################################
-############ 镜像相关配置 ##########################
+############ 应用相关配置 ##########################
 ##################################################
-image:
-  backend: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:20240902
-  frontend: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:20240902
+application:
+  backend:
+    replicas: 1
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:20240902
+  frontend:
+    replicas: 1
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:20240902
 
 
 ##################################################
