@@ -316,7 +316,7 @@ func (s *sso) GetToken(param *Token) (token *ResponseToken, err error) {
 
 	// 生成token供access_token和id_token使用（OIDC认证使用的id_token，OAuth认证使用的access_token）
 	user, err = dao.User.GetUser(ticket.UserID)
-	idToken, err := middleware.GenerateOAuthToken(uint(user.ID), user.Name, user.Username, site.ClientId, "admin")
+	idToken, err := middleware.GenerateOAuthToken(uint(user.ID), user.Name, user.Username, site.ClientId, "readonly")
 	if err != nil {
 		return nil, err
 	}
