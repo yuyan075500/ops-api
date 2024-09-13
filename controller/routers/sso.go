@@ -14,8 +14,10 @@ func initSSORouters(router *gin.Engine) {
 		sso.POST("/oauth/authorize", controller.SSO.OAuthAuthorize)
 		// 获取Token（OAuth2.0）
 		sso.POST("/oauth/token", controller.SSO.GetToken)
-		// 获取用户信息（OAuth2.0）
+		// 获取用户信息（OAuth2.0 GET请求）
 		sso.GET("/oauth/userinfo", controller.SSO.GetUserInfo)
+		// 获取用户信息（OAuth2.0 POST请求）
+		sso.POST("/oauth/userinfo", controller.SSO.GetUserInfo)
 		// 获取Jwks配置
 		sso.GET("/oidc/jwks", controller.SSO.GetJwksConfig)
 		// 获取授权（CAS3.0）

@@ -1,6 +1,9 @@
 package middleware
 
 import (
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -9,6 +12,7 @@ import (
 	"net/http"
 	"ops-api/config"
 	"ops-api/global"
+	"ops-api/utils"
 	"os"
 	"strings"
 	"time"
@@ -24,6 +28,16 @@ type UserClaims struct {
 	ID       uint   `json:"id"`
 	Name     string `json:"name"`
 	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+// OAuthClaims 保存需要保存到JWT中的信息结构体，适用于OAuth2认证
+type OAuthClaims struct {
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Azp      string `json:"azp"`
+	Policy   string `json:"policy"`
 	jwt.RegisteredClaims
 }
 
@@ -102,6 +116,7 @@ func ValidateJWT(token string) (mc *UserClaims, err error) {
 
 // GenerateJWT 生成Token
 func GenerateJWT(id uint, name, username string) (string, error) {
+
 	claims := UserClaims{
 		id,
 		name,
@@ -111,16 +126,8 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                                                         // 签发时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                                                         // 生效时间
 			Issuer:    config.Conf.ExternalUrl,                                                                // 签发者
-			Audience:  []string{"all"},                                                                        // 令牌的受众，服务端未对此进行校验，所以可以填写任意字符串
-			//Subject:   fmt.Sprintf("user-%d", id),                                                             // 令牌主题，通常是用户的唯一标识符
 		},
 	}
-
-	// 使用HS256签名算法生成Token
-	//token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	// 返回Token字符串
-	//return token.SignedString([]byte(config.Conf.JWT.Secret))
 
 	// 使用RS256签名算法生成Token
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -136,6 +143,63 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	// 返回Token字符串（使用密钥签名）
+	return token.SignedString(privateKey)
+}
+
+// GenerateOAuthToken 生成GenerateOAuthToken
+func GenerateOAuthToken(id uint, name, username, clientId, policy string) (string, error) {
+
+	claims := OAuthClaims{
+		id,
+		name,
+		username,
+		clientId, // 授权谁给，通常是客户端ID
+		policy,   // 授权的策略，具体看客户端定义
+		jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间
+			IssuedAt:  jwt.NewNumericDate(time.Now()),                                                         // 签发时间
+			NotBefore: jwt.NewNumericDate(time.Now()),                                                         // 生效时间
+			Issuer:    config.Conf.ExternalUrl,                                                                // 签发者
+			Audience:  []string{"all"},                                                                        // 令牌的受众，服务端未对此进行校验，所以可以填写任意字符串
+			Subject:   fmt.Sprintf("user-%d", id),                                                             // 令牌主题，通常是用户的唯一标识符
+		},
+	}
+
+	// 使用RS256签名算法生成Token
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+
+	// 读取私钥
+	privateKeyData, err := os.ReadFile("config/certs/private.key")
+	if err != nil {
+		return "", err
+	}
+
+	// 解析私钥
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyData)
+	if err != nil {
+		return "", err
+	}
+
+	// 读取公钥文件
+	pubKey, err := utils.LoadPublicKey()
+	if err != nil {
+		return "", err
+	}
+
+	// 将公钥转换为PKIX格式的字节
+	pubKeyBytes, err := x509.MarshalPKIXPublicKey(pubKey)
+	if err != nil {
+		return "", err
+	}
+
+	// 基于公钥内容生成kid
+	hash := sha256.Sum256(pubKeyBytes)
+	kid := base64.URLEncoding.EncodeToString(hash[:])
+
+	// 设置kid
+	token.Header["kid"] = kid
 
 	// 返回Token字符串（使用密钥签名）
 	return token.SignedString(privateKey)
