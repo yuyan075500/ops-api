@@ -117,4 +117,5 @@ spec:
 | KubePi      | SAML2       | 未完成      |
 | 阿里云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")            |
 | 腾讯云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/tencent.md "参考文档")           |
+| Minio       | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/oidc.md "参考文档")              |
 | GitLab      | CAS3.0      | 未完成      |
