@@ -16,7 +16,7 @@ import (
 func MySQLInit() error {
 
 	// 组装数据库连接配置
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.Conf.MySQL.User,
 		config.Conf.MySQL.Password,
 		config.Conf.MySQL.Host,
