@@ -114,7 +114,7 @@ spec:
 | JumpServer  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jumpserver.md "参考文档")        |
 | Jira        | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/jira.md "参考文档")              |
 | Confluence  | OAuth2.0    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/confluence.md "参考文档")        |
-| KubePi      | SAML2       | 未完成      |
+| KubePi      | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/kubepi.md "参考文档")            |
 | 阿里云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")            |
 | 腾讯云       | SAML2       | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/tencent.md "参考文档")           |
 | Minio       | OIDC        | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/oidc.md "参考文档")              |
