@@ -115,11 +115,17 @@ type Attributes struct {
 
 // ResponseUserinfo 返回给客户端的用户信息
 type ResponseUserinfo struct {
-	Id          uint   `json:"id"`
-	Name        string `json:"name"`         // 用户姓名
-	Username    string `json:"username"`     // 用户名
-	Email       string `json:"email"`        // 邮箱地址
-	PhoneNumber string `json:"phone_number"` // 电话号码
+	Id                uint   `json:"id"`
+	Name              string `json:"name"`               // 用户姓名
+	Username          string `json:"username"`           // 用户名
+	PreferredUsername string `json:"preferred_username"` // 首选用户名
+	Email             string `json:"email"`              // 邮箱地址
+	PhoneNumber       string `json:"phone_number"`       // 电话号码
+}
+
+type Claims struct {
+	PreferredUsername string `json:"preferred_username"`
+	NickName          string `json:"nickName"`
 }
 
 // OIDCConfig 返回给前端的OIDC配置信息
@@ -344,11 +350,12 @@ func (s *sso) GetUserinfo(token string) (user *ResponseUserinfo, err error) {
 	userinfo, err := dao.User.GetUser(mc.ID)
 
 	user = &ResponseUserinfo{
-		Id:          uint(userinfo.ID),
-		Name:        userinfo.Name,
-		Username:    userinfo.Username,
-		Email:       userinfo.Email,
-		PhoneNumber: userinfo.PhoneNumber,
+		Id:                uint(userinfo.ID),
+		Name:              userinfo.Name,
+		Username:          userinfo.Username,
+		PreferredUsername: userinfo.Username,
+		Email:             userinfo.Email,
+		PhoneNumber:       userinfo.PhoneNumber,
 	}
 
 	return user, err
