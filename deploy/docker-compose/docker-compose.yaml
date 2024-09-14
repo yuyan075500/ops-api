@@ -26,6 +26,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
+      - ../data.sql:/root/data.sql
       - ./data/mysql:/var/lib/mysql
   minio:
     image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/minio:2024.8.26
