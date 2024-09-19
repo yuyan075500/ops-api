@@ -198,7 +198,7 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 			if err != nil {
 				// 如果用户已存在则更新
 				if utils.IsDuplicateEntryError(err) {
-					// 仅更新来源为AD域的用户，则进行用户更新
+					// 仅更新来源为LDAP的用户，则进行用户更新
 					if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
 						return err
 					}

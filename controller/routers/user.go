@@ -28,7 +28,7 @@ func initUserRouters(router *gin.Engine) {
 		user.POST("/avatarUpload", controller.User.UploadAvatar)
 		// 重置用户密码（用户自己）
 		user.POST("/reset_password", controller.User.UpdateSelfPassword)
-		// 从AD从步用户
+		// 从LDAP从步用户
 		user.POST("/sync/ad", controller.User.UserSyncAd)
 	}
 }

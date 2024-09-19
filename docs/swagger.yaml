@@ -159,6 +159,9 @@ definitions:
         type: string
       code:
         type: string
+      nginx_redirect_uri:
+        description: Nginx代理客户端：回调地址
+        type: string
       redirect_uri:
         description: OAuth2.0客户端：重定向URL
         type: string
@@ -233,6 +236,9 @@ definitions:
         type: string
       phone_number:
         description: 电话号码
+        type: string
+      preferred_username:
+        description: 首选用户名
         type: string
       username:
         description: 用户名
@@ -350,6 +356,9 @@ definitions:
         type: string
       client_id:
         description: OAuth2.0客户端：客户端ID
+        type: string
+      nginx_redirect_uri:
+        description: Nginx代理客户端：回调地址
         type: string
       password:
         type: string
@@ -1063,6 +1072,15 @@ paths:
       summary: 客户端授权
       tags:
       - CAS3.0认证
+  /api/v1/sso/cookie/auth:
+    get:
+      description: Cookie认证相关接口
+      responses:
+        "200":
+          description: OK
+      summary: Cookie认证
+      tags:
+      - Cookie认证
   /api/v1/sso/oauth/authorize:
     post:
       description: OAuth2.0认证相关接口
@@ -1366,7 +1384,7 @@ paths:
           description: '{"code": 0, "msg": "同步成功"}'
           schema:
             type: string
-      summary: AD域用户同步
+      summary: LDAP用户同步
       tags:
       - 用户管理
   /api/v1/users:

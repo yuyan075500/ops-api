@@ -544,8 +544,8 @@ func (u *user) UpdateSelfPassword(c *gin.Context) {
 	})
 }
 
-// UserSyncAd AD域用户同步
-// @Summary AD域用户同步
+// UserSyncAd LDAP用户同步
+// @Summary LDAP用户同步
 // @Description 用户相关接口
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"

@@ -71,7 +71,7 @@ func (a *ad) LDAPUserSearch(username string) (result *ldap.SearchResult, err err
 			0,
 			0,
 			false,
-			fmt.Sprintf("(&(objectClass=person)(sAMAccountName=%s))", username),
+			fmt.Sprintf("(&(objectClass=person)(%s=%s))", config.Conf.LDAP.UserAttribute, username),
 			[]string{},
 			nil,
 		)
@@ -105,6 +105,7 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 
 	// 获取用户信息
 	searchResult, err := a.LDAPUserSearch(username)
+
 	if err != nil {
 		return nil, err
 	}
@@ -202,12 +203,12 @@ func (a *ad) LDAPUserSync() (users []UserSync, err error) {
 			// 获取用户信息
 			userInfo := &UserSync{
 				Name:        value.GetAttributeValue("cn"),
-				Username:    value.GetAttributeValue("sAMAccountName"),
+				Username:    value.GetAttributeValue(config.Conf.LDAP.UserAttribute),
 				Password:    "",
 				IsActive:    isActive,
 				PhoneNumber: value.GetAttributeValue("telephoneNumber"),
 				Email:       value.GetAttributeValue("mail"),
-				UserFrom:    "AD域",
+				UserFrom:    "LDAP",
 			}
 			// 将用户信息追加到结构体
 			userList = append(userList, *userInfo)

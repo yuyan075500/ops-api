@@ -1051,6 +1051,20 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sso/cookie/auth": {
+            "get": {
+                "description": "Cookie认证相关接口",
+                "tags": [
+                    "Cookie认证"
+                ],
+                "summary": "Cookie认证",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/api/v1/sso/oauth/authorize": {
             "post": {
                 "description": "OAuth2.0认证相关接口",
@@ -1463,7 +1477,7 @@ const docTemplate = `{
                 "tags": [
                     "用户管理"
                 ],
-                "summary": "AD域用户同步",
+                "summary": "LDAP用户同步",
                 "parameters": [
                     {
                         "type": "string",
@@ -1832,6 +1846,10 @@ const docTemplate = `{
                 "code": {
                     "type": "string"
                 },
+                "nginx_redirect_uri": {
+                    "description": "Nginx代理客户端：回调地址",
+                    "type": "string"
+                },
                 "redirect_uri": {
                     "description": "OAuth2.0客户端：重定向URL",
                     "type": "string"
@@ -1934,6 +1952,10 @@ const docTemplate = `{
                 },
                 "phone_number": {
                     "description": "电话号码",
+                    "type": "string"
+                },
+                "preferred_username": {
+                    "description": "首选用户名",
                     "type": "string"
                 },
                 "username": {
@@ -2109,6 +2131,10 @@ const docTemplate = `{
                 },
                 "client_id": {
                     "description": "OAuth2.0客户端：客户端ID",
+                    "type": "string"
+                },
+                "nginx_redirect_uri": {
+                    "description": "Nginx代理客户端：回调地址",
                     "type": "string"
                 },
                 "password": {

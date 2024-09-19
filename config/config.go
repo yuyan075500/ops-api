@@ -52,6 +52,7 @@ type LDAP struct {
 	BindUserDN       string `yaml:"bindUserDN"`
 	BindUserPassword string `yaml:"bindUserPassword"`
 	SearchDN         string `yaml:"searchDN"`
+	UserAttribute    string `yaml:"userAttribute"`
 }
 
 type Redis struct {

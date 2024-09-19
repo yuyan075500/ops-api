@@ -47,7 +47,7 @@ type RestPassword struct {
 	RePassword  string `json:"re_password" binding:"required"`
 }
 
-// UserSync 用户同步结构体，用于AD用户同步
+// UserSync 用户同步结构体，用于LDAP用户同步
 type UserSync struct {
 	Name        string `json:"name"`
 	Username    string `json:"username"`
@@ -168,8 +168,8 @@ func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 		return err
 	}
 
-	// 如果是AD域账号则访问AD进行用户密码重置
-	if user.UserFrom == "AD域" {
+	// 如果是LDAP账号则访问LDAP进行用户密码重置
+	if user.UserFrom == "LDAP" {
 		if err := AD.LDAPUserResetPassword(user.Username, data.Password); err != nil {
 			return err
 		}
@@ -315,9 +315,9 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 	return token, "", nil, nil
 }
 
-// UserSync AD域用户同步
+// UserSync LDAP用户同步
 func (u *user) UserSync() (err error) {
-	// 获取AD域中的用户
+	// 获取LDAP中的用户
 	users, err := AD.LDAPUserSync()
 	if err != nil {
 		return err
@@ -364,8 +364,8 @@ func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
 	}
 
 	// 用户密码检查
-	if user.UserFrom == "AD域" {
-		// AD用户认证
+	if user.UserFrom == "LDAP" {
+		// LDAP用户认证
 		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
 			return errors.New("用户密码错误或系统错误")
 		}
