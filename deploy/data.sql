@@ -25,7 +25,7 @@ INSERT INTO `system_path` VALUES (3, 'UpdateUserPassword', '/api/v1/user/reset_p
 INSERT INTO `system_path` VALUES (4, 'ResetUserMFA', '/api/v1/user/reset_mfa/:id', 'PUT', 'UserManagement', 'MAF重置');
 INSERT INTO `system_path` VALUES (5, 'DeleteUser', '/api/v1/user/:id', 'DELETE', 'UserManagement', '删除用户');
 INSERT INTO `system_path` VALUES (6, 'GetUserList', '/api/v1/users', 'GET', 'UserManagement', '获取用户列表（表格）');
-INSERT INTO `system_path` VALUES (7, 'UserSyncAd', '/api/v1/user/sync/ad', 'post', 'UserManagement', 'AD域用户同步');
+INSERT INTO `system_path` VALUES (7, 'UserSyncAd', '/api/v1/user/sync/ad', 'post', 'UserManagement', 'LDAP用户同步');
 INSERT INTO `system_path` VALUES (8, 'GetUserListAll', '/api/v1/user/list', 'GET', 'UserManagement', '获取用户列表（所有）');
 INSERT INTO `system_path` VALUES (9, 'AddGroup', '/api/v1/group', 'POST', 'GroupManagement', '新增分组');
 INSERT INTO `system_path` VALUES (10, 'UpdateGroup', '/api/v1/group', 'PUT', 'GroupManagement', '修改分组');
