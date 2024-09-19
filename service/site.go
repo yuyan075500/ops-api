@@ -158,7 +158,7 @@ func (s *site) DeleteSite(id int) (err error) {
 		return err
 	}
 
-	// 删除分组
+	// 删除站点
 	if err := dao.Site.DeleteSite(site); err != nil {
 		return err
 	}

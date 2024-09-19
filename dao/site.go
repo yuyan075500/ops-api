@@ -278,10 +278,27 @@ func (s *site) DeleteGroup(group *model.SiteGroup) (err error) {
 // DeleteSite 删除站点
 func (s *site) DeleteSite(site *model.Site) (err error) {
 
-	// 删除分组
-	if err := global.MySQLClient.Unscoped().Delete(&site).Error; err != nil {
-		return errors.New(err.Error())
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 删除站点内所有用户
+	if err := tx.Model(&site).Association("Users").Clear(); err != nil {
+		tx.Rollback()
+		return err
 	}
+
+	// 删除站点
+	if err := tx.Unscoped().Delete(&site).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 
