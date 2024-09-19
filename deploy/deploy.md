@@ -93,6 +93,7 @@ ldap:
   bindUserDN: ""
   bindUserPassword: ""
   searchDN: ""
+  userAttribute: ""
 sms:
   url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
   appKey: ""
@@ -117,11 +118,19 @@ swagger: true
 * [x] jwt：`JWT`相关配置。
 * [x] mfa：双因素认证相关配置，`issuer`为手机APP扫码后显示的名称。
 * [x] oss：`Minio`对象存储相关配置。
-* [ ] ldap：`AD`相关配置。
+* [ ] ldap：`LDAP`相关配置。
 * [ ] sms：短信相关配置，目前仅支持华为云，需要在华为云开通短信服务，并配置[短信模板](#短信模板)。
 * [ ] mail：邮件相关配置。
 * [x] swagger：Swagger接口，如果是生产环境不建议开启。
-    > 注意： `externalUrl`地址一经固定，切忽随意更改，如果有使用SSO的相关功能，那么客户端可能会受此影响无法登录，你需要重置进行配置。
+    > 注意： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
+## LDAP配置
+平台用户支持与Windows AD或LDAP进行对接，实现用户认证，使配置说明如下：
+* [x] host：服务器地址，格式为：`ldap[s]://<host>:<port>`。
+* [x] bindUserDN：绑定的用户DN，格式为：`cn=admin,dc=example,dc=cn`。
+* [x] bindUserPassword：绑定的用户密码。
+* [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割。
+* [x] userAttribute：用户属性，如果是LDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
+> 说明：更改Windows AD或LDAP用户密码需要绑定的用户有足够的权限，Windows AD还要求使用`ldaps`协议进行连接。
 # 项目证书
 为确保重要信息不会泄露，在项目部署时建议生成一套全新的证书，推荐使用[证书在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具")创建。建议将证书有效期设置为10年，证书生成完成后需要下载CRT证书文件、证书公钥和证书私钥并严格按以下名称命名：
 * private.key：私钥

@@ -26,9 +26,10 @@ func initUserRouters(router *gin.Engine) {
 		user.GET("/list", controller.User.GetUserListAll)
 		// 用户头像上传
 		user.POST("/avatarUpload", controller.User.UploadAvatar)
-		// 重置用户密码（用户自己）
-		user.POST("/reset_password", controller.User.UpdateSelfPassword)
 		// 从LDAP从步用户
 		user.POST("/sync/ad", controller.User.UserSyncAd)
 	}
+
+	// 重置用户密码（用户自己）
+	router.POST("/api/v1/reset_password", controller.User.UpdateSelfPassword)
 }

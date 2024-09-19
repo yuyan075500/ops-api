@@ -1,7 +1,9 @@
 package service
 
 import (
+	"crypto/sha512"
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-ldap/ldap/v3"
@@ -129,10 +131,6 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 		return err
 	}
 
-	// 对密码进行utf16编码
-	utf16 := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
-	pwdEncoded, _ := utf16.NewEncoder().String("\"" + password + "\"")
-
 	// 获取用户信息
 	searchResult, err := a.LDAPUserSearch(username)
 	if err != nil {
@@ -143,8 +141,25 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 	userDN := searchResult.Entries[0].DN
 	req := ldap.NewModifyRequest(userDN, []ldap.Control{})
 
-	// 修改密码
-	req.Replace("unicodePwd", []string{pwdEncoded})
+	if config.Conf.LDAP.UserAttribute == "uid" {
+		// 使用 SHA-512 算法对密码进行哈希处理
+		hash := sha512.New()
+		hash.Write([]byte(password))
+		digest := hash.Sum(nil)
+
+		// 将哈希结果进行 Base64 编码
+		encoded := base64.StdEncoding.EncodeToString(digest)
+
+		// LDAP 用户修改密码
+		req.Replace("userPassword", []string{fmt.Sprintf("{SHA512}%s", encoded)})
+	} else {
+		// 对密码进行utf16编码
+		utf16 := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM)
+		pwdEncoded, _ := utf16.NewEncoder().String("\"" + password + "\"")
+
+		// Windows AD用户修改密码
+		req.Replace("unicodePwd", []string{pwdEncoded})
+	}
 
 	// 修改用户账户状态
 	//req.Replace("userAccountControl", []string{fmt.Sprintf("%d", 512)})
