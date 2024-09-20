@@ -41,7 +41,7 @@
 * [x] [Helm](https://helm.sh "Helm") 客户端，确保能访问Kubernetes集群。
 * [x] MySQL 8.0。
 * [x] Redis 5.x。
-* [x] MinIO。
+* [x] MinIO或华为云OBS。
 ### 部署
 1. **克隆项目**：将项目克隆到本地Helm客户端所在服务器。
     ```shell
@@ -124,7 +124,7 @@ swagger: true
 * [x] redis：`Redis`相关配置。
 * [x] jwt：`JWT`相关配置。
 * [x] mfa：双因素认证相关配置，`issuer`为APP扫码后显示的名称。
-* [x] oss：`MinIO`对象存储相关配置。
+* [x] oss：对象存储相关配置，支持MinIO和华为云OBS。
 * [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
 * [ ] sms：参考 [短信配置](#LDAP配置)。
 * [ ] mail：邮件相关配置，目前系统中未使用。

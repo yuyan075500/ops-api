@@ -30,12 +30,35 @@
 | 钉钉         | 🟡 待支持 | ❌ 不支持 | ❌ 不支持  | ❌ 不支持         |
 | 企业微信       | 🟡 待支持 | ❌ 不支持 | ❌ 不支持  | ❌ 不支持         |
 | 飞书         | 🟡 待支持 | ❌ 不支持 | ❌ 不支持  | ❌ 不支持         |
+### 账号同步规则
+无论使用哪一种用户认证方式，都需要确保本地系统中用户存在，所以当配置好Windows AD或OpenLDAP后，需要登录平台点击【用户管理】-【分组管理】-【LDAP账号同步】执行一次用户同步，用户的同步规则如下：
+1. 如果本地系统中没有，LDAP中有，则创建。
+2. 如果本地系统有，LDAP中有，则更新（仅更新用户来源为LDAP且`username`相同，更新手机号和邮箱字段）。
 
+同步用户时，用户字段映射规则如下：
+```shell
+# OpenLDAP
+{
+	"name": "uid",
+	"username": "cn",
+	"email": "mail",
+	"phone_number": "telephoneNumber"
+}
+
+# Windows AD
+{
+	"name": "sAMAccountName",
+	"username": "cn",
+	"email": "mail",
+	"phone_number": "telephoneNumber",
+	"is_active": "userAccountControl"
+}
+```
 ## 其它
 * 支持Swagger接口文档：访问地址：`/swagger/index.html`。
 * 支持用户密码自助更改：访问地址：`/reset_password`。
 # 项目部署
-参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2%E7%94%9F%E7%8E%AF%E5%A2%83%E7%8E%AF%E5%A2%83%E6%8E%A8%E8%8D%90 "Kubernetes部署")。
+参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
 # 项目交流
 如果你对此项目感兴趣，欢迎扫描下方二维码加入微信交流群。  
 <br>
