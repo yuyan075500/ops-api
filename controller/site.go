@@ -3,11 +3,13 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/dao"
 	"ops-api/service"
 	"ops-api/utils"
+	"path/filepath"
 	"strconv"
 )
 
@@ -342,8 +344,7 @@ func (s *site) UploadLogo(c *gin.Context) {
 
 	// 上传图片到MinIO
 	// 拼接存储的路径（此路径为临时路径，在表单提交时会将图片移动到实际位置）
-	logoPath := fmt.Sprintf("site/logo/%v", logo.Filename)
-
+	logoPath := fmt.Sprintf("site/logo/%s%s", uuid.New(), filepath.Ext(logo.Filename))
 	// 检查对象是否存在，err不为空是则表示对象已存在
 	_, err = utils.StatObject(logoPath)
 	if err == nil {
