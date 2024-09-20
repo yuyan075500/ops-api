@@ -1,14 +1,14 @@
 # 项目部署
-项目支持使用[Docker Compose一键部署](#docker-compose部署)和[Kubernetes部署](#Kubernetes部署（生环境环境推荐）)。
+项目支持使用[Docker Compose一键部署](#docker-compose部署)和[Kubernetes部署](#Kubernetes部署（生产环境推荐）)。
 ## Docker Compose部署
 如果你想快速拥有一个简易的环境用于测试、演示，对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
 1. **部署环境准备**：你需要准备一台Linux服务器，并安装以下组件。
-   * [x] Docker。
-   * [x] Docker Compose。
-   * [ ] MySQL 8.0。
-   * [ ] Redis 5.x。
-   * [ ] MinIO。  
-   `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
+ * [x] Docker。
+ * [x] Docker Compose。
+ * [ ] MySQL 8.0。
+ * [ ] Redis 5.x。
+ * [ ] MinIO。  
+ `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
 2. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
@@ -19,7 +19,9 @@
     ```
 4. **环境变量配置**：修改`.env`文件中环境变量，如果你使用`docker-compose.yaml`指定的`MySQL`、`Redis`、`MinIO`，则可以跳过此步骤。
 5. **项目配置**：修改`conf/config.yaml`文件中相关配置，请参考[配置文件说明](#配置文件说明)。
+
    > 注意：MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与配置文件中指定的值相同即可。
+
 6. **证书**：[创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
@@ -32,7 +34,7 @@
     ```
 9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
-## Kubernetes部署（生环境环境推荐）
+## Kubernetes部署（生产环境推荐）
 在Kubernetes中部署，需要用到Helm，请确保已安成[Helm安装](https://helm.sh/docs/intro/install/#from-the-binary-releases "Helm安装")。
 ### 运行环境准备
 在Kubernetes中部署需要独立准备额外的资源，包含：
