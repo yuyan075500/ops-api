@@ -29,7 +29,7 @@
    * Authorization Endpoint：`http[s]://<address>[:<port>]/login`
    * Access Token Endpoint：`http[s]://<address>[:<port>]/api/v1/sso/oauth/token`
    * User Info Endpoint：`http[s]://<address>[:<port>]/api/v1/sso/oauth/userinfo`  
-   配置完成后点击【Save】保存即可。
+   配置完成后点击【Save】保存即可。  
 
    > **提示**：在此页面显示了Jira正确的`Callback URL`，可以将此地址复制到平台的站点配置中覆盖之前的回调地址，以确保平台配置正确。
 
@@ -38,7 +38,7 @@
 配置说明：
    * Username Attribute：`username`
    * Email Attribute：`email`
-   * Full Name Attribute：`name`
+   * Full Name Attribute：`name`  
 
    > **提示**：建议将`User Profile Mapping`选项开启，可以更新用户信息到已存在的用户。
 
