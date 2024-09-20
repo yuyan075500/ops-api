@@ -4,10 +4,10 @@
 application:
   backend:
     replicas: 1
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:20240914
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:20240920
   frontend:
     replicas: 1
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:20240902
+    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:20240920
 
 
 ##################################################
