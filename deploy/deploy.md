@@ -1,27 +1,26 @@
 # 项目部署
-项目支持使用[Docker Compose一键部署](#docker-compose部署)和[Kubernetes部署](#Kubernetes部署)。
+项目支持使用[Docker Compose一键部署](#docker-compose部署)和[Kubernetes部署](#Kubernetes部署（生环境环境推荐）)。
 ## Docker Compose部署
-如果你想快速拥有一个简易的环境用于测试、演示，且对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
-1. **准备部署环境**：你需要准备一台Linux服务器，并安装以下相关组件。
-* [x] Docker。
-* [x] Docker Compose。
-* [ ] MySQL 8.0。
-* [ ] Redis 5.x。
-* [ ] MinIO。  
-`Docker`和`Docker Compose`是环境必须的，其它的都可以使用配置文件自带的，也可以使用独立的`MySQL`、`Redis`、`MinIO`的。
-> 说明：如果使用了独立的`MySQL`、`Redis`和`MinIO`，在执行部署的时候也会部署自带的版本。如果你不想部署自带的版本，删除`docker-compose.yaml`文件中相关的配置即可。`
-2. **克隆项目**：将项目克隆到服务器中。
+如果你想快速拥有一个简易的环境用于测试、演示，对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
+1. **部署环境准备**：你需要准备一台Linux服务器，并安装以下组件。
+   * [x] Docker。
+   * [x] Docker Compose。
+   * [ ] MySQL 8.0。
+   * [ ] Redis 5.x。
+   * [ ] MinIO。  
+   `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
+2. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
     ```
-3. **进入部署目录**：切换至`Docker Compose`部署目录。
+3. **切换工作目录**：
     ```shell
     cd ops-api/deploy/docker-compose
     ```
-4. **修改环境变量**：修改`.env`文件中的相关配置，如果你使用了独立的`MySQL`、`Redis`、`MinIO`，那么可以跳过此步骤。
-5. **修改项目配置**：修改`conf/config.yaml`配置文件，如果使用了独立的`MySQL`、`Redis`、`MinIO`，请确保配置文件中的相关连接信息正确，参考[配置说明](#配置文件说明)。
-> 注意：配置文件中`secret`项需要更改成随机的字符串，用于CAS3.0票据签名。`OSS`的`accessKey`和`secretKey`可以先随机生成，在第Minio部署完成后登录后创建即可。
-6. **创建证书**：创建[项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书，但在生产环境中不推荐如此使用。
+4. **环境变量配置**：修改`.env`文件中环境变量，如果你使用`docker-compose.yaml`指定的`MySQL`、`Redis`、`MinIO`，则可以跳过此步骤。
+5. **项目配置**：修改`conf/config.yaml`文件中相关配置，请参考[配置文件说明](#配置文件说明)。
+   > 注意：MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与配置文件中指定的值相同即可。
+6. **证书**：[创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
     mkdir -p data/minio
@@ -55,9 +54,9 @@
    ```shell
    helm install <自定义应用名> --namespace <名称空间> .
    ```
-7. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
-8. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
-> 说明：应用的高可用只需调整应用的副本数即可，数据库和中间件的高可用需要自行完成。
+6. **数据初始化**：导入`deploy/data.sql`数据到`MySQL`数据库中。
+7. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+> 说明：如果需要高可用只需调整应用的副本数即可，数据库和中间件的高可用需要自行完成。
 # 配置文件说明
 ```yaml
 server: "0.0.0.0:8000"

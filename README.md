@@ -32,7 +32,7 @@
 <br>
 <img src="deploy/sso_example/img/wechat.png" alt="img" width="200" height="200"/>
 ## 作者联系方式
-Wechat：270142877。  
+WeChat：270142877。  
 Email：270142877@qq.com。  
 <br>
 联系时请注名来意。
