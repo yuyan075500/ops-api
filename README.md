@@ -22,6 +22,14 @@
 * **SSO单点登录**：支持`CAS 3.0`、`OAuth 2.0`和`SAML2`协议，可以参考 [客户端配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md "配置指南") 和 [已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
 * **用户认证**：同时支持~~钉钉扫码登录~~、~~企业微信扫码登录~~、~~飞书扫码登录~~、OpenLDAP认证、Windows AD认证和本地账号认证。
 * **双因素**：支持使用Google Authenticator、阿里云APP和华为云APP扫描获取动态验证码。
+### 第三方用户策略
+| 用户来源    | 用户登录     | 账号同步     | 用户密码修改    | 用户信息修改（电话、邮箱）    |
+| :---        | :---        | :----         | :---            | :---            |
+| Windows AD  | 支持         | 支持         | 支持            | 待支持          |
+| OpenLDAP    | 支持         | 支持         | 支持            | 待支持          |
+| 钉钉        | 待支持       | 不支持       | 不支持          | 不支持          |
+| 企业微信    | 待支持       | 不支持       | 不支持          | 不支持          |
+| 飞书        | 待支持       | 不支持       | 不支持          | 不支持          |
 ## 其它
 * 支持Swagger接口文档：访问地址：`/swagger/index.html`。
 * 支持用户密码自助更改：访问地址：`/reset_password`。

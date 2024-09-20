@@ -125,7 +125,7 @@ swagger: true
 * [x] jwt：`JWT`相关配置。
 * [x] mfa：双因素认证相关配置，`issuer`为APP扫码后显示的名称。
 * [x] oss：`MinIO`对象存储相关配置。
-* [ ] ldap：参考 [LDAP配置](#LDAP配置)。
+* [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
 * [ ] sms：参考 [短信配置](#LDAP配置)。
 * [ ] mail：邮件相关配置，目前系统中未使用。
 * [x] swagger：Swagger接口，生产环境不建议关闭。
@@ -147,6 +147,7 @@ swagger: true
 ```
 ${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保管好校验码，请勿泄漏！
 ```
+短信模板三个变量，分别代表用户名、校验码和校验码有效时间。
 # 项目证书
 为确保重要信息不会泄露，在项目部署时建议生成一套全新的证书，推荐使用 [证书在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具") 创建。建议将证书有效期设置为10年，证书生成完成后需要下载CRT证书文件、证书公钥和证书私钥并严格按以下名称命名：
 * private.key：私钥
@@ -162,6 +163,5 @@ openssl req -new -x509 -key private.key -out certificate.crt -days 3650
 # 从证书中提取公钥
 openssl rsa -in private.key -pubout -out public.key
 ```
-短信模板需要包含三个变量，分别代表用户名、校验码和校验码有效时间，其它文字可以自定义。
 # IP地址库
 记录用户登录信息中的源IP来源于离线库文件，该文件位于项目`config/GeoLite2-City.mmdb`目录，最后更新日志为`2024-07-23`，最新库文件可从官方获取并替换即可。
