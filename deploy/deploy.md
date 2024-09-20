@@ -3,12 +3,13 @@
 ## Docker Compose部署
 如果你想快速拥有一个简易的环境用于测试、演示，对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
 1. **部署环境准备**：你需要准备一台Linux服务器，并安装以下组件。
- * [x] Docker。
- * [x] Docker Compose。
- * [ ] MySQL 8.0。
- * [ ] Redis 5.x。
- * [ ] MinIO。  
- `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
+   * [x] Docker。
+   * [x] Docker Compose。
+   * [ ] MySQL 8.0。
+   * [ ] Redis 5.x。
+   * [ ] MinIO。
+
+    `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
 2. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git

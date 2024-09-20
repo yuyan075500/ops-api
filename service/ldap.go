@@ -141,6 +141,7 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 	userDN := searchResult.Entries[0].DN
 	req := ldap.NewModifyRequest(userDN, []ldap.Control{})
 
+	// 密码修改
 	if config.Conf.LDAP.UserAttribute == "uid" {
 		// 使用 SHA-512 算法对密码进行哈希处理
 		hash := sha512.New()
