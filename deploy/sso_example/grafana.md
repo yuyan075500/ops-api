@@ -3,12 +3,13 @@
 ## 配置方法
 1. **站点注册**：登录到平台，点击【资产管理】-【站点管理】-【新增】将Grafana站点信息注册到平台，配置如下所示：
 ![img.png](img/grafana.jpg)
+配置说明：
     * 站点名称：指定一个名称，便于用户区分。
     * 登录地址：Grafana的登录地址。
     * SSO认证：启用。
     * 认证类型：选择`OAuth2`。
     * 站点描述：描述信息。
-    * 回调地址：单点登录的回调地址，务必填写正确，默认为：`<protocol>://<address>[:<port>]/login/generic_oauth`。
+    * 回调地址：单点登录的回调地址，务必填写正确，默认为：`http[s]://<address>[:<port>]/login/generic_oauth`。
 2. **Grafana配置修改**：编辑`grafana.ini`配置文件，修改的配置项如下所示：
     ```shell
     [server]
@@ -39,9 +40,9 @@
     # 固定值
     scopes = openid
     # OAuth2认证登录登录地址
-    auth_url = <protocol>://<address>[:<port>]/login
+    auth_url = http[s]://<address>[:<port>]/login
     # OAuth2认证获取Token接口
-    token_url = <protocol>://<address>[:<port>]/api/v1/sso/oauth/token
+    token_url = http[s]://<address>[:<port>]/api/v1/sso/oauth/token
     # OAuth2认证获取用户信息接口
-    api_url = <protocol>://<address>[:<port>]/api/v1/sso/oauth/userinfo
+    api_url = http[s]://<address>[:<port>]/api/v1/sso/oauth/userinfo
     ```
