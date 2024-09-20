@@ -23,13 +23,13 @@
 * **用户认证**：同时支持~~钉钉扫码登录~~、~~企业微信扫码登录~~、~~飞书扫码登录~~、OpenLDAP认证、Windows AD认证和本地账号认证。
 * **双因素**：支持使用Google Authenticator、阿里云APP和华为云APP扫描获取动态验证码。
 ### 第三方用户策略
-| 用户来源    | 用户登录     | 账号同步     | 用户密码修改    | 用户信息修改（电话、邮箱）    |
-| :---        | :---        | :----         | :---            | :---            |
-| Windows AD  | 支持         | 支持         | 支持            | 待支持          |
-| OpenLDAP    | 支持         | 支持         | 支持            | 待支持          |
-| 钉钉        | 待支持       | 不支持       | 不支持          | 不支持          |
-| 企业微信    | 待支持       | 不支持       | 不支持          | 不支持          |
-| 飞书        | 待支持       | 不支持       | 不支持          | 不支持          |
+| 用户来源       | 用户登录                                     | 账号同步                                  | 用户密码修改                                | 用户信息修改（电话、邮箱）                            |
+|:-----------|:-----------------------------------------|:--------------------------------------|:--------------------------------------|:-----------------------------------------|
+| Windows AD | <span style="color: green;">支持</span>    | <span style="color: green;">支持</span> | <span style="color: green;">支持</span> | <span style="color: #BDB76B;">待支持</span> |
+| OpenLDAP   | <span style="color: green;">支持</span>    | <span style="color: green;">支持</span> | <span style="color: green;">支持</span> | <span style="color: #BDB76B;">待支持</span> |
+| 钉钉         | <span style="color: #BDB76B;">待支持</span> | 不支持                                   | 不支持                                   | 不支持                                      |
+| 企业微信       | <span style="color: #BDB76B;">待支持</span> | 不支持                                   | 不支持                                   | 不支持                                      |
+| 飞书         | <span style="color: #BDB76B;">待支持</span> | 不支持                                   | 不支持                                   | 不支持                                      |
 ## 其它
 * 支持Swagger接口文档：访问地址：`/swagger/index.html`。
 * 支持用户密码自助更改：访问地址：`/reset_password`。
