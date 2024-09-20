@@ -58,7 +58,7 @@
    helm install <自定义应用名> --namespace <名称空间> .
    ```
 
-   > **说明**：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
+   > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
 
 6. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 7. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
@@ -117,27 +117,36 @@ mail:
   password: ""
 swagger: true
 ```
-* [x] server：服务监听的地址和端口。
-* [x] externalUrl：对外提供的访问地址，格式为：`<protocol>://<address>[:<port>]`。
-* [x] secret: `CAS3.0`票据签名字符串。
+* [x] server：后端服务监听的地址和端口，保持默认。
+* [x] externalUrl：对台对外提供的访问地址，格式为：`http[s]://<address>[:<port>]`。
+* [x] secret: `CAS3.0`票据签名字符串，生产环境请务必进行修改。
 * [x] mysql：`MySQL`数据库相关配置。
 * [x] redis：`Redis`相关配置。
 * [x] jwt：`JWT`相关配置。
-* [x] mfa：双因素认证相关配置，`issuer`为手机APP扫码后显示的名称。
-* [x] oss：`Minio`对象存储相关配置。
-* [ ] ldap：`LDAP`相关配置。
-* [ ] sms：短信相关配置，目前仅支持华为云，需要在华为云开通短信服务，并配置 [短信模板](#短信模板)。
-* [ ] mail：邮件相关配置。
-* [x] swagger：Swagger接口，如果是生产环境不建议开启。
-    > 注意： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
+* [x] mfa：双因素认证相关配置，`issuer`为APP扫码后显示的名称。
+* [x] oss：`MinIO`对象存储相关配置。
+* [ ] ldap：参考 [LDAP配置](#LDAP配置)。
+* [ ] sms：参考 [短信配置](#LDAP配置)。
+* [ ] mail：邮件相关配置，目前系统中未使用。
+* [x] swagger：Swagger接口，生产环境不建议关闭。
+
+> **注意**： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
+
 ## LDAP配置
-平台用户支持与Windows AD或LDAP进行对接，实现用户认证，使配置说明如下：
+平台用户支持与Windows AD或OpenLDAP进行对接，实现用户认证，使配置说明如下：
 * [x] host：服务器地址，格式为：`ldap[s]://<host>:<port>`。
 * [x] bindUserDN：绑定的用户DN，格式为：`cn=admin,dc=example,dc=cn`。
 * [x] bindUserPassword：绑定的用户密码。
-* [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割。
-* [x] userAttribute：用户属性，如果是LDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
-> 说明：更改Windows AD或LDAP用户密码需要绑定的用户有足够的权限，Windows AD还要求使用`ldaps`协议进行连接。
+* [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割，如：`ou=IT,dc=example,dc=cn&ou=HR,dc=example,dc=cn`。
+* [x] userAttribute：用户属性，如果是OpenLDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
+
+> 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限，Windows AD还要求使用`ldaps`协议进行连接。
+
+## 短信模板
+目前仅支持华为云短信服务（MSGSMS），需要在华为云开通短信服务。短信将用于用户自助密码修改，不使用该功能则可以忽略，短信模板如下所示：
+```
+${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保管好校验码，请勿泄漏！
+```
 # 项目证书
 为确保重要信息不会泄露，在项目部署时建议生成一套全新的证书，推荐使用 [证书在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具") 创建。建议将证书有效期设置为10年，证书生成完成后需要下载CRT证书文件、证书公钥和证书私钥并严格按以下名称命名：
 * private.key：私钥
@@ -152,11 +161,6 @@ openssl genpkey -algorithm RSA -out private.key -pkeyopt rsa_keygen_bits:2048 -o
 openssl req -new -x509 -key private.key -out certificate.crt -days 3650
 # 从证书中提取公钥
 openssl rsa -in private.key -pubout -out public.key
-```
-# 短信模板
-目前短信用于用户自助密码修改，不使用该功能则可以忽略，短信模板如下所示：
-```
-${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保管好校验码，请勿泄漏！
 ```
 短信模板需要包含三个变量，分别代表用户名、校验码和校验码有效时间，其它文字可以自定义。
 # IP地址库
