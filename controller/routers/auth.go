@@ -20,6 +20,8 @@ func initAuthRouters(router *gin.Engine) {
 
 	// 登录
 	router.POST("/api/auth/login", controller.User.Login)
+	// 获取授权（钉钉）
+	router.POST("/api/auth/dingtalk_login", controller.User.DingTalkLogin)
 	// 注销
 	router.POST("/api/auth/logout", controller.User.Logout)
 }

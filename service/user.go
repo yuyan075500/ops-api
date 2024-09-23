@@ -21,6 +21,20 @@ var User user
 
 type user struct{}
 
+// AuthorizeParam 通用的单点登录授权参数接口
+type AuthorizeParam interface {
+	GetResponseType() string
+	GetClientId() string
+	GetRedirectURI() string
+	GetService() string
+	GetSAMLRequest() string
+	GetRelayState() string
+	GetSigAlg() string
+	GetSignature() string
+	GetScope() string
+	GetState() string
+}
+
 // UserLogin 用户登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
 type UserLogin struct {
 	Username         string `json:"username" binding:"required"`
@@ -37,6 +51,44 @@ type UserLogin struct {
 	Signature        string `json:"Signature"`          // SAML2客户端：签名
 	NginxRedirectURI string `json:"nginx_redirect_uri"` // Nginx代理客户端：回调地址
 }
+
+// DingTalkLogin 钉钉扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
+type DingTalkLogin struct {
+	AuthCode         string `form:"authCode" binding:"required"`
+	ResponseType     string `json:"response_type"`      // OAuth2.0客户端：授权类型，固定值：code
+	ClientId         string `json:"client_id"`          // OAuth2.0客户端：客户端ID
+	RedirectURI      string `json:"redirect_uri"`       // OAuth2.0客户端：重定向URL
+	State            string `json:"state"`              // OAuth2.0客户端：客户端状态码
+	Scope            string `json:"scope"`              // OAuth2.0客户端：申请权限范围
+	Service          string `json:"service"`            // CAS3.0客户端：回调地址
+	SAMLRequest      string `json:"SAMLRequest"`        // SAML2客户端：SAMLRequest
+	RelayState       string `json:"RelayState"`         // SAML2客户端：客户端状态码
+	SigAlg           string `json:"SigAlg"`             // SAML2客户端：签名算法
+	Signature        string `json:"Signature"`          // SAML2客户端：签名
+	NginxRedirectURI string `json:"nginx_redirect_uri"` // Nginx代理客户端：回调地址
+}
+
+func (d DingTalkLogin) GetResponseType() string { return d.ResponseType }
+func (d DingTalkLogin) GetClientId() string     { return d.ClientId }
+func (d DingTalkLogin) GetRedirectURI() string  { return d.RedirectURI }
+func (d DingTalkLogin) GetService() string      { return d.Service }
+func (d DingTalkLogin) GetSAMLRequest() string  { return d.SAMLRequest }
+func (d DingTalkLogin) GetRelayState() string   { return d.RelayState }
+func (d DingTalkLogin) GetSigAlg() string       { return d.SigAlg }
+func (d DingTalkLogin) GetSignature() string    { return d.Signature }
+func (d DingTalkLogin) GetScope() string        { return d.Scope }
+func (d DingTalkLogin) GetState() string        { return d.State }
+
+func (u UserLogin) GetResponseType() string { return u.ResponseType }
+func (u UserLogin) GetClientId() string     { return u.ClientId }
+func (u UserLogin) GetRedirectURI() string  { return u.RedirectURI }
+func (u UserLogin) GetService() string      { return u.Service }
+func (u UserLogin) GetSAMLRequest() string  { return u.SAMLRequest }
+func (u UserLogin) GetRelayState() string   { return u.RelayState }
+func (u UserLogin) GetSigAlg() string       { return u.SigAlg }
+func (u UserLogin) GetSignature() string    { return u.Signature }
+func (u UserLogin) GetScope() string        { return u.Scope }
+func (u UserLogin) GetState() string        { return u.State }
 
 // RestPassword 重置密码时用户信息绑定的结构体
 type RestPassword struct {
@@ -263,6 +315,68 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 	}
 
 	return nil
+}
+
+// DingTalkLogin 钉钉扫码认证
+func (u *user) DingTalkLogin(params *DingTalkLogin, c *gin.Context) (token, redirectUri string, err error) {
+
+	// 初始化钉钉客户端
+	dingClient, err := NewDingTalkClient()
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户Token
+	userAccessToken, err := dingClient.GetUserAccessToken(params.AuthCode)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户信息
+	userInfo, err := dingClient.GetUserInfo(userAccessToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 定义用户匹配条件
+	conditions := map[string]interface{}{
+		"name":         userInfo.Body.Nick,
+		"phone_number": userInfo.Body.Mobile,
+	}
+
+	// 在本地数据库中查找匹配的用户
+	user, err := dao.User.GetUser(conditions)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 判断用户是否禁用
+	if !user.IsActive {
+		return "", "", errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 生成用户Token
+	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 记录登录信息
+	if err := u.RecordLoginInfo(1, "钉钉扫码", user.Username, user, nil, c); err != nil {
+		return "", "", err
+	}
+
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		callbackData, err := SSO.Login(params, *user)
+		if err != nil {
+			return "", "", err
+		}
+		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
+		return token, callbackData, nil
+	}
+
+	return token, "", nil
 }
 
 // Login 用户登录（支持CAS3.0和OAuth2.0）

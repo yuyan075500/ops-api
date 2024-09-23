@@ -32,6 +32,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/dingtalk_login": {
+            "post": {
+                "description": "用户认证相关接口",
+                "tags": [
+                    "用户认证"
+                ],
+                "summary": "钉钉扫码认证",
+                "parameters": [
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.DingTalkAuthorize"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"token\": \"用户令牌\", \"redirect_uri\": redirect_uri}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "用户认证相关接口",
@@ -44,7 +72,7 @@ const docTemplate = `{
                 "tags": [
                     "用户认证"
                 ],
-                "summary": "登录",
+                "summary": "账号密码认证",
                 "parameters": [
                     {
                         "description": "用户名密码",
@@ -58,7 +86,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"code\": 0, \"token\": \"用户令牌\"}",
+                        "description": "{\"code\": 0, \"token\": \"用户令牌\", \"redirect_uri\": redirect_uri}",
                         "schema": {
                             "type": "string"
                         }
@@ -1738,6 +1766,61 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "ticket": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.DingTalkAuthorize": {
+            "type": "object",
+            "required": [
+                "authCode"
+            ],
+            "properties": {
+                "RelayState": {
+                    "description": "SAML2客户端：客户端状态码",
+                    "type": "string"
+                },
+                "SAMLRequest": {
+                    "description": "SAML2客户端：SAMLRequest",
+                    "type": "string"
+                },
+                "SigAlg": {
+                    "description": "SAML2客户端：签名算法",
+                    "type": "string"
+                },
+                "Signature": {
+                    "description": "SAML2客户端：签名",
+                    "type": "string"
+                },
+                "authCode": {
+                    "type": "string"
+                },
+                "client_id": {
+                    "description": "OAuth2.0客户端：客户端ID",
+                    "type": "string"
+                },
+                "nginx_redirect_uri": {
+                    "description": "Nginx代理客户端：回调地址",
+                    "type": "string"
+                },
+                "redirect_uri": {
+                    "description": "OAuth2.0客户端：重定向URL",
+                    "type": "string"
+                },
+                "response_type": {
+                    "description": "OAuth2.0客户端：授权类型，固定值：code",
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "OAuth2.0客户端：申请权限范围",
+                    "type": "string"
+                },
+                "service": {
+                    "description": "CAS3.0客户端：回调地址",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "OAuth2.0客户端：客户端状态码",
                     "type": "string"
                 }
             }

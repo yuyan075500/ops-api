@@ -52,7 +52,8 @@ func PermissionCheck() gin.HandlerFunc {
 
 		// 排除不需要权限验证的接口，支持前缀匹配
 		ignorePath := []string{
-			"/api/auth/login",                   // 登录接口
+			"/api/auth/login",                   // 账号密码登录接口
+			"/api/auth/dingtalk_login",          // 钉钉扫码登录接口
 			"/api/auth/logout",                  // 注销接口
 			"/health",                           // 预留健身检查接口
 			"/api/v1/user/info",                 // 用户登录成功后获取用户信息接口
@@ -65,7 +66,6 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/mfa_auth",             // MFA认证
 			"/api/v1/site/logoUpload",           // 站点图片上传
 			"/api/v1/site/guide",                // 获取导航站点信息
-			"/api/v1/sso/dingtalk/authorize",    // 钉钉客户端授权
 			"/api/v1/sso/oauth/authorize",       // OAuth2.0客户端授权
 			"/api/v1/sso/oauth/token",           // OAuth2.0客户端获取Token
 			"/api/v1/sso/oauth/userinfo",        // OAuth2.0客户端获取用户信息

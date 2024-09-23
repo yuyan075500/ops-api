@@ -46,55 +46,6 @@ func (s *sso) CookieAuth(c *gin.Context) {
 	})
 }
 
-// DingTalkAuthorize 客户端授权
-// @Summary 客户端授权
-// @Description 钉钉认证相关接口
-// @Tags 钉钉认证
-// @Param authorize body service.DingTalkAuthorize true "授权请求参数"
-// @Success 200 {string} json "{"code": 0, "msg": 授权成功, "redirect_uri": redirect_uri}"
-// @Router /api/v1/sso/dingtalk/authorize [post]
-func (s *sso) DingTalkAuthorize(c *gin.Context) {
-
-	var params = &service.DingTalkAuthorize{}
-
-	// 请求参数绑定
-	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
-		return
-	}
-
-	// 获取JWT Token
-	token, redirectUri, err := service.SSO.GetDingTalkAuthorize(params, c)
-	if err != nil {
-		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "钉钉扫码", "", nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
-			return
-		}
-
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":         0,
-		"token":        token,
-		"redirect_uri": redirectUri,
-	})
-}
-
 // OAuthAuthorize 客户端授权
 // @Summary 客户端授权
 // @Description OAuth2.0认证相关接口
