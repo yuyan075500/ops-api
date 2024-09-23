@@ -36,6 +36,7 @@ data:
       bindUserDN: ""
       bindUserPassword: ""
       searchDN: ""
+      userAttribute: "uid"
     sms:
       url: ""
       appKey: ""
@@ -50,6 +51,9 @@ data:
       smtpPort: 587
       from: ""
       password: ""
+    dingTalk:
+      appKey: ""
+      appSecret: ""
     swagger: false
   private.key: |
     -----BEGIN PRIVATE KEY-----

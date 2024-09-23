@@ -30,6 +30,7 @@ ldap:
   bindUserDN: ""
   bindUserPassword: ""
   searchDN: ""
+  userAttribute: "uid"
 sms:
   url: ""
   appKey: ""
@@ -44,4 +45,7 @@ mail:
   smtpPort: 587
   from: ""
   password: ""
+dingTalk:
+  appKey: ""
+  appSecret: ""
 swagger: false

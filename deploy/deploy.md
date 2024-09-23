@@ -115,6 +115,9 @@ mail:
   smtpPort: 587
   from: ""
   password: ""
+dingTalk:
+   appKey: ""
+   appSecret: ""
 swagger: true
 ```
 * [x] server：后端服务监听的地址和端口，保持默认。
@@ -128,6 +131,7 @@ swagger: true
 * [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
 * [ ] sms：参考 [短信配置](#LDAP配置)。
 * [ ] mail：邮件相关配置，目前系统中未使用。
+* [ ] dingTalk：钉钉应用配置，不需要钉钉扫码登录，可以忽略，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
 * [x] swagger：Swagger接口，生产环境不建议关闭。
 
 > **注意**： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
