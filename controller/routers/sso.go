@@ -22,6 +22,8 @@ func initSSORouters(router *gin.Engine) {
 		sso.GET("/oidc/jwks", controller.SSO.GetJwksConfig)
 		// 获取授权（CAS3.0）
 		sso.POST("/cas/authorize", controller.SSO.CASAuthorize)
+		// 获取授权（钉钉）
+		sso.POST("/dingtalk/authorize", controller.SSO.DingTalkAuthorize)
 		// 获取IDP元数据（SAML2）
 		sso.GET("/saml/metadata", controller.SSO.GetIdPMetadata)
 		// SP授权（SAML2）

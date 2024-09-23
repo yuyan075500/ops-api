@@ -122,8 +122,20 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 	}, nil
 }
 
-// GetUser 获取用户信息
-func (u *user) GetUser(userid uint) (userinfo *UserInfoWithMenu, err error) {
+// GetUser 获取用户信息（动态查找，返回单个用户信息）
+func (u *user) GetUser(conditions interface{}) (*model.AuthUser, error) {
+
+	var user model.AuthUser
+
+	if err := global.MySQLClient.Where(conditions).First(&user).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+// GetUserInfo 获取用户信息
+func (u *user) GetUserInfo(userid uint) (userinfo *UserInfoWithMenu, err error) {
 
 	var (
 		userInfo *UserInfo

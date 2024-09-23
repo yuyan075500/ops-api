@@ -65,6 +65,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/mfa_auth",             // MFA认证
 			"/api/v1/site/logoUpload",           // 站点图片上传
 			"/api/v1/site/guide",                // 获取导航站点信息
+			"/api/v1/sso/dingtalk/authorize",    // 钉钉客户端授权
 			"/api/v1/sso/oauth/authorize",       // OAuth2.0客户端授权
 			"/api/v1/sso/oauth/token",           // OAuth2.0客户端获取Token
 			"/api/v1/sso/oauth/userinfo",        // OAuth2.0客户端获取用户信息

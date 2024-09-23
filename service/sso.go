@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/LoginRadius/go-saml"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/jwk"
 	"net/url"
@@ -37,6 +38,22 @@ type OAuthAuthorize struct {
 	RedirectURI  string `json:"redirect_uri"`
 	State        string `json:"state"`
 	Scope        string `json:"scope"`
+}
+
+// DingTalkAuthorize 钉钉扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
+type DingTalkAuthorize struct {
+	AuthCode         string `form:"authCode" binding:"required"`
+	ResponseType     string `json:"response_type"`      // OAuth2.0客户端：授权类型，固定值：code
+	ClientId         string `json:"client_id"`          // OAuth2.0客户端：客户端ID
+	RedirectURI      string `json:"redirect_uri"`       // OAuth2.0客户端：重定向URL
+	State            string `json:"state"`              // OAuth2.0客户端：客户端状态码
+	Scope            string `json:"scope"`              // OAuth2.0客户端：申请权限范围
+	Service          string `json:"service"`            // CAS3.0客户端：回调地址
+	SAMLRequest      string `json:"SAMLRequest"`        // SAML2客户端：SAMLRequest
+	RelayState       string `json:"RelayState"`         // SAML2客户端：客户端状态码
+	SigAlg           string `json:"SigAlg"`             // SAML2客户端：签名算法
+	Signature        string `json:"Signature"`          // SAML2客户端：签名
+	NginxRedirectURI string `json:"nginx_redirect_uri"` // Nginx代理客户端：回调地址
 }
 
 // CASAuthorize CAS3.0客户端获取授权请求参数
@@ -160,6 +177,104 @@ func (s *sso) GetOIDCConfig() (configuration *OIDCConfig, err error) {
 	return config, nil
 }
 
+// AuthorizeParam 通用的授权参数接口
+type AuthorizeParam interface {
+	GetResponseType() string
+	GetClientId() string
+	GetRedirectURI() string
+	GetService() string
+	GetSAMLRequest() string
+	GetRelayState() string
+	GetSigAlg() string
+	GetSignature() string
+	GetScope() string
+	GetState() string
+}
+
+func (d DingTalkAuthorize) GetResponseType() string { return d.ResponseType }
+func (d DingTalkAuthorize) GetClientId() string     { return d.ClientId }
+func (d DingTalkAuthorize) GetRedirectURI() string  { return d.RedirectURI }
+func (d DingTalkAuthorize) GetService() string      { return d.Service }
+func (d DingTalkAuthorize) GetSAMLRequest() string  { return d.SAMLRequest }
+func (d DingTalkAuthorize) GetRelayState() string   { return d.RelayState }
+func (d DingTalkAuthorize) GetSigAlg() string       { return d.SigAlg }
+func (d DingTalkAuthorize) GetSignature() string    { return d.Signature }
+func (d DingTalkAuthorize) GetScope() string        { return d.Scope }
+func (d DingTalkAuthorize) GetState() string        { return d.State }
+
+func (u UserLogin) GetResponseType() string { return u.ResponseType }
+func (u UserLogin) GetClientId() string     { return u.ClientId }
+func (u UserLogin) GetRedirectURI() string  { return u.RedirectURI }
+func (u UserLogin) GetService() string      { return u.Service }
+func (u UserLogin) GetSAMLRequest() string  { return u.SAMLRequest }
+func (u UserLogin) GetRelayState() string   { return u.RelayState }
+func (u UserLogin) GetSigAlg() string       { return u.SigAlg }
+func (u UserLogin) GetSignature() string    { return u.Signature }
+func (u UserLogin) GetScope() string        { return u.Scope }
+func (u UserLogin) GetState() string        { return u.State }
+
+// GetDingTalkAuthorize 钉钉客户端授权
+func (s *sso) GetDingTalkAuthorize(params *DingTalkAuthorize, c *gin.Context) (token, redirectUri string, err error) {
+
+	// 初始化钉钉客户端
+	dingClient, err := NewDingTalkClient()
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户Token
+	userAccessToken, err := dingClient.GetUserAccessToken(params.AuthCode)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户信息
+	userInfo, err := dingClient.GetUserInfo(userAccessToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 定义用户匹配条件
+	conditions := map[string]interface{}{
+		"name":         userInfo.Body.Nick,
+		"phone_number": userInfo.Body.Mobile,
+	}
+
+	// 在本地数据库中查找匹配的用户
+	user, err := dao.User.GetUser(conditions)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 判断用户是否禁用
+	if !user.IsActive {
+		return "", "", errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 生成用户Token
+	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 记录登录信息
+	if err := User.RecordLoginInfo(1, "钉钉扫码", user.Username, user, nil, c); err != nil {
+		return "", "", err
+	}
+
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		callbackData, err := SSO.Login(params, *user)
+		if err != nil {
+			return "", "", err
+		}
+		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
+		return token, callbackData, nil
+	}
+
+	return token, "", nil
+}
+
 // GetCASAuthorize CAS3.0客户端授权
 func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) (callbackUrl string, err error) {
 
@@ -239,7 +354,7 @@ func (s *sso) ServiceValidate(param *CASServiceValidate) (data *CASServiceRespon
 	}
 
 	// 获取用户信息
-	user, err := dao.User.GetUser(ticketInfo.UserID)
+	user, err := dao.User.GetUserInfo(ticketInfo.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +436,7 @@ func (s *sso) GetToken(param *Token) (token *ResponseToken, err error) {
 	}
 
 	// 生成token供access_token和id_token使用（OIDC认证使用的id_token，OAuth认证使用的access_token）
-	user, err = dao.User.GetUser(ticket.UserID)
+	user, err = dao.User.GetUserInfo(ticket.UserID)
 	idToken, err := middleware.GenerateOAuthToken(uint(user.ID), user.Name, user.Username, site.ClientId, "readwrite")
 	if err != nil {
 		return nil, err
@@ -347,7 +462,7 @@ func (s *sso) GetUserinfo(token string) (user *ResponseUserinfo, err error) {
 	}
 
 	// 获取用户信息
-	userinfo, err := dao.User.GetUser(mc.ID)
+	userinfo, err := dao.User.GetUserInfo(mc.ID)
 
 	user = &ResponseUserinfo{
 		Id:                uint(userinfo.ID),
@@ -547,7 +662,7 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	}
 
 	// 获取用户信息
-	userinfo, err := dao.User.GetUser(userId)
+	userinfo, err := dao.User.GetUserInfo(userId)
 	if err != nil {
 		return "", err
 	}
@@ -613,41 +728,41 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 }
 
 // Login 单点登录
-func (s *sso) Login(queryParams *UserLogin, user model.AuthUser) (callbackData string, err error) {
+func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackData string, err error) {
 
 	var data string
 
-	if queryParams.ResponseType != "" && queryParams.ClientId != "" && queryParams.RedirectURI != "" {
+	if queryParams.GetResponseType() != "" && queryParams.GetClientId() != "" && queryParams.GetRedirectURI() != "" {
 		// OAuth认证返回
 		params := &OAuthAuthorize{
-			ClientId:     queryParams.ClientId,
-			RedirectURI:  queryParams.RedirectURI,
-			ResponseType: queryParams.ResponseType,
-			Scope:        queryParams.Scope,
-			State:        queryParams.State,
+			ClientId:     queryParams.GetClientId(),
+			RedirectURI:  queryParams.GetRedirectURI(),
+			ResponseType: queryParams.GetResponseType(),
+			Scope:        queryParams.GetScope(),
+			State:        queryParams.GetState(),
 		}
 		callbackUrl, err := s.GetOAuthAuthorize(params, user.ID)
 		if err != nil {
 			return "", err
 		}
 		data = callbackUrl
-	} else if queryParams.Service != "" {
+	} else if queryParams.GetService() != "" {
 		// CAS认证返回
 		params := &CASAuthorize{
-			Service: queryParams.Service,
+			Service: queryParams.GetService(),
 		}
 		callbackUrl, err := s.GetCASAuthorize(params, user.ID, user.Username)
 		if err != nil {
 			return "", err
 		}
 		data = callbackUrl
-	} else if queryParams.SAMLRequest != "" {
+	} else if queryParams.GetSAMLRequest() != "" {
 		// SAML2认证返回
 		params := &SAMLRequest{
-			SAMLRequest: queryParams.SAMLRequest,
-			RelayState:  queryParams.RelayState,
-			SigAlg:      queryParams.SigAlg,
-			Signature:   queryParams.Signature,
+			SAMLRequest: queryParams.GetSAMLRequest(),
+			RelayState:  queryParams.GetRelayState(),
+			SigAlg:      queryParams.GetSigAlg(),
+			Signature:   queryParams.GetSignature(),
 		}
 		html, err := s.GetSPAuthorize(params, user.ID)
 		if err != nil {

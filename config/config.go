@@ -10,18 +10,19 @@ var Conf *Config
 
 // Config 配置文件结构体, 与YAML文件对应
 type Config struct {
-	Server      string `yaml:"server"`
-	ExternalUrl string `yaml:"externalUrl"`
-	Secret      string `yaml:"secret"`
-	MFA         MFA    `yaml:"mfa"`
-	MySQL       MySQL  `yaml:"mysql"`
-	JWT         JWT    `yaml:"jwt"`
-	Redis       Redis  `yaml:"redis"`
-	OSS         OSS    `yaml:"oss"`
-	LDAP        LDAP   `yaml:"ldap"`
-	SMS         SMS    `yaml:"sms"`
-	Mail        Mail   `yaml:"mail"`
-	Swagger     bool   `yaml:"swagger"`
+	Server      string   `yaml:"server"`
+	ExternalUrl string   `yaml:"externalUrl"`
+	Secret      string   `yaml:"secret"`
+	MFA         MFA      `yaml:"mfa"`
+	MySQL       MySQL    `yaml:"mysql"`
+	JWT         JWT      `yaml:"jwt"`
+	Redis       Redis    `yaml:"redis"`
+	OSS         OSS      `yaml:"oss"`
+	LDAP        LDAP     `yaml:"ldap"`
+	SMS         SMS      `yaml:"sms"`
+	Mail        Mail     `yaml:"mail"`
+	DingTalk    DingTalk `yaml:"dingTalk"`
+	Swagger     bool     `yaml:"swagger"`
 }
 
 type MySQL struct {
@@ -45,6 +46,11 @@ type Mail struct {
 type MFA struct {
 	Enable bool   `yaml:"enable"`
 	Issuer string `yaml:"issuer"`
+}
+
+type DingTalk struct {
+	AppKey    string `yaml:"appKey"`
+	AppSecret string `yaml:"appSecret"`
 }
 
 type LDAP struct {

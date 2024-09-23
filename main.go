@@ -61,6 +61,7 @@ func main() {
 		IgnorePaths("/.well-known/openid-configuration").
 		IgnorePaths("/api/v1/sso/oidc/jwks").
 		IgnorePaths("/api/v1/sso/cookie/auth").
+		IgnorePaths("/api/v1/sso/dingtalk/authorize").
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())

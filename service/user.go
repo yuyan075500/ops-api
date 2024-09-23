@@ -21,7 +21,7 @@ var User user
 
 type user struct{}
 
-// UserLogin 用户登录结构体（支持CAS3.0和OAuth2.0）
+// UserLogin 用户登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
 type UserLogin struct {
 	Username         string `json:"username" binding:"required"`
 	Password         string `json:"password" binding:"required"`
@@ -78,7 +78,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *dao.UserList, er
 
 // GetUser 获取用户信息
 func (u *user) GetUser(userid uint) (user *dao.UserInfoWithMenu, err error) {
-	user, err = dao.User.GetUser(userid)
+	user, err = dao.User.GetUserInfo(userid)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +382,7 @@ func (u *user) RecordLoginInfo(status int, loginMethod, userName string, user *m
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
-	// 记录用户最后登录时间
+	// 更新用户最后登录时间
 	if status == 1 {
 		if err := u.UpdateUserLoginTime(tx, *user); err != nil {
 			tx.Rollback()
