@@ -23,7 +23,7 @@
 * **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、~~企业微信扫码登录~~、~~飞书扫码登录~~、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置")和本地账号认证。
 * **双因素**：支持使用Google Authenticator、阿里云APP和华为云APP扫描获取动态验证码。
 ### 用户登录策略
-✅：支持，🟡：待支持，❌：不支持
+✅支持，🟡待支持，❌不支持
 
 | 用户来源       | 用户登录 | 账号同步 | 用户密码修改 | 用户信息修改（电话、邮箱） | 双因素认证 | 单点登录 | [NGINX鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "NGINX鉴权") |
 |:-----------|:-----|:-----|:-------|:--------------|:------|:-----|:------------------------------------------------------------------------------------------------------------------------------|
