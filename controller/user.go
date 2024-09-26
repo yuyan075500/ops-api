@@ -146,6 +146,55 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 	})
 }
 
+// WeChatLogin 企业微信扫码认证
+// @Summary 企业微信扫码认证
+// @Description 用户认证相关接口
+// @Tags 用户认证
+// @Param authorize body service.WeChatLogin true "授权请求参数"
+// @Success 200 {string} json "{"code": 0, "token": "用户令牌", "redirect_uri": redirect_uri}"
+// @Router /api/auth/ww_login [post]
+func (u *user) WeChatLogin(c *gin.Context) {
+
+	var params = &service.WeChatLogin{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取JWT Token
+	token, redirectUri, err := service.User.WeChatLogin(params, c)
+	if err != nil {
+		// 记录登录信息
+		if err := service.User.RecordLoginInfo(2, "企业微信扫码", "", nil, err, c); err != nil {
+			logger.Error("ERROR：" + err.Error())
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":         0,
+		"token":        token,
+		"redirect_uri": redirectUri,
+	})
+}
+
 // Logout 注销
 // @Summary 注销
 // @Description 用户认证相关接口

@@ -22,6 +22,8 @@ func initAuthRouters(router *gin.Engine) {
 	router.POST("/api/auth/login", controller.User.Login)
 	// 获取授权（钉钉）
 	router.POST("/api/auth/dingtalk_login", controller.User.DingTalkLogin)
+	// 获取授权（企业微信）
+	router.POST("/api/auth/ww_login", controller.User.WeChatLogin)
 	// 注销
 	router.POST("/api/auth/logout", controller.User.Logout)
 }

@@ -67,6 +67,22 @@ type DingTalkLogin struct {
 	Signature    string `json:"Signature"`     // SAML2客户端：签名
 }
 
+// WeChatLogin 企业微信扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
+type WeChatLogin struct {
+	Code         string `form:"code" binding:"required"`
+	Appid        string `json:"appid" binding:"required"`
+	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
+	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
+	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
+	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
+	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
+	Service      string `json:"service"`       // CAS3.0客户端：回调地址
+	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
+	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
+	SigAlg       string `json:"SigAlg"`        // SAML2客户端：签名算法
+	Signature    string `json:"Signature"`     // SAML2客户端：签名
+}
+
 func (d DingTalkLogin) GetResponseType() string { return d.ResponseType }
 func (d DingTalkLogin) GetClientId() string     { return d.ClientId }
 func (d DingTalkLogin) GetRedirectURI() string  { return d.RedirectURI }
@@ -77,6 +93,17 @@ func (d DingTalkLogin) GetSigAlg() string       { return d.SigAlg }
 func (d DingTalkLogin) GetSignature() string    { return d.Signature }
 func (d DingTalkLogin) GetScope() string        { return d.Scope }
 func (d DingTalkLogin) GetState() string        { return d.State }
+
+func (w WeChatLogin) GetResponseType() string { return w.ResponseType }
+func (w WeChatLogin) GetClientId() string     { return w.ClientId }
+func (w WeChatLogin) GetRedirectURI() string  { return w.RedirectURI }
+func (w WeChatLogin) GetService() string      { return w.Service }
+func (w WeChatLogin) GetSAMLRequest() string  { return w.SAMLRequest }
+func (w WeChatLogin) GetRelayState() string   { return w.RelayState }
+func (w WeChatLogin) GetSigAlg() string       { return w.SigAlg }
+func (w WeChatLogin) GetSignature() string    { return w.Signature }
+func (w WeChatLogin) GetScope() string        { return w.Scope }
+func (w WeChatLogin) GetState() string        { return w.State }
 
 func (u UserLogin) GetResponseType() string { return u.ResponseType }
 func (u UserLogin) GetClientId() string     { return u.ClientId }
@@ -362,6 +389,60 @@ func (u *user) DingTalkLogin(params *DingTalkLogin, c *gin.Context) (token, redi
 
 	// 记录登录信息
 	if err := u.RecordLoginInfo(1, "钉钉扫码", user.Username, user, nil, c); err != nil {
+		return "", "", err
+	}
+
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		callbackData, err := SSO.Login(params, *user)
+		if err != nil {
+			return "", "", err
+		}
+		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
+		return token, callbackData, nil
+	}
+
+	return token, "", nil
+}
+
+// WeChatLogin 企业微信扫码认证
+func (u *user) WeChatLogin(params *WeChatLogin, c *gin.Context) (token, redirectUri string, err error) {
+
+	wechatClient, err := NewWeChatClient()
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户ID
+	userId, err := wechatClient.GetUserId(params.Code)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 定义用户匹配条件
+	conditions := map[string]interface{}{
+		"ww_id": userId,
+	}
+
+	// 在本地数据库中查找匹配的用户
+	user, err := dao.User.GetUser(conditions)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 判断用户是否禁用
+	if !user.IsActive {
+		return "", "", errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 生成用户Token
+	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 记录登录信息
+	if err := u.RecordLoginInfo(1, "企业微信扫码", user.Username, user, nil, c); err != nil {
 		return "", "", err
 	}
 

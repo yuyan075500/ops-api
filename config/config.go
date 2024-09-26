@@ -22,6 +22,7 @@ type Config struct {
 	SMS         SMS      `yaml:"sms"`
 	Mail        Mail     `yaml:"mail"`
 	DingTalk    DingTalk `yaml:"dingTalk"`
+	Wechat      Wechat   `yaml:"wechat"`
 	Swagger     bool     `yaml:"swagger"`
 }
 
@@ -46,6 +47,12 @@ type Mail struct {
 type MFA struct {
 	Enable bool   `yaml:"enable"`
 	Issuer string `yaml:"issuer"`
+}
+
+type Wechat struct {
+	CorpId  string `yaml:"corpId"`
+	AgentId int    `yaml:"agentId"`
+	Secret  string `yaml:"secret"`
 }
 
 type DingTalk struct {
