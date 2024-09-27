@@ -54,6 +54,10 @@ data:
     dingTalk:
       appKey: ""
       appSecret: ""
+    wechat:
+      corpId: ""
+      agentId: ""
+      secret: ""
     swagger: false
   private.key: |
     -----BEGIN PRIVATE KEY-----
