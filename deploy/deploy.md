@@ -34,6 +34,9 @@
     docker-compose up -d
     ```
 9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
+
+   > **注意**：如果使用的外部数据库，请确保数据库使用的字符集为`utf8mb4`，排序规则为`utf8mb4_general_ci`。
+
 10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
 你需要自行准备以下相关资源：
@@ -61,6 +64,9 @@
    > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
 
 6. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
+
+   > **注意**：请确保数据库使用的字符集为`utf8mb4`，排序规则为`utf8mb4_general_ci`。
+
 7. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 
    > 说明：如果需要高可用只需调整应用的副本数即可，数据库和中间件的高可用需要自行完成。
@@ -118,6 +124,13 @@ mail:
 dingTalk:
    appKey: ""
    appSecret: ""
+wechat:
+   corpId: ""
+   agentId: ""
+   secret: ""
+feishu:
+   appId: ""
+   appSecret: ""
 swagger: true
 ```
 * [x] server：后端服务监听的地址和端口，保持默认。
@@ -131,7 +144,9 @@ swagger: true
 * [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
 * [ ] sms：参考 [短信配置](#LDAP配置)。
 * [ ] mail：邮件相关配置，目前系统中未使用。
-* [ ] dingTalk：钉钉应用配置，不需要钉钉扫码登录，可以忽略，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
+* [ ] dingTalk：钉钉自建应用配置，如果不需要钉钉扫码登录，可以忽略，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
+* [ ] wechat：企业微信自建应用配置，如果不需要企业微信扫码登录，可以忽略，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
+* [ ] feishu：飞书自建应用配置，如果不需要飞书扫码登录，可以忽略，参考 [飞书配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")。
 * [x] swagger：Swagger接口，生产环境不建议关闭。
 
 > **注意**： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。

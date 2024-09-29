@@ -52,4 +52,7 @@ wechat:
   corpId: ""
   agentId: ""
   secret: ""
+feishu:
+  appId: ""
+  appSecret: ""
 swagger: false

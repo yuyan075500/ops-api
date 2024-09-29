@@ -58,6 +58,9 @@ data:
       corpId: ""
       agentId: ""
       secret: ""
+    feishu:
+      appId: ""
+      appSecret: ""
     swagger: false
   private.key: |
     -----BEGIN PRIVATE KEY-----
