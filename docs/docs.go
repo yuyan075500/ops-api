@@ -60,6 +60,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/auth/feishu_login": {
+            "post": {
+                "description": "用户认证相关接口",
+                "tags": [
+                    "用户认证"
+                ],
+                "summary": "飞书扫码认证",
+                "parameters": [
+                    {
+                        "description": "授权请求参数",
+                        "name": "authorize",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.FeishuLogin"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"token\": \"用户令牌\", \"redirect_uri\": redirect_uri}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/auth/login": {
             "post": {
                 "description": "用户认证相关接口",
@@ -1825,6 +1853,62 @@ const docTemplate = `{
                 },
                 "client_id": {
                     "description": "OAuth2.0客户端：客户端ID",
+                    "type": "string"
+                },
+                "redirect_uri": {
+                    "description": "OAuth2.0客户端：重定向URL",
+                    "type": "string"
+                },
+                "response_type": {
+                    "description": "OAuth2.0客户端：授权类型，固定值：code",
+                    "type": "string"
+                },
+                "scope": {
+                    "description": "OAuth2.0客户端：申请权限范围",
+                    "type": "string"
+                },
+                "service": {
+                    "description": "CAS3.0客户端：回调地址",
+                    "type": "string"
+                },
+                "state": {
+                    "description": "OAuth2.0客户端：客户端状态码",
+                    "type": "string"
+                }
+            }
+        },
+        "service.FeishuLogin": {
+            "type": "object",
+            "required": [
+                "byte",
+                "code"
+            ],
+            "properties": {
+                "RelayState": {
+                    "description": "SAML2客户端：客户端状态码",
+                    "type": "string"
+                },
+                "SAMLRequest": {
+                    "description": "SAML2客户端：SAMLRequest",
+                    "type": "string"
+                },
+                "SigAlg": {
+                    "description": "SAML2客户端：签名算法",
+                    "type": "string"
+                },
+                "Signature": {
+                    "description": "SAML2客户端：签名",
+                    "type": "string"
+                },
+                "byte": {
+                    "description": "自定义参数",
+                    "type": "string"
+                },
+                "client_id": {
+                    "description": "OAuth2.0客户端：客户端ID",
+                    "type": "string"
+                },
+                "code": {
                     "type": "string"
                 },
                 "redirect_uri": {
