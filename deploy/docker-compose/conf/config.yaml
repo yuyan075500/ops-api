@@ -48,4 +48,8 @@ mail:
 dingTalk:
   appKey: ""
   appSecret: ""
+wechat:
+  corpId: ""
+  agentId: ""
+  secret: ""
 swagger: false
