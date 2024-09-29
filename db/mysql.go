@@ -58,7 +58,13 @@ func MySQLInit() error {
 
 	// 创建超级用户
 	var user model.AuthUser
-	global.MySQLClient.FirstOrCreate(&user, model.AuthUser{Name: "管理员", Username: "admin", IsActive: true, Password: "admin@123..."})
+	global.MySQLClient.FirstOrCreate(&user, model.AuthUser{
+		Name:     "管理员",
+		Username: "admin",
+		IsActive: true,
+		Password: "admin@123...",
+		WwId:     nil,
+	})
 
 	return nil
 }

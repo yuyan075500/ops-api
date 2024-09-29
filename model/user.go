@@ -12,7 +12,7 @@ import (
 type AuthUser struct {
 	gorm.Model
 	Name        string       `json:"name"`
-	WwId        string       `json:"ww_id" gorm:"unique"` // 企业微信用户ID
+	WwId        *string      `json:"ww_id" gorm:"unique"` // 企业微信用户ID
 	Username    string       `json:"username" gorm:"unique"`
 	Avatar      *string      `json:"avatar"`
 	Password    string       `json:"password"`
