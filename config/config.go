@@ -23,6 +23,7 @@ type Config struct {
 	Mail        Mail     `yaml:"mail"`
 	DingTalk    DingTalk `yaml:"dingTalk"`
 	Wechat      Wechat   `yaml:"wechat"`
+	Feishu      Feishu   `yaml:"feishu"`
 	Swagger     bool     `yaml:"swagger"`
 }
 
@@ -53,6 +54,11 @@ type Wechat struct {
 	CorpId  string `yaml:"corpId"`
 	AgentId int    `yaml:"agentId"`
 	Secret  string `yaml:"secret"`
+}
+
+type Feishu struct {
+	AppId     string `yaml:"appId"`
+	AppSecret string `yaml:"appSecret"`
 }
 
 type DingTalk struct {

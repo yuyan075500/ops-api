@@ -97,6 +97,55 @@ func (u *user) Login(c *gin.Context) {
 	})
 }
 
+// FeishuLogin 飞书扫码认证
+// @Summary 飞书扫码认证
+// @Description 用户认证相关接口
+// @Tags 用户认证
+// @Param authorize body service.FeishuLogin true "授权请求参数"
+// @Success 200 {string} json "{"code": 0, "token": "用户令牌", "redirect_uri": redirect_uri}"
+// @Router /api/auth/feishu_login [post]
+func (u *user) FeishuLogin(c *gin.Context) {
+
+	var params = &service.FeishuLogin{}
+
+	// 请求参数绑定
+	if err := c.ShouldBind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取JWT Token
+	token, redirectUri, err := service.User.FeishuLogin(params, c)
+	if err != nil {
+		// 记录登录信息
+		if err := service.User.RecordLoginInfo(2, "飞书扫码", "", nil, err, c); err != nil {
+			logger.Error("ERROR：" + err.Error())
+			c.JSON(http.StatusOK, gin.H{
+				"code": 90500,
+				"msg":  err.Error(),
+			})
+			return
+		}
+
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":         0,
+		"token":        token,
+		"redirect_uri": redirectUri,
+	})
+}
+
 // DingTalkLogin 钉钉扫码认证
 // @Summary 钉钉扫码认证
 // @Description 用户认证相关接口

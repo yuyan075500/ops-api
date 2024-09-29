@@ -55,6 +55,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/auth/login",                   // 账号密码登录接口
 			"/api/auth/dingtalk_login",          // 钉钉扫码登录接口
 			"/api/auth/ww_login",                // 企业微信扫码登录接口
+			"/api/auth/feishu_login",            // 飞书扫码登录接口
 			"/api/auth/logout",                  // 注销接口
 			"/health",                           // 预留健身检查接口
 			"/api/v1/user/info",                 // 用户登录成功后获取用户信息接口

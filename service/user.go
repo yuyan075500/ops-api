@@ -54,7 +54,7 @@ type UserLogin struct {
 
 // DingTalkLogin 钉钉扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
 type DingTalkLogin struct {
-	AuthCode     string `form:"authCode" binding:"required"`
+	AuthCode     string `json:"authCode" binding:"required"`
 	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
 	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
 	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
@@ -69,7 +69,7 @@ type DingTalkLogin struct {
 
 // WeChatLogin 企业微信扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
 type WeChatLogin struct {
-	Code         string `form:"code" binding:"required"`
+	Code         string `json:"code" binding:"required"`
 	Appid        string `json:"appid" binding:"required"`
 	ResponseType string `json:"response_type"` // OAuth2.0客户端：授权类型，固定值：code
 	ClientId     string `json:"client_id"`     // OAuth2.0客户端：客户端ID
@@ -82,6 +82,33 @@ type WeChatLogin struct {
 	SigAlg       string `json:"SigAlg"`        // SAML2客户端：签名算法
 	Signature    string `json:"Signature"`     // SAML2客户端：签名
 }
+
+// FeishuLogin 飞书扫码登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
+type FeishuLogin struct {
+	Code         string `json:"code" binding:"required"`
+	Byte         string `json:"byte" binding:"required"` // 自定义参数
+	ResponseType string `json:"response_type"`           // OAuth2.0客户端：授权类型，固定值：code
+	ClientId     string `json:"client_id"`               // OAuth2.0客户端：客户端ID
+	RedirectURI  string `json:"redirect_uri"`            // OAuth2.0客户端：重定向URL
+	State        string `json:"state"`                   // OAuth2.0客户端：客户端状态码
+	Scope        string `json:"scope"`                   // OAuth2.0客户端：申请权限范围
+	Service      string `json:"service"`                 // CAS3.0客户端：回调地址
+	SAMLRequest  string `json:"SAMLRequest"`             // SAML2客户端：SAMLRequest
+	RelayState   string `json:"RelayState"`              // SAML2客户端：客户端状态码
+	SigAlg       string `json:"SigAlg"`                  // SAML2客户端：签名算法
+	Signature    string `json:"Signature"`               // SAML2客户端：签名
+}
+
+func (f FeishuLogin) GetResponseType() string { return f.ResponseType }
+func (f FeishuLogin) GetClientId() string     { return f.ClientId }
+func (f FeishuLogin) GetRedirectURI() string  { return f.RedirectURI }
+func (f FeishuLogin) GetService() string      { return f.Service }
+func (f FeishuLogin) GetSAMLRequest() string  { return f.SAMLRequest }
+func (f FeishuLogin) GetRelayState() string   { return f.RelayState }
+func (f FeishuLogin) GetSigAlg() string       { return f.SigAlg }
+func (f FeishuLogin) GetSignature() string    { return f.Signature }
+func (f FeishuLogin) GetScope() string        { return f.Scope }
+func (f FeishuLogin) GetState() string        { return f.State }
 
 func (d DingTalkLogin) GetResponseType() string { return d.ResponseType }
 func (d DingTalkLogin) GetClientId() string     { return d.ClientId }
@@ -389,6 +416,66 @@ func (u *user) DingTalkLogin(params *DingTalkLogin, c *gin.Context) (token, redi
 
 	// 记录登录信息
 	if err := u.RecordLoginInfo(1, "钉钉扫码", user.Username, user, nil, c); err != nil {
+		return "", "", err
+	}
+
+	// 处理单点登录请求
+	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
+		callbackData, err := SSO.Login(params, *user)
+		if err != nil {
+			return "", "", err
+		}
+		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
+		return token, callbackData, nil
+	}
+
+	return token, "", nil
+}
+
+// FeishuLogin 飞书扫码认证
+func (u *user) FeishuLogin(params *FeishuLogin, c *gin.Context) (token, redirectUri string, err error) {
+
+	client, err := NewFeishuClient()
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户访问Token
+	resp, err := client.GetUserAccessToken(params.Code)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 获取用户信息
+	userinfo, err := client.GetUserInfo(*resp.Data.AccessToken)
+
+	// 定义用户匹配条件
+	mobile := *userinfo.Data.Mobile
+	conditions := map[string]interface{}{
+		"name":         *userinfo.Data.Name,
+		"phone_number": mobile[3:],
+		"email":        *userinfo.Data.Email,
+	}
+
+	// 在本地数据库中查找匹配的用户
+	user, err := dao.User.GetUser(conditions)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 判断用户是否禁用
+	if !user.IsActive {
+		return "", "", errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 生成用户Token
+	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
+	if err != nil {
+		return "", "", err
+	}
+
+	// 记录登录信息
+	if err := u.RecordLoginInfo(1, "飞书扫码", user.Username, user, nil, c); err != nil {
 		return "", "", err
 	}
 
