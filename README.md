@@ -1,6 +1,12 @@
 # 项目介绍
 该项目主要提供**统一用户管理**和**统一系统认证**服务，采用前后端分离的架构模式。后端项目基于Gin + Gorm + Casbin实现，[前端项目](https://github.com/yuyan075500/ops-web "前端项目") 基于 [Vue Admin Template](https://github.com/PanJiaChen/vue-admin-template "Vue Admin Template") 进行二次开发。
-# 目录说明
+## 架构设计
+项目采用前后端分离架构设计，项目地址如下：
+| 项目   | 项目地址 |
+|:------|:-----|
+| 前端   | https://github.com/yuyan075500/ops-web    |                                                                                                              |
+| 后端   | https://github.com/yuyan075500/ops-api    |
+## 后端目录说明
 * config：全局配置。
 * controller：路由规则配置和接口的入参与响应。
 * service：接口的处理逻辑。
@@ -9,7 +15,7 @@
 * db：数据库、缓存等客户端初始化。
 * middleware：中间件层，作用于全局，如跨域、JWT认证、权限校验等。
 * utils：工具层，如Token解析，文件操作等。
-# 后端Code状态码说明
+## 后端Code状态码说明
 * 0：请求成功。
 * 90400：请求参数错误。
 * 90401：认证失败。
@@ -23,8 +29,9 @@
 * **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置")和本地账号认证。
 * **双因素**：支持使用Google Authenticator、阿里云APP和华为云APP扫描获取动态验证码。
 <br>
-<img src="deploy/sso_example/img/login-1.gif" alt="img" width="350" height="200"/>&nbsp;&nbsp;
+<img src="deploy/sso_example/img/login-1.gif" alt="img" width="350" height="200"/>&ensp;&ensp;
 <img src="deploy/sso_example/img/login-mfa.gif" alt="img" width="350" height="200"/>
+<br>
 ### 用户登录策略
 ✅支持，🟡待支持，❌不支持
 
