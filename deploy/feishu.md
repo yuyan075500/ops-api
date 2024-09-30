@@ -1,11 +1,11 @@
-# 配置钉钉应用
-1. **登录飞机开放平台**：https://open.feishu.cn ，并进入开发者后台。
+# 配置飞机应用
+1. **登录飞书开放平台**：https://open.feishu.cn ，并进入开发者后台。
 2. **创建自建应用**：参考 [官方文档](https://open.feishu.cn/document/home/introduction-to-custom-app-development/self-built-application-development-process#a0a7f6b0 "官方文档")。
 3. **应用配置**：进入应用详情页，单击【开发配置】 > 【安全设置】，填写重定向 URL（回调域名）。回调域名为该平台的登录地址，为`http[s]://<address>[:<port>]/login`，当用户扫码后浏览器默认会跳转至该地址。
-4. **应用授权**：进入应用详情页，单击【开发配置】 > 【权限管理】，在权限搜索框中输入权限名称并申请权限。需要授与该应用`contact:user.email:readonly`和`contact:user.phone:readonly`权限。)
+4. **应用授权**：进入应用详情页，单击【开发配置】 > 【权限管理】，在权限搜索框中输入权限名称并申请权限。需要授与该应用`contact:user.email:readonly`和`contact:user.phone:readonly`权限。
 5. **发布应用**：参考 [官方文档](https://open.feishu.cn/document/home/introduction-to-custom-app-development/self-built-application-development-process#baf09c7d "官方文档")。
 # 后端应用配置
-需要在配置中添加钉钉应用的相关配置。
+需要在配置中添加飞书应用的相关配置。
 ```yaml
 feishu:
   appId: ""
