@@ -1,4 +1,4 @@
-# 配置飞机应用
+# 配置飞书应用
 1. **登录飞书开放平台**：https://open.feishu.cn ，并进入开发者后台。
 2. **创建自建应用**：参考 [官方文档](https://open.feishu.cn/document/home/introduction-to-custom-app-development/self-built-application-development-process#a0a7f6b0 "官方文档")。
 3. **应用配置**：进入应用详情页，单击【开发配置】 > 【安全设置】，填写重定向 URL（回调域名）。回调域名为该平台的登录地址，为`http[s]://<address>[:<port>]/login`，当用户扫码后浏览器默认会跳转至该地址。

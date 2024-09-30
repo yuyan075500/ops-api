@@ -51,7 +51,7 @@ services:
       - mysql
       - redis
       - minio
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-api:${OPS_API_VERSION}
+    image: ${OPS_API_IMAGE}:${OPS_API_VERSION}
     container_name: ops-api
     restart: always
     networks:
@@ -62,7 +62,7 @@ services:
       - ./certs/private.key:/app/certs/private.key
       - ./certs/public.key:/app/certs/public.key
   ops-web:
-    image: swr.cn-east-3.myhuaweicloud.com/lansefenbao/ops-web:${OPS_WEB_VERSION}
+    image: ${OPS_WEB_IMAGE}:${OPS_WEB_VERSION}
     container_name: ops-web
     restart: always
     networks:

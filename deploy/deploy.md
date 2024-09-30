@@ -19,6 +19,9 @@
     cd ops-api/deploy/docker-compose
     ```
 4. **环境变量配置**：修改`.env`文件中环境变量，如果你使用`docker-compose.yaml`指定的`MySQL`、`Redis`、`MinIO`，则可以跳过此步骤。
+
+   > **注意**：如果有使用[钉钉](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")、[企业微信](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")或[飞书](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")扫码认证，请按要求对前端项目进行单独构建打包，并修改`.env`文件对中应前端的镜像配置。
+
 5. **项目配置**：修改`conf/config.yaml`文件中相关配置，请参考 [配置文件说明](#配置文件说明)。
 
    > **注意**：MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与配置文件中指定的值相同即可。
@@ -61,7 +64,7 @@
    helm install <自定义应用名> --namespace <名称空间> .
    ```
 
-   > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。
+   > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。如果有使用[钉钉](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")、[企业微信](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")或[飞书](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")扫码认证，请按要求对前端项目进行单独构建打包，并修改`value.yaml`文件对中应前端的镜像配置。
 
 6. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
 
