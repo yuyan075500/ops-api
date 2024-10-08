@@ -1,8 +1,6 @@
 module ops-api
 
-go 1.23
-
-toolchain go1.23.1
+go 1.23.1
 
 require (
 	github.com/LoginRadius/go-saml v0.0.0-20201026053633-34983fa40dc5

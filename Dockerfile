@@ -1,4 +1,4 @@
-FROM golang:1.21.8
+FROM swr.cn-east-3.myhuaweicloud.com/lansefenbao/golang:1.23.1
 
 # 指定工作目录
 WORKDIR /app
