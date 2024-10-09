@@ -18,7 +18,7 @@ dingtalk:
     ```js
     VUE_APP_DINGTALK_CLIENT_ID = ''
     ```
-* [x] VUE_APP_DINGTALK_CLIENT_ID：和后端应用中配置的`appKey`一致。
+   * [x] VUE_APP_DINGTALK_CLIENT_ID：和后端应用中配置的`appKey`一致。
 2. **代码编译**：执行下面的命令对前端项目进行编译打包。
     ```shell
     npm install
