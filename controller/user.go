@@ -621,7 +621,7 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 // @Produce application/json
 // @Param user body service.RestPassword true "用户信息"
 // @Success 200 {string} json "{"code": 0, "msg": "校验码已发送..."}"
-// @Router /api/v1/sms/reset_password_code [post]
+// @Router /api/v1/sms/reset_password [post]
 func (u *user) GetVerificationCode(c *gin.Context) {
 
 	var (

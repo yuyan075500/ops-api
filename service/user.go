@@ -13,7 +13,6 @@ import (
 	"ops-api/model"
 	"ops-api/utils"
 	"ops-api/utils/check"
-	"strconv"
 	"time"
 )
 
@@ -321,7 +320,7 @@ func (u *user) GetVerificationCode(data *UserInfo, expirationTime int) (err erro
 	}
 
 	// 发送短信验证码
-	code, err := Log.SMSSend(data, strconv.Itoa(expirationTime))
+	code, err := Log.SMSSend(data)
 	if err != nil {
 		return err
 	}

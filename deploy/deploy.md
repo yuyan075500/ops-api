@@ -111,11 +111,12 @@ ldap:
   searchDN: ""
   userAttribute: ""
 sms:
-  url: "https://smsapi.cn-north-4.myhuaweicloud.com:443/sms/batchSendDiffSms/v1"
+  provider: ""
+  url: ""
   appKey: ""
   appSecret: ""
-  callbackUrl: "<externalUrl>/api/v1/sms/callback"
-  verificationCode:
+  callbackUrl: ""
+  resetPassword:
     sender: ""
     templateId: ""
     signature: ""
@@ -145,7 +146,7 @@ swagger: true
 * [x] mfa：双因素认证相关配置，`issuer`为APP扫码后显示的名称。
 * [x] oss：对象存储相关配置，支持MinIO和华为云OBS。
 * [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
-* [ ] sms：参考 [短信配置](#LDAP配置)。
+* [ ] sms：参考 [短信配置](#短信配置)。
 * [ ] mail：邮件相关配置，目前系统中未使用。
 * [ ] dingTalk：钉钉自建应用配置，如果不需要钉钉扫码登录，可以忽略，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
 * [ ] wechat：企业微信自建应用配置，如果不需要企业微信扫码登录，可以忽略，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
@@ -164,12 +165,27 @@ swagger: true
 
 > 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限，Windows AD还要求使用`ldaps`协议进行连接。
 
-## 短信模板
-目前仅支持华为云短信服务（MSGSMS），需要在华为云开通短信服务。短信将用于用户自助密码修改，不使用该功能则可以忽略，短信模板如下所示：
+## 短信配置
+目前短信支持华为云和阿里云，具体配置如下所示：
+* [x] provider：指定短信服务商，固定值，`aliyun`或`huawei`。
+* [x] url：短信服务地址，不同服务商的配置不同，阿里云参考[短信服务接入点](https://help.aliyun.com/zh/sms/developer-reference/api-dysmsapi-2017-05-25-endpoint "阿里云短信服务接入点")，华为云参考[API请求地址](https://support.huaweicloud.com/api-msgsms/sms_05_0000.html#section1 "API请求地址")。
+* [x] appKey: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
+* [x] appSecret: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
+* [x] callbackUrl：短信回调地址，用于接收短信发送状态，仅华为云需要配置，回调地址为`<externalUrl>/api/v1/sms/huawei/callback`。
+* [x] resetPassword.sender：重置密码短信通道号，仅华为云需要配置。
+* [x] resetPassword.templateId：重置密码短信模板ID。
+* [x] resetPassword.signature：重置密码短信签名名称。
+### 短信模板
+阿里云模板如下所示：
 ```
-${1}您好，您的校验码为：${2}，校验码在${3}分钟内有效，保管好校验码，请勿泄漏！
+# 重置密码短信模板
+您的验证码为：${code}，验证码在5分钟内有效，请勿泄漏他人！
 ```
-短信模板三个变量，分别代表用户名、校验码和校验码有效时间。
+华为云模板如下所示：
+```
+# 重置密码短信模板
+您的验证码为：${1}，验证码在5分钟内有效，请勿泄漏他人！
+```
 # 项目证书
 为确保重要信息不会泄露，在项目部署时建议生成一套全新的证书，推荐使用 [证书在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具") 创建。建议将证书有效期设置为10年，证书生成完成后需要下载CRT证书文件、证书公钥和证书私钥并严格按以下名称命名：
 * private.key：私钥

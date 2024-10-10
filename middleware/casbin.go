@@ -61,8 +61,8 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/info",                 // 用户登录成功后获取用户信息接口
 			"/api/v1/user/avatarUpload",         // 用户头像上传接口
 			"/swagger/",                         // swagger接口
-			"/api/v1/sms/callback",              // 短信回调接口
-			"/api/v1/sms/reset_password_code",   // 获取重置密码验证码
+			"/api/v1/sms/huawei/callback",       // 华为云短信回调接口
+			"/api/v1/sms/reset_password",        // 获取重置密码验证码
 			"/api/v1/reset_password",            // 密码自助重置接口
 			"/api/v1/user/mfa_qrcode",           // 获取MFA二维码
 			"/api/v1/user/mfa_auth",             // MFA认证

@@ -38,11 +38,12 @@ data:
       searchDN: ""
       userAttribute: "uid"
     sms:
+      provider: ""
       url: ""
       appKey: ""
       appSecret: ""
       callbackUrl: ""
-      verificationCode:
+      resetPassword:
         sender: ""
         templateId: ""
         signature: ""

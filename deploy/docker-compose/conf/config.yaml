@@ -32,11 +32,12 @@ ldap:
   searchDN: ""
   userAttribute: "uid"
 sms:
+  provider: ""
   url: ""
   appKey: ""
   appSecret: ""
   callbackUrl: ""
-  verificationCode:
+  resetPassword:
     sender: ""
     templateId: ""
     signature: ""
@@ -55,4 +56,4 @@ wechat:
 feishu:
   appId: ""
   appSecret: ""
-swagger: false
+swagger: true

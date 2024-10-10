@@ -43,7 +43,7 @@ type UserInfo struct {
 }
 
 // SMSSend 发送短信
-func (l *log) SMSSend(data *UserInfo, expirationTime string) (code string, err error) {
+func (l *log) SMSSend(data *UserInfo) (code string, err error) {
 
 	var (
 		response Response
@@ -58,12 +58,12 @@ func (l *log) SMSSend(data *UserInfo, expirationTime string) (code string, err e
 
 	// 发送短信验证码
 	resp, err := sms.Send(
-		config.Conf.SMS.VerificationCode.Sender,
-		config.Conf.SMS.VerificationCode.TemplateId,
+		config.Conf.SMS.ResetPassword.Sender,
+		config.Conf.SMS.ResetPassword.TemplateId,
 		config.Conf.SMS.CallbackUrl,
-		config.Conf.SMS.VerificationCode.Signature,
-		[]string{data.PhoneNumber},
-		[]string{data.Username, strconv.Itoa(num), expirationTime},
+		config.Conf.SMS.ResetPassword.Signature,
+		data.PhoneNumber,
+		num,
 	)
 	if err != nil {
 		return "", err
@@ -84,8 +84,8 @@ func (l *log) SMSSend(data *UserInfo, expirationTime string) (code string, err e
 		}
 		s := &model.LogSMS{
 			Note:       "密码重置",
-			Signature:  config.Conf.SMS.VerificationCode.Signature,
-			TemplateId: config.Conf.SMS.VerificationCode.TemplateId,
+			Signature:  config.Conf.SMS.ResetPassword.Signature,
+			TemplateId: config.Conf.SMS.ResetPassword.TemplateId,
 			Receiver:   result.OriginTo,
 			Status:     "API请求成功",
 			SmsMsgId:   result.SmsMsgId,
