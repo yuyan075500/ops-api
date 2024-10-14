@@ -7,12 +7,22 @@ import (
 	"ops-api/config"
 	"ops-api/dao"
 	"ops-api/model"
-	"ops-api/utils/sms"
+	messages "ops-api/utils/sms"
 )
 
-var Login login
+var Audit audit
 
-type login struct{}
+type audit struct{}
+
+type Result struct {
+	Total      int    `json:"total"`
+	OriginTo   string `json:"originTo"`
+	CreateTime string `json:"createTime"`
+	From       string `json:"from"`
+	SmsMsgId   string `json:"smsMsgId"`
+	CountryId  string `json:"countryId"`
+	Status     string `json:"status"`
+}
 
 // AliyunSMSReceipt 阿里云短信回执
 type AliyunSMSReceipt struct {
@@ -41,7 +51,7 @@ type ResponseBody struct {
 }
 
 // GetSMSReceipt 获取短信回执
-func (l *login) GetSMSReceipt(smsId int) (err error) {
+func (a *audit) GetSMSReceipt(smsId int) (err error) {
 
 	// 华为云不需要
 	if config.Conf.SMS.Provider != "aliyun" {
@@ -54,14 +64,14 @@ func (l *login) GetSMSReceipt(smsId int) (err error) {
 	}
 
 	// 查找短信记录
-	smsRecord, err := dao.Log.GetSendDetail(conditions)
+	smsRecord, err := dao.Audit.GetSendDetail(conditions)
 	if err != nil {
 		return err
 	}
 
 	// 获取短信回执
 	date := smsRecord.CreatedAt
-	receipt, err := sms.GetSMSReceipt(smsRecord.Receiver, smsRecord.SmsMsgId, date.Format("20060102"))
+	receipt, err := messages.GetSMSReceipt(smsRecord.Receiver, smsRecord.SmsMsgId, date.Format("20060102"))
 	if err != nil {
 		return err
 	}
@@ -100,24 +110,33 @@ func (l *login) GetSMSReceipt(smsId int) (err error) {
 	}
 
 	// 将回调数据写入数据库
-	if err := dao.Log.SMSCallback(callback); err != nil {
+	if err := dao.Audit.SMSCallback(callback); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// GetLoginRecordList 获取用户登录列表
-func (l *login) GetLoginRecordList(username string, page, limit int) (data *dao.LoginRecordList, err error) {
-	data, err = dao.Login.GetLoginRecordList(username, page, limit)
+// GetSMSRecordList 获取短信发送记录
+func (a *audit) GetSMSRecordList(receiver string, page, limit int) (data *dao.SMSRecordList, err error) {
+	data, err = dao.Audit.GetSMSRecordList(receiver, page, limit)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
 }
 
-// AddLoginRecord 新增登录记录
-func (l *login) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod string, failedReason error, c *gin.Context) (err error) {
+// GetLoginRecordList 获取系统登录记录
+func (a *audit) GetLoginRecordList(username string, page, limit int) (data *dao.LoginRecordList, err error) {
+	data, err = dao.Audit.GetLoginRecordList(username, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// AddLoginRecord 新增系统登录记录
+func (a *audit) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod string, failedReason error, c *gin.Context) (err error) {
 	// 获取客户端Agent
 	userAgent := c.Request.UserAgent()
 	// 获取客户端IP
@@ -138,7 +157,7 @@ func (l *login) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod st
 	}
 
 	// 记录登录客户端信息
-	if err := dao.Login.AddLoginRecord(tx, loginRecord); err != nil {
+	if err := dao.Audit.AddLoginRecord(tx, loginRecord); err != nil {
 		return err
 	}
 	return nil

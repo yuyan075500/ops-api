@@ -9,42 +9,17 @@ import (
 	"ops-api/global"
 	"ops-api/model"
 	"ops-api/utils"
-	"ops-api/utils/sms"
+	message "ops-api/utils/sms"
 	"strconv"
 	"strings"
 )
 
-var Log log
+var SMS sms
 
-type log struct{}
-
-// Response 短信API发送请求返回的数据
-type Response struct {
-	Result      []Result `json:"result"`      // 华为云
-	Code        string   `json:"code"`        // 华为云
-	Description string   `json:"description"` // 华为云
-	Body        Body     `json:"body"`        // 阿里云
-	StatusCode  int      `json:"statusCode"`  // 阿里云
-}
-type Body struct {
-	BizId     string `json:"BizId"`
-	Code      string `json:"Code"`
-	Message   string `json:"Message"`
-	RequestId string `json:"RequestId"`
-}
-
-type Result struct {
-	Total      int    `json:"total"`
-	OriginTo   string `json:"originTo"`
-	CreateTime string `json:"createTime"`
-	From       string `json:"from"`
-	SmsMsgId   string `json:"smsMsgId"`
-	CountryId  string `json:"countryId"`
-	Status     string `json:"status"`
-}
+type sms struct{}
 
 // SMSSend 发送短信
-func (l *log) SMSSend(data *sms.ResetPassword) (string, error) {
+func (s *sms) SMSSend(data *message.ResetPassword) (string, error) {
 
 	// 定义验证码
 	var code = strconv.Itoa(utils.GenerateRandomNumber())
@@ -56,7 +31,7 @@ func (l *log) SMSSend(data *sms.ResetPassword) (string, error) {
 	}
 
 	// 获取短信服务商
-	smsSender := sms.GetSMSSender()
+	smsSender := message.GetSMSSender()
 	if smsSender == nil {
 		return "", errors.New("不支持的短信服务提供商")
 	}
@@ -83,24 +58,15 @@ func (l *log) SMSSend(data *sms.ResetPassword) (string, error) {
 		SmsMsgId:   smsMsgId,
 	}
 
-	if err := dao.Log.AddSMSRecord(smsLog); err != nil {
+	if err := dao.Audit.AddSMSRecord(smsLog); err != nil {
 		return "", err
 	}
 
 	return code, nil
 }
 
-// GetSMSRecordList 获取发送短信列表
-func (l *log) GetSMSRecordList(receiver string, page, limit int) (data *dao.SMSRecordList, err error) {
-	data, err = dao.Log.GetSMSRecordList(receiver, page, limit)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
 // SMSCallback 短信回调
-func (l *log) SMSCallback(data string) error {
+func (s *sms) SMSCallback(data string) error {
 
 	// 对回调返回的数据进行处理
 	ss, _ := url.QueryUnescape(data)
@@ -123,7 +89,7 @@ func (l *log) SMSCallback(data string) error {
 	}
 
 	// 将回调数据写入数据库
-	if err := dao.Log.SMSCallback(callback); err != nil {
+	if err := dao.Audit.SMSCallback(callback); err != nil {
 		return err
 	}
 

@@ -9,9 +9,7 @@ import (
 func initSmsRouters(router *gin.Engine) {
 	sms := router.Group("/api/v1/sms")
 	{
-		// 获取重置密码验证码
-		sms.POST("/reset_password", controller.User.GetVerificationCode)
-		// 接收短信回调地址
-		sms.POST("/huawei/callback", controller.Log.SMSCallback)
+		// 接收短信回调（华为云）
+		sms.POST("/huawei/callback", controller.SMS.SMSCallback)
 	}
 }

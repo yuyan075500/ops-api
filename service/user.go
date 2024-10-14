@@ -13,7 +13,7 @@ import (
 	"ops-api/model"
 	"ops-api/utils"
 	"ops-api/utils/check"
-	"ops-api/utils/sms"
+	messages "ops-api/utils/sms"
 	"time"
 )
 
@@ -296,7 +296,7 @@ func (u *user) ResetUserMFA(id int) (err error) {
 }
 
 // GetVerificationCode 获取重置密码短信验证码
-func (u *user) GetVerificationCode(data *sms.ResetPassword, expirationTime int) (err error) {
+func (u *user) GetVerificationCode(data *messages.ResetPassword, expirationTime int) (err error) {
 
 	var (
 		keyName = fmt.Sprintf("%s_rest_password_verification_code", data.Username)
@@ -321,7 +321,7 @@ func (u *user) GetVerificationCode(data *sms.ResetPassword, expirationTime int) 
 	}
 
 	// 发送短信验证码
-	code, err := Log.SMSSend(data)
+	code, err := SMS.SMSSend(data)
 	if err != nil {
 		return err
 	}
@@ -672,7 +672,7 @@ func (u *user) RecordLoginInfo(status int, loginMethod, userName string, user *m
 	}
 
 	// 新增登录记录
-	if err := Login.AddLoginRecord(tx, status, userName, loginMethod, failedReason, c); err != nil {
+	if err := Audit.AddLoginRecord(tx, status, userName, loginMethod, failedReason, c); err != nil {
 		tx.Rollback()
 		return err
 	}
