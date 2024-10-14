@@ -13,6 +13,7 @@ import (
 	"ops-api/model"
 	"ops-api/utils"
 	"ops-api/utils/check"
+	"ops-api/utils/sms"
 	"time"
 )
 
@@ -295,7 +296,7 @@ func (u *user) ResetUserMFA(id int) (err error) {
 }
 
 // GetVerificationCode 获取重置密码短信验证码
-func (u *user) GetVerificationCode(data *UserInfo, expirationTime int) (err error) {
+func (u *user) GetVerificationCode(data *sms.ResetPassword, expirationTime int) (err error) {
 
 	var (
 		keyName = fmt.Sprintf("%s_rest_password_verification_code", data.Username)

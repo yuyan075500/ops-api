@@ -11,6 +11,7 @@ import (
 	"ops-api/model"
 	"ops-api/service"
 	"ops-api/utils"
+	"ops-api/utils/sms"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -625,7 +626,7 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 func (u *user) GetVerificationCode(c *gin.Context) {
 
 	var (
-		data           = &service.UserInfo{}
+		data           = &sms.ResetPassword{}
 		expirationTime = 5 // 指定验证码过期时间
 	)
 

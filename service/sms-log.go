@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
 	"gorm.io/gorm"
 	"net/url"
@@ -21,9 +20,17 @@ type log struct{}
 
 // Response 短信API发送请求返回的数据
 type Response struct {
-	Result      []Result `json:"result"`
-	Code        string   `json:"code"`
-	Description string   `json:"description"`
+	Result      []Result `json:"result"`      // 华为云
+	Code        string   `json:"code"`        // 华为云
+	Description string   `json:"description"` // 华为云
+	Body        Body     `json:"body"`        // 阿里云
+	StatusCode  int      `json:"statusCode"`  // 阿里云
+}
+type Body struct {
+	BizId     string `json:"BizId"`
+	Code      string `json:"Code"`
+	Message   string `json:"Message"`
+	RequestId string `json:"RequestId"`
 }
 
 type Result struct {
@@ -36,66 +43,51 @@ type Result struct {
 	Status     string `json:"status"`
 }
 
-// UserInfo 户重置密码时用户信息绑定的结构体
-type UserInfo struct {
-	Username    string `json:"username" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
-}
-
 // SMSSend 发送短信
-func (l *log) SMSSend(data *UserInfo) (code string, err error) {
+func (l *log) SMSSend(data *sms.ResetPassword) (string, error) {
 
-	var (
-		response Response
-		num      = utils.GenerateRandomNumber()
-	)
+	// 定义验证码
+	var code = strconv.Itoa(utils.GenerateRandomNumber())
 
-	// 在数据库中查询用户是否存在
+	// 查询用户是否存在
 	tx := global.MySQLClient.First(&model.AuthUser{}, "username = ? AND phone_number = ?", data.Username, data.PhoneNumber)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 		return "", errors.New("用户名或手机号错误")
 	}
 
-	// 发送短信验证码
-	resp, err := sms.Send(
-		config.Conf.SMS.ResetPassword.Sender,
-		config.Conf.SMS.ResetPassword.TemplateId,
-		config.Conf.SMS.CallbackUrl,
-		config.Conf.SMS.ResetPassword.Signature,
-		data.PhoneNumber,
-		num,
-	)
+	// 获取短信服务商
+	smsSender := sms.GetSMSSender()
+	if smsSender == nil {
+		return "", errors.New("不支持的短信服务提供商")
+	}
+
+	// 发送短信
+	resp, err := smsSender.SendSMS(data, code)
 	if err != nil {
 		return "", err
 	}
 
-	// 将发送短信API请求返回的数据转换为结构体
-	if err := json.Unmarshal([]byte(resp), &response); err != nil {
+	// 处理响应并获取短信唯一标识
+	smsMsgId, err := smsSender.ProcessResponse(resp)
+	if err != nil {
 		return "", err
 	}
-	// 将短信发送的记录存入数据库
-	for _, result := range response.Result {
-		if response.Code != "E000510" && response.Code != "000000" {
-			return "", errors.New("短信发送失败，错误码：" + response.Code)
-		}
 
-		if response.Code == "E000510" && result.Status != "000000" {
-			return "", errors.New("短信发送失败，错误码：" + result.Status)
-		}
-		s := &model.LogSMS{
-			Note:       "密码重置",
-			Signature:  config.Conf.SMS.ResetPassword.Signature,
-			TemplateId: config.Conf.SMS.ResetPassword.TemplateId,
-			Receiver:   result.OriginTo,
-			Status:     "API请求成功",
-			SmsMsgId:   result.SmsMsgId,
-		}
-		if err := dao.Log.AddSMSRecord(s); err != nil {
-			return "", err
-		}
+	// 记录短信发送日志
+	smsLog := &model.LogSMS{
+		Note:       "密码重置",
+		Signature:  config.Conf.SMS.ResetPassword.Signature,
+		TemplateId: config.Conf.SMS.ResetPassword.TemplateId,
+		Receiver:   data.PhoneNumber,
+		Status:     "API请求成功",
+		SmsMsgId:   smsMsgId,
 	}
 
-	return strconv.Itoa(num), nil
+	if err := dao.Log.AddSMSRecord(smsLog); err != nil {
+		return "", err
+	}
+
+	return code, nil
 }
 
 // GetSMSRecordList 获取发送短信列表
