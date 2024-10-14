@@ -18,10 +18,17 @@ type ResetPassword struct {
 	PhoneNumber string `json:"phone_number" binding:"required"`
 }
 
+// SendDetail 发送详情
+type SendDetail struct {
+	Date        string
+	PhoneNumber string
+	BizId       string
+}
+
 // Response 短信返回的数据
 type Response struct {
 	Result      []Result `json:"result"`      // 华为云
-	Code        string   `json:"code"`        // 华为云
+	Code        string   `json:"code"`        // 华为云/阿里云短信回执
 	Description string   `json:"description"` // 华为云
 	Body        Body     `json:"body"`        // 阿里云
 	StatusCode  int      `json:"statusCode"`  // 阿里云

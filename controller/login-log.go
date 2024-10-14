@@ -53,3 +53,39 @@ func (l *login) GetLoginRecordList(c *gin.Context) {
 		"data": data,
 	})
 }
+
+// GetSMSReceipt 获取短信回执
+// @Summary 获取短信回执
+// @Description 日志相关接口
+// @Tags 日志管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param id query int true "短信记录ID"
+// @Success 200 {string} json "{"code": 0}"
+// @Router /api/v1/audit/sms/receipt [get]
+func (l *login) GetSMSReceipt(c *gin.Context) {
+	params := new(struct {
+		Id int `form:"id" binding:"required"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	err := service.Login.GetSMSReceipt(params.Id)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+	})
+}

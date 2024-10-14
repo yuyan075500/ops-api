@@ -61,6 +61,18 @@ func (l *log) AddSMSRecord(data *model.LogSMS) (err error) {
 	return nil
 }
 
+// GetSendDetail 获取短信发送记录
+func (l *log) GetSendDetail(conditions interface{}) (*model.LogSMS, error) {
+
+	var sms model.LogSMS
+
+	if err := global.MySQLClient.Where(conditions).First(&sms).Error; err != nil {
+		return nil, err
+	}
+
+	return &sms, nil
+}
+
 // SMSCallback 短信回执
 func (l *log) SMSCallback(data *Callback) (err error) {
 	if err := global.MySQLClient.Model(&model.LogSMS{}).Where("sms_msg_id = ?", data.SmsMsgId).Updates(data).Error; err != nil {

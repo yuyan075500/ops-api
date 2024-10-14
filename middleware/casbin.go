@@ -79,6 +79,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/.well-known/openid-configuration", // OIDC配置
 			"/api/v1/sso/oidc/jwks",             // OIDC JWKS配置
 			"/api/v1/sso/cookie/auth",           // Cookie认证
+			"/api/v1/audit/sms/receipt",         // 获取短信回执
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {
