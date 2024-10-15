@@ -83,21 +83,21 @@ func MySQLInit() error {
 		})
 		global.MySQLClient.FirstOrCreate(&site1, model.Site{
 			Name:        "密码重置",
-			Description: "统一认证平台密码自助更改平台",
+			Description: "统一认证平台密码自助更改平台，支持本地、Windows AD和OpenLDAP用户密码修改",
 			Address:     fmt.Sprintf("%s/reset_password", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		})
 		global.MySQLClient.FirstOrCreate(&site2, model.Site{
 			Name:        "接口文档",
-			Description: "统一认证平台接口文档",
+			Description: "统一认证平台Swagger接口文档，生产环境建议关闭",
 			Address:     fmt.Sprintf("%s/swagger/index.html", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		})
 		global.MySQLClient.FirstOrCreate(&site3, model.Site{
 			Name:        "站点导航",
-			Description: "统一认证平台站点导航",
+			Description: "统一认证平台站点导航，无需认证，可在后台进行编辑",
 			Address:     fmt.Sprintf("%s/sites", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
