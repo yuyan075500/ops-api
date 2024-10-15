@@ -15,6 +15,14 @@ import (
 // MySQLInit MySQL初始化
 func MySQLInit() error {
 
+	var (
+		user      model.AuthUser
+		siteGroup model.SiteGroup
+		site1     model.Site
+		site2     model.Site
+		site3     model.Site
+	)
+
 	// 组装数据库连接配置
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.Conf.MySQL.User,
@@ -57,14 +65,44 @@ func MySQLInit() error {
 	logger.Info("MySQL数据库初始化成功.")
 
 	// 创建超级用户
-	var user model.AuthUser
-	global.MySQLClient.FirstOrCreate(&user, model.AuthUser{
+	result := global.MySQLClient.FirstOrCreate(&user, model.AuthUser{
 		Name:     "管理员",
 		Username: "admin",
 		IsActive: true,
 		Password: "admin@123...",
 		WwId:     nil,
 	})
+
+	if result.RowsAffected == 0 {
+		logger.Warn("admin用户已存在.")
+	} else {
+		logger.Info("admin用户创建成功.")
+		// 创建初始站点
+		global.MySQLClient.FirstOrCreate(&siteGroup, model.SiteGroup{
+			Name: "信息化公用",
+		})
+		global.MySQLClient.FirstOrCreate(&site1, model.Site{
+			Name:        "密码重置",
+			Description: "统一认证平台密码自助更改平台",
+			Address:     fmt.Sprintf("%s/reset_password", config.Conf.ExternalUrl),
+			SSO:         false,
+			SiteGroupID: siteGroup.ID,
+		})
+		global.MySQLClient.FirstOrCreate(&site2, model.Site{
+			Name:        "接口文档",
+			Description: "统一认证平台接口文档",
+			Address:     fmt.Sprintf("%s/swagger/index.html", config.Conf.ExternalUrl),
+			SSO:         false,
+			SiteGroupID: siteGroup.ID,
+		})
+		global.MySQLClient.FirstOrCreate(&site3, model.Site{
+			Name:        "站点导航",
+			Description: "统一认证平台站点导航",
+			Address:     fmt.Sprintf("%s/sites", config.Conf.ExternalUrl),
+			SSO:         false,
+			SiteGroupID: siteGroup.ID,
+		})
+	}
 
 	return nil
 }
