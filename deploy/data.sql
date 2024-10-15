@@ -1,22 +1,20 @@
 SET NAMES 'utf8mb4';
 
 # 一级菜单
-INSERT INTO `system_menu` VALUES (1, '系统导航', 'Navigation', 'navigation', '/', 'Layout', 1, '/navigation/sites');
-INSERT INTO `system_menu` VALUES (2, '用户管理', 'User', 'menu-user', '/user', 'Layout', 2, null);
-INSERT INTO `system_menu` VALUES (3, '资产管理', 'Asset', 'menu-asset', '/asset', 'Layout', 3, null);
-INSERT INTO `system_menu` VALUES (4, '日志审计', 'Audit', 'menu-audit', '/audit', 'Layout', 4, null);
-INSERT INTO `system_menu` VALUES (5, '系统设置', 'System', 'menu-system', '/system', 'Layout', 5, null);
+INSERT INTO `system_menu` VALUES (1, '用户管理', 'User', 'menu-user', '/user', 'Layout', 2, null);
+INSERT INTO `system_menu` VALUES (2, '资产管理', 'Asset', 'menu-asset', '/asset', 'Layout', 3, null);
+INSERT INTO `system_menu` VALUES (3, '日志审计', 'Audit', 'menu-audit', '/audit', 'Layout', 4, null);
+INSERT INTO `system_menu` VALUES (4, '系统设置', 'System', 'menu-system', '/system', 'Layout', 5, null);
 
 # 二级菜单
-INSERT INTO `system_sub_menu` VALUES (1, '站点导航', 'SiteNavigation', 'sub-menu-site-navigation', 'navigation/sites', 'dashboard/index', 1, null, 1);
-INSERT INTO `system_sub_menu` VALUES (2, '用户管理', 'UserManagement', 'sub-menu-user', 'user', 'user/user/index', 1, null, 2);
-INSERT INTO `system_sub_menu` VALUES (3, '分组管理', 'GroupManagement', 'sub-menu-group', 'group', 'user/group/index', 2, null, 2);
-INSERT INTO `system_sub_menu` VALUES (4, '账号管理', 'AccountManagement', 'sub-menu-account', 'account', 'asset/account/index', 1, null, 3);
-INSERT INTO `system_sub_menu` VALUES (5, '站点管理', 'SiteManagement', 'sub-menu-site', 'site', 'asset/site/index', 2, null, 3);
-INSERT INTO `system_sub_menu` VALUES (6, '登录日志', 'AuditLoginRecord', 'sub-menu-login-record', 'login', 'audit/login/index', 1, null, 4);
-INSERT INTO `system_sub_menu` VALUES (7, '短信记录', 'AuditSMSRecord', 'sub-menu-sms-record', 'sms', 'audit/sms/index', 2, null, 4);
-INSERT INTO `system_sub_menu` VALUES (8, '菜单管理', 'MenuManagement', 'sub-menu-menu', 'menu', 'system/menu/index', 1, null, 5);
-INSERT INTO `system_sub_menu` VALUES (9, '系统设置', 'ConfigManagement', 'sub-menu-config', 'config', 'system/config/index', 2, null, 5);
+INSERT INTO `system_sub_menu` VALUES (1, '用户管理', 'UserManagement', 'sub-menu-user', 'user', 'user/user/index', 1, null, 1);
+INSERT INTO `system_sub_menu` VALUES (2, '分组管理', 'GroupManagement', 'sub-menu-group', 'group', 'user/group/index', 2, null, 1);
+INSERT INTO `system_sub_menu` VALUES (3, '账号管理', 'AccountManagement', 'sub-menu-account', 'account', 'asset/account/index', 1, null, 2);
+INSERT INTO `system_sub_menu` VALUES (4, '站点管理', 'SiteManagement', 'sub-menu-site', 'site', 'asset/site/index', 2, null, 2);
+INSERT INTO `system_sub_menu` VALUES (5, '登录日志', 'AuditLoginRecord', 'sub-menu-login-record', 'login', 'audit/login/index', 1, null, 3);
+INSERT INTO `system_sub_menu` VALUES (6, '短信记录', 'AuditSMSRecord', 'sub-menu-sms-record', 'sms', 'audit/sms/index', 2, null, 3);
+INSERT INTO `system_sub_menu` VALUES (7, '菜单管理', 'MenuManagement', 'sub-menu-menu', 'menu', 'system/menu/index', 1, null, 4);
+INSERT INTO `system_sub_menu` VALUES (8, '系统设置', 'ConfigManagement', 'sub-menu-config', 'config', 'system/config/index', 2, null, 4);
 
 # API接口
 INSERT INTO `system_path` VALUES (1, 'AddUser', '/api/v1/user', 'POST', 'UserManagement', '新增用户');
