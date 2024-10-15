@@ -228,6 +228,22 @@ func (u *user) AddUser(data *dao.UserCreate) (err error) {
 
 // DeleteUser 删除
 func (u *user) DeleteUser(id int) (err error) {
+
+	// 定义用户匹配条件
+	conditions := map[string]interface{}{
+		"id": id,
+	}
+
+	// 在本地数据库中查找匹配的用户
+	user, err := dao.User.GetUser(conditions)
+	if err != nil {
+		return err
+	}
+
+	if user.ID == 1 || user.Username == "admin" {
+		return errors.New("超级管理员不允许删除")
+	}
+
 	err = dao.User.DeleteUser(id)
 	if err != nil {
 		return err
