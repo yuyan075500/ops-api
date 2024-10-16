@@ -84,25 +84,34 @@ type UpdateSite struct {
 }
 
 // GetSiteGuideList 获取站点列表（站点导航）
-func (s *site) GetSiteGuideList() (data *SiteGuideList, err error) {
+func (s *site) GetSiteGuideList(name string) (data *SiteGuideList, err error) {
 	// 定义返回的内容
 	var siteGroups []*model.SiteGroup
 
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
-		Preload("Sites"). // 预加载分组包含的站点
+		Preload("Sites", "name like ? OR description like ?", "%"+name+"%", "%"+name+"%"). // 预加载分组包含的站点
 		Find(&siteGroups)
 	if tx.Error != nil {
 		return nil, errors.New(tx.Error.Error())
 	}
 
+	// 通过遍历结果集过滤掉没有站点的分组
+	filteredSiteGroups := make([]*model.SiteGroup, 0)
+	for _, group := range siteGroups {
+		// 只保留包含站点的分组
+		if len(group.Sites) > 0 {
+			filteredSiteGroups = append(filteredSiteGroups, group)
+		}
+	}
+
 	// 最外层结构体数据绑定（由于需要对站点URL特殊处理，所以不能直接返回siteGroups结果）
 	siteList := &SiteGuideList{
-		Items: make([]*SiteGuideGroup, len(siteGroups)), // 初始化分组列表切片，指定长度为siteGroups
+		Items: make([]*SiteGuideGroup, len(filteredSiteGroups)), // 初始化分组列表切片，指定长度为siteGroups
 	}
 
 	// 对分组进行循环处理
-	for i, sg := range siteGroups {
+	for i, sg := range filteredSiteGroups {
 		siteGroup := &SiteGuideGroup{
 			ID:    sg.ID,
 			Name:  sg.Name,
@@ -140,7 +149,7 @@ func (s *site) GetSiteGuideList() (data *SiteGuideList, err error) {
 }
 
 // GetSiteList 获取站点列表（表格）
-func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err error) {
+func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *SiteList, err error) {
 	// 定义数据的起始位置
 	startSet := (page - 1) * limit
 
@@ -152,10 +161,10 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
-		Preload("Sites").                   // 预加载分组包含的站点
-		Preload("Sites.Users").             // 确保预加载站点用户
-		Where("name like ?", "%"+name+"%"). // 实现过滤
-		Count(&total).                      // 获取总数
+		Preload("Sites", "name like ? OR description like ?", "%"+siteName+"%", "%"+siteName+"%"). // 预加载分组包含的站点
+		Preload("Sites.Users").                                                                    // 确保预加载站点用户
+		Where("name like ?", "%"+groupName+"%").
+		Count(&total). // 获取总数
 		Limit(limit).
 		Offset(startSet).
 		Find(&siteGroups)
@@ -176,8 +185,6 @@ func (s *site) GetSiteList(name string, page, limit int) (data *SiteList, err er
 			Name:  sg.Name,
 			Sites: make([]*SiteItem, len(sg.Sites)), // 初始化分组内的站点列表切片，指定长度为sg.Sites
 		}
-
-		// 对分组内的站点循环处理
 		for j, s := range sg.Sites {
 			siteItem := &SiteItem{
 				ID:           s.ID,

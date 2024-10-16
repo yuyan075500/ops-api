@@ -45,8 +45,8 @@ type SiteUserUpdate struct {
 }
 
 // GetSiteList 获取站点分组列表（表格）
-func (s *site) GetSiteList(name string, page, limit int) (data *dao.SiteList, err error) {
-	data, err = dao.Site.GetSiteList(name, page, limit)
+func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *dao.SiteList, err error) {
+	data, err = dao.Site.GetSiteList(groupName, siteName, page, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +54,8 @@ func (s *site) GetSiteList(name string, page, limit int) (data *dao.SiteList, er
 }
 
 // GetSiteGuideList 获取站点分组列表（站点导航）
-func (s *site) GetSiteGuideList() (data *dao.SiteGuideList, err error) {
-	data, err = dao.Site.GetSiteGuideList()
+func (s *site) GetSiteGuideList(name string) (data *dao.SiteGuideList, err error) {
+	data, err = dao.Site.GetSiteGuideList(name)
 	if err != nil {
 		return nil, err
 	}

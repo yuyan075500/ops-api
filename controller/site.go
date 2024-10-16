@@ -17,8 +17,8 @@ var Site site
 
 type site struct{}
 
-// GetSiteList 获取站点列表
-// @Summary 获取站点列表
+// GetSiteList 获取站点列表（表格）
+// @Summary 获取站点列表（表格）
 // @Description 站点关接口
 // @Tags 站点管理
 // @Param Authorization header string true "Bearer 用户令牌"
@@ -29,9 +29,10 @@ type site struct{}
 // @Router /api/v1/sites [get]
 func (s *site) GetSiteList(c *gin.Context) {
 	params := new(struct {
-		Name  string `form:"name"`
-		Page  int    `form:"page" binding:"required"`
-		Limit int    `form:"limit" binding:"required"`
+		GroupName string `form:"groupName"`
+		SiteName  string `form:"siteName"`
+		Page      int    `form:"page" binding:"required"`
+		Limit     int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
 		logger.Error("ERROR：" + err.Error())
@@ -42,7 +43,7 @@ func (s *site) GetSiteList(c *gin.Context) {
 		return
 	}
 
-	data, err := service.Site.GetSiteList(params.Name, params.Page, params.Limit)
+	data, err := service.Site.GetSiteList(params.GroupName, params.SiteName, params.Page, params.Limit)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
@@ -58,16 +59,27 @@ func (s *site) GetSiteList(c *gin.Context) {
 	})
 }
 
-// GetSiteGuideList 获取站点列表
-// @Summary 获取站点列表
+// GetSiteGuideList 获取站点列表（导航）
+// @Summary 获取站点列表（导航）
 // @Description 站点关接口
 // @Tags 站点管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/site/guide [get]
 func (s *site) GetSiteGuideList(c *gin.Context) {
+	params := new(struct {
+		Name string `form:"name"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
 
-	data, err := service.Site.GetSiteGuideList()
+	data, err := service.Site.GetSiteGuideList(params.Name)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{
