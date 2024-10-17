@@ -45,6 +45,7 @@ func MySQLInit() error {
 		&model.AuthUser{},
 		&model.AuthGroup{},
 		&model.SiteGroup{},
+		&model.Tag{},
 		&model.Site{},
 		&model.Menu{},
 		&model.SubMenu{},

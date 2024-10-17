@@ -36,6 +36,7 @@ type Site struct {
 	IDPName      string      `json:"idp_name" gorm:"default:null;column:idp_name"` // SAML2.0 SP 华为云相关
 	SiteGroupID  uint        `json:"site_group_id"`
 	Users        []*AuthUser `json:"users" gorm:"many2many:site_users"`
+	Tags         []*Tag      `json:"tags" gorm:"many2many:site_tags"`
 }
 
 func (*Site) TableName() (name string) {

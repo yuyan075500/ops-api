@@ -29,6 +29,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 	initMenuRouters(router)
 	initAuthRouters(router)
 	initSSORouters(router)
+	initTagRouters(router)
 
 	// 健康检查
 	router.GET("/health", func(c *gin.Context) {

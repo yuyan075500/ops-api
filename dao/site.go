@@ -2,6 +2,7 @@ package dao
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/global"
 	"ops-api/model"
@@ -57,6 +58,7 @@ type SiteItem struct {
 	RedirectUrl  string           `json:"redirect_url"`
 	IDPName      string           `json:"idp_name"`
 	Users        []*UserBasicInfo `json:"users"`
+	Tags         []*string        `json:"tags"`
 }
 
 // SiteGuideItem 站点（站点导航）
@@ -162,7 +164,8 @@ func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *S
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
 		Preload("Sites", "name like ? OR description like ?", "%"+siteName+"%", "%"+siteName+"%"). // 预加载分组包含的站点
-		Preload("Sites.Users").                                                                    // 确保预加载站点用户
+		Preload("Sites.Users").                                                                    // 预加载站点用户
+		Preload("Sites.Tags").                                                                     // 预加载站点标签
 		Where("name like ?", "%"+groupName+"%").
 		Count(&total). // 获取总数
 		Limit(limit).
@@ -223,6 +226,12 @@ func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *S
 				}
 			}
 
+			// 处理标签信息
+			siteItem.Tags = make([]*string, len(s.Tags))
+			for k, t := range s.Tags {
+				siteItem.Tags[k] = &t.Name
+			}
+
 			// 追加站点到分组
 			siteGroup.Sites[j] = siteItem
 		}
@@ -243,8 +252,8 @@ func (s *site) AddGroup(data *model.SiteGroup) (err error) {
 }
 
 // AddSite 新增站点
-func (s *site) AddSite(data *model.Site) (err error) {
-	if err := global.MySQLClient.Create(&data).Error; err != nil {
+func (s *site) AddSite(tx *gorm.DB, data *model.Site) (err error) {
+	if err := tx.Create(&data).Error; err != nil {
 		return errors.New(err.Error())
 	}
 	return nil
@@ -259,9 +268,9 @@ func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
 }
 
 // UpdateSite 修改站点
-func (s *site) UpdateSite(site *model.Site, data *UpdateSite) (err error) {
-	if err := global.MySQLClient.Model(&site).Updates(data).Error; err != nil {
-		return errors.New(err.Error())
+func (s *site) UpdateSite(tx *gorm.DB, site *model.Site, data *UpdateSite) (err error) {
+	if err := tx.Model(&site).Omit("Tags").Updates(data).Error; err != nil {
+		return err
 	}
 	return nil
 }
@@ -290,6 +299,12 @@ func (s *site) DeleteSite(site *model.Site) (err error) {
 
 	// 删除站点内所有用户
 	if err := tx.Model(&site).Association("Users").Clear(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 删除站点关联的标签
+	if err := tx.Model(&site).Association("Tags").Clear(); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -351,10 +366,28 @@ func (s *site) UpdateSiteUser(site *model.Site, users []model.AuthUser) (err err
 	return nil
 }
 
+// UpdateSiteTag 更新站点标签
+func (s *site) UpdateSiteTag(tx *gorm.DB, site *model.Site, tags []model.Tag) (err error) {
+	if err := tx.Model(&site).Association("Tags").Replace(tags); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // ClearSiteUser 清空站点用户
 func (s *site) ClearSiteUser(site *model.Site) (err error) {
 	if err := global.MySQLClient.Model(&site).Association("Users").Clear(); err != nil {
-		return errors.New(err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// ClearSiteTag 清空站点标签
+func (s *site) ClearSiteTag(site *model.Site) (err error) {
+	if err := global.MySQLClient.Model(&site).Association("Tags").Clear(); err != nil {
+		return err
 	}
 
 	return nil

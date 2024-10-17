@@ -41,7 +41,8 @@ INSERT INTO `system_path` VALUES (21, 'AddSiteGroup', '/api/v1/site/group', 'POS
 INSERT INTO `system_path` VALUES (22, 'UpdateSiteGroup', '/api/v1/site/group', 'PUT', 'SiteManagement', '修改站点分组');
 INSERT INTO `system_path` VALUES (23, 'DeleteSiteGroup', '/api/v1/site/group/:id', 'DELETE', 'SiteManagement', '删除站点分组');
 INSERT INTO `system_path` VALUES (24, 'UpdateSiteUser', '/api/v1/site/users', 'PUT', 'SiteManagement', '更改站点用户');
-INSERT INTO `system_path` VALUES (25, 'GetSMSRecordList', '/api/v1/audit/sms', 'GET', 'AuditSMSRecord', '获取短信发送记录');
-INSERT INTO `system_path` VALUES (26, 'GetLoginRecordList', '/api/v1/audit/login', 'GET', 'AuditLoginRecord', '获取用户登录记录');
-INSERT INTO `system_path` VALUES (27, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
-INSERT INTO `system_path` VALUES (28, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
+INSERT INTO `system_path` VALUES (25, 'UpdateSiteTag', '/api/v1/site/tags', 'PUT', 'SiteManagement', '更改站点标签');
+INSERT INTO `system_path` VALUES (26, 'GetSMSRecordList', '/api/v1/audit/sms', 'GET', 'AuditSMSRecord', '获取短信发送记录');
+INSERT INTO `system_path` VALUES (27, 'GetLoginRecordList', '/api/v1/audit/login', 'GET', 'AuditLoginRecord', '获取用户登录记录');
+INSERT INTO `system_path` VALUES (28, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
+INSERT INTO `system_path` VALUES (29, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');

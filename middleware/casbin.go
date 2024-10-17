@@ -80,6 +80,7 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/sso/oidc/jwks",             // OIDC JWKS配置
 			"/api/v1/sso/cookie/auth",           // Cookie认证
 			"/api/v1/audit/sms/receipt",         // 获取短信回执
+			"/api/v1/tag/list",                  // 获取标签列表
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {
