@@ -63,11 +63,12 @@ type SiteItem struct {
 
 // SiteGuideItem 站点（站点导航）
 type SiteGuideItem struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Icon        string `json:"icon"`
-	Address     string `json:"address"`
-	Description string `json:"description"`
+	ID          uint      `json:"id"`
+	Name        string    `json:"name"`
+	Icon        string    `json:"icon"`
+	Address     string    `json:"address"`
+	Description string    `json:"description"`
+	Tags        []*string `json:"tags"`
 }
 
 // UpdateSite 更新站点结构体，定义新增时的字段信息
@@ -93,6 +94,7 @@ func (s *site) GetSiteGuideList(name string) (data *SiteGuideList, err error) {
 	// 获取分组列表
 	tx := global.MySQLClient.Model(&model.SiteGroup{}).
 		Preload("Sites", "name like ? OR description like ?", "%"+name+"%", "%"+name+"%"). // 预加载分组包含的站点
+		Preload("Sites.Tags").
 		Find(&siteGroups)
 	if tx.Error != nil {
 		return nil, errors.New(tx.Error.Error())
@@ -137,6 +139,12 @@ func (s *site) GetSiteGuideList(name string) (data *SiteGuideList, err error) {
 				} else {
 					siteItem.Icon = iconUrl.String()
 				}
+			}
+
+			// 处理标签信息
+			siteItem.Tags = make([]*string, len(s.Tags))
+			for k, t := range s.Tags {
+				siteItem.Tags[k] = &t.Name
 			}
 
 			// 追加站点到分组

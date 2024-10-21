@@ -178,11 +178,11 @@ const docTemplate = `{
         },
         "/api/v1/audit/login": {
             "get": {
-                "description": "日志相关接口",
+                "description": "审计相关接口",
                 "tags": [
-                    "日志管理"
+                    "登录日志管理"
                 ],
-                "summary": "获取用户登录列表",
+                "summary": "获取系统登录记录",
                 "parameters": [
                     {
                         "type": "string",
@@ -224,11 +224,11 @@ const docTemplate = `{
         },
         "/api/v1/audit/sms": {
             "get": {
-                "description": "日志相关接口",
+                "description": "审计相关接口",
                 "tags": [
-                    "日志管理"
+                    "短信发送记录管理"
                 ],
-                "summary": "获取短信发送列表",
+                "summary": "获取短信发送记录",
                 "parameters": [
                     {
                         "type": "string",
@@ -261,6 +261,39 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/audit/sms/receipt": {
+            "get": {
+                "description": "审计相关接口",
+                "tags": [
+                    "登录日志管理"
+                ],
+                "summary": "获取短信回执（阿里云）",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "短信记录ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0}",
                         "schema": {
                             "type": "string"
                         }
@@ -899,7 +932,7 @@ const docTemplate = `{
                 "tags": [
                     "站点管理"
                 ],
-                "summary": "获取站点列表",
+                "summary": "获取站点列表（导航）",
                 "parameters": [
                     {
                         "type": "string",
@@ -945,6 +978,41 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"path\": logoPath}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/site/tags": {
+            "put": {
+                "description": "站点关接口",
+                "tags": [
+                    "站点管理"
+                ],
+                "summary": "更新站点标签",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.SiteTagUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -1026,7 +1094,7 @@ const docTemplate = `{
                 "tags": [
                     "站点管理"
                 ],
-                "summary": "获取站点列表",
+                "summary": "获取站点列表（表格）",
                 "parameters": [
                     {
                         "type": "string",
@@ -1066,7 +1134,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/sms/reset_password_code": {
+        "/api/v1/sms/reset_password": {
             "post": {
                 "description": "个人信息管理相关接口",
                 "consumes": [
@@ -1797,6 +1865,9 @@ const docTemplate = `{
                 },
                 "phone_number": {
                     "type": "string"
+                },
+                "ww_id": {
+                    "type": "string"
                 }
             }
         },
@@ -2256,6 +2327,24 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "service.SiteTagUpdate": {
+            "type": "object",
+            "required": [
+                "id",
+                "tags"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

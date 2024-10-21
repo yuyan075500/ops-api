@@ -71,6 +71,8 @@ definitions:
         type: boolean
       phone_number:
         type: string
+      ww_id:
+        type: string
     required:
     - id
     type: object
@@ -393,6 +395,18 @@ definitions:
     - id
     - name
     type: object
+  service.SiteTagUpdate:
+    properties:
+      id:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+    required:
+    - id
+    - tags
+    type: object
   service.SiteUserUpdate:
     properties:
       id:
@@ -610,7 +624,7 @@ paths:
       - 用户认证
   /api/v1/audit/login:
     get:
-      description: 日志相关接口
+      description: 审计相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -636,12 +650,12 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取用户登录列表
+      summary: 获取系统登录记录
       tags:
-      - 日志管理
+      - 登录日志管理
   /api/v1/audit/sms:
     get:
-      description: 日志相关接口
+      description: 审计相关接口
       parameters:
       - description: Bearer 用户令牌
         in: header
@@ -667,9 +681,31 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取短信发送列表
+      summary: 获取短信发送记录
       tags:
-      - 日志管理
+      - 短信发送记录管理
+  /api/v1/audit/sms/receipt:
+    get:
+      description: 审计相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 短信记录ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0}'
+          schema:
+            type: string
+      summary: 获取短信回执（阿里云）
+      tags:
+      - 登录日志管理
   /api/v1/group:
     post:
       consumes:
@@ -1120,7 +1156,7 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取站点列表
+      summary: 获取站点列表（导航）
       tags:
       - 站点管理
   /api/v1/site/logoUpload:
@@ -1143,6 +1179,29 @@ paths:
           schema:
             type: string
       summary: 站点图片上传
+      tags:
+      - 站点管理
+  /api/v1/site/tags:
+    put:
+      description: 站点关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/service.SiteTagUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新站点标签
       tags:
       - 站点管理
   /api/v1/site/users:
@@ -1196,10 +1255,10 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取站点列表
+      summary: 获取站点列表（表格）
       tags:
       - 站点管理
-  /api/v1/sms/reset_password_code:
+  /api/v1/sms/reset_password:
     post:
       consumes:
       - application/json
