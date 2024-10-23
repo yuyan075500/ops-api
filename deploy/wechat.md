@@ -16,19 +16,7 @@ wechat:
 * [x] agentId：企业微信管理后台，应用详情中获取。
 * [x] secret：企业微信管理后台，应用详情中获取。
 # 前端应用配置
-1. **配置修改**：修改配置文件`.env.production`中飞书相关的配置：
-    ```js
-    VUE_APP_WECHAT_APP_ID = ''
-    VUE_APP_WECHAT_AGENT_ID = ''
-    ```
-* [x] VUE_APP_WECHAT_APP_ID：和后端应用中配置的`corpId`一致。
-* [x] VUE_APP_WECHAT_AGENT_ID：和后端应用中配置的`agentId`一致。
-2. **代码编译**：执行下面的命令对前端项目进行编译打包。
-    ```shell
-    npm install
-    npm run build:prod
-    ```
-3. **镜像打包**：前端项目在部署时需要将编译好的前端静态文件打包到容器镜像中，推荐使用项目默认的`Dockerfile`进行打包。
+参考 [前端配置](https://github.com/yuyan075500/ops-web "前端配置") 相关文档，修改配置文件中关于企业微信相关的配置项，并构建打包项目，使用新的容器镜像。
 # 创建本地用户
 企业微信扫码登录需要事先在本地创建对应的用户，或者从LDAP、Windows AD中同步用户到本地。
 # 本地用户与企业微信用户关联

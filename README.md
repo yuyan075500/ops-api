@@ -26,7 +26,7 @@
 # 功能概览
 ## 认证相关
 * **SSO单点登录**：支持`CAS 3.0`、`OAuth 2.0`和`SAML2`协议，可以参考 [客户端配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md "配置指南") 和 [已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
-* **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置")和本地账号认证。
+* **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置") 和本地账号认证。前端登录页面支持个性化配置，只显示某个平台，如钉钉、企业微信、飞书等，参考 [前端配置指南](https://github.com/yuyan075500/ops-web "前端配置")，按要需求修改前端项目配置文件并打包新的镜像即可。
 * **双因素**：支持使用Google Authenticator、阿里云APP和华为云APP扫描获取动态验证码。
 
     <br>
@@ -75,11 +75,10 @@
 * 企业网站导航：访问地址：`/sites`。
 # 项目部署
 参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
+# 开发环境搭建
+参考 [开发环境搭建](https://github.com/yuyan075500/ops-api/blob/main/deploy/dev.md "开发环境搭建")。
 # 项目交流
-如果你对此项目感兴趣，欢迎扫描下方二维码加入微信交流群。  
-<br>
-<img src="deploy/sso_example/img/wechat.jpg" alt="img" width="200" height="200"/>
-## 作者联系方式
+如果你对此项目感兴趣，可添加作者联系方式
 WeChat：270142877。  
 Email：270142877@qq.com。  
 <br>
