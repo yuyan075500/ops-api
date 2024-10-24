@@ -40,7 +40,7 @@ type Callback struct {
 }
 
 // GetLoginRecordList 获取系统登录记录
-func (a *audit) GetLoginRecordList(username string, page, limit int) (data *LoginRecordList, err error) {
+func (a *audit) GetLoginRecordList(name string, page, limit int) (data *LoginRecordList, err error) {
 
 	// 定义数据的起始位置
 	startSet := (page - 1) * limit
@@ -53,7 +53,7 @@ func (a *audit) GetLoginRecordList(username string, page, limit int) (data *Logi
 
 	// 获取菜单列表
 	tx := global.MySQLClient.Model(&model.LogLogin{}).
-		Where("username like ?", "%"+username+"%").
+		Where("username like ? OR source_ip like ? OR user_agent like ? OR city like ?", "%"+name+"%", "%"+name+"%", "%"+name+"%", "%"+name+"%").
 		Count(&total).
 		Limit(limit).
 		Offset(startSet).

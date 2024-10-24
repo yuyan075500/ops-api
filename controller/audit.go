@@ -97,15 +97,15 @@ func (l *audit) GetSMSReceipt(c *gin.Context) {
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param page query int true "分页"
 // @Param limit query int true "分页大小"
-// @Param username query string false "用户名"
+// @Param name query string false "关键字"
 // @Success 200 {string} json "{"code": 0, "data": []}"
 // @Router /api/v1/audit/login [get]
 func (l *audit) GetLoginRecord(c *gin.Context) {
 
 	params := new(struct {
-		Username string `form:"username"`
-		Page     int    `form:"page" binding:"required"`
-		Limit    int    `form:"limit" binding:"required"`
+		Name  string `form:"name"`
+		Page  int    `form:"page" binding:"required"`
+		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
 		logger.Error("ERROR：" + err.Error())
@@ -116,7 +116,7 @@ func (l *audit) GetLoginRecord(c *gin.Context) {
 		return
 	}
 
-	data, err := service.Audit.GetLoginRecordList(params.Username, params.Page, params.Limit)
+	data, err := service.Audit.GetLoginRecordList(params.Name, params.Page, params.Limit)
 
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())

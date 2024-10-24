@@ -207,8 +207,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "用户名",
-                        "name": "username",
+                        "description": "关键字",
+                        "name": "name",
                         "in": "query"
                     }
                 ],

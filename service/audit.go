@@ -127,8 +127,8 @@ func (a *audit) GetSMSRecordList(receiver string, page, limit int) (data *dao.SM
 }
 
 // GetLoginRecordList 获取系统登录记录
-func (a *audit) GetLoginRecordList(username string, page, limit int) (data *dao.LoginRecordList, err error) {
-	data, err = dao.Audit.GetLoginRecordList(username, page, limit)
+func (a *audit) GetLoginRecordList(name string, page, limit int) (data *dao.LoginRecordList, err error) {
+	data, err = dao.Audit.GetLoginRecordList(name, page, limit)
 	if err != nil {
 		return nil, err
 	}

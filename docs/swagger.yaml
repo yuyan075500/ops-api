@@ -641,9 +641,9 @@ paths:
         name: limit
         required: true
         type: integer
-      - description: 用户名
+      - description: 关键字
         in: query
-        name: username
+        name: name
         type: string
       responses:
         "200":
