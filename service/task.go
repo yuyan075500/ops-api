@@ -58,7 +58,7 @@ func (t *task) DeleteTask(id int) (err error) {
 	}
 
 	// 删除已经加载的任务
-	global.CornSchedule.Remove(*task.EntryID)
+	global.CornSchedule.Remove(task.EntryID)
 
 	// 删除任务本身
 	if err = dao.Task.DeleteTask(id); err != nil {
@@ -87,8 +87,8 @@ func (t *task) UpdateTask(data *dao.TaskUpdate) error {
 			return err
 		}
 	} else {
-		if task.EntryID != nil {
-			global.CornSchedule.Remove(*task.EntryID)
+		if task.EntryID != 0 {
+			global.CornSchedule.Remove(task.EntryID)
 		}
 	}
 
