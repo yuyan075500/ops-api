@@ -42,8 +42,8 @@ func AddOrUpdateTask(task model.ScheduledTask) error {
 	var entryID cron.EntryID
 
 	// 检查任务是否已经运行
-	if task.EntryID != 0 {
-		global.CornSchedule.Remove(task.EntryID)
+	if task.EntryID != nil {
+		global.CornSchedule.Remove(*task.EntryID)
 	}
 
 	// 使用任务的 Cron 表达式
