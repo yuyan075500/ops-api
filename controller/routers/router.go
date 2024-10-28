@@ -30,6 +30,7 @@ func (r *router) InitRouter(router *gin.Engine) {
 	initAuthRouters(router)
 	initSSORouters(router)
 	initTagRouters(router)
+	initTaskRouters(router)
 
 	// 健康检查
 	router.GET("/health", func(c *gin.Context) {

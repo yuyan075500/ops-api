@@ -14,7 +14,7 @@ INSERT INTO `system_sub_menu` VALUES (4, '站点管理', 'SiteManagement', 'sub-
 INSERT INTO `system_sub_menu` VALUES (5, '登录日志', 'AuditLoginRecord', 'sub-menu-login-record', 'login', 'audit/login/index', 1, null, 3);
 INSERT INTO `system_sub_menu` VALUES (6, '短信记录', 'AuditSMSRecord', 'sub-menu-sms-record', 'sms', 'audit/sms/index', 2, null, 3);
 INSERT INTO `system_sub_menu` VALUES (7, '菜单管理', 'MenuManagement', 'sub-menu-menu', 'menu', 'system/menu/index', 1, null, 4);
-INSERT INTO `system_sub_menu` VALUES (8, '系统设置', 'ConfigManagement', 'sub-menu-config', 'config', 'system/config/index', 2, null, 4);
+INSERT INTO `system_sub_menu` VALUES (8, '定时任务', 'CornManagement', 'sub-menu-corn', 'corn', 'system/corn/index', 2, null, 4);
 
 # API接口
 INSERT INTO `system_path` VALUES (1, 'AddUser', '/api/v1/user', 'POST', 'UserManagement', '新增用户');
@@ -46,3 +46,7 @@ INSERT INTO `system_path` VALUES (26, 'GetSMSRecordList', '/api/v1/audit/sms', '
 INSERT INTO `system_path` VALUES (27, 'GetLoginRecordList', '/api/v1/audit/login', 'GET', 'AuditLoginRecord', '获取用户登录记录');
 INSERT INTO `system_path` VALUES (28, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
 INSERT INTO `system_path` VALUES (29, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
+INSERT INTO `system_path` VALUES (30, 'GetTaskList', '/api/v1/tasks', 'GET', 'CornManagement', '获取定时任务列表');
+INSERT INTO `system_path` VALUES (31, 'AddTask', '/api/v1/site', 'POST', 'CornManagement', '新增定时任务');
+INSERT INTO `system_path` VALUES (32, 'UpdateTask', '/api/v1/site', 'PUT', 'CornManagement', '修改定时任务');
+INSERT INTO `system_path` VALUES (33, 'DeleteTask', '/api/v1/site/:id', 'DELETE', 'CornManagement', '删除定时任务');

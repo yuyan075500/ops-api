@@ -1331,6 +1331,159 @@
                 }
             }
         },
+        "/api/v1/task": {
+            "put": {
+                "description": "定时任务相关接口",
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "更新定时任务信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "定时任务信息",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.TaskUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "定时任务相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "创建定时任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "定时任务信息",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.TaskCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"创建成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks": {
+            "get": {
+                "description": "定时任务相关接口",
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "获取定时任务列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "定时任务名称",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tasks/{id}": {
+            "delete": {
+                "description": "定时任务相关接口",
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "删除定时任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "定时任务ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user": {
             "put": {
                 "description": "用户相关接口",
@@ -1747,6 +1900,35 @@
         }
     },
     "definitions": {
+        "dao.TaskUpdate": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "built_in_method": {
+                    "type": "string"
+                },
+                "cron_expr": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
         "dao.UpdateSite": {
             "type": "object",
             "properties": {
@@ -2352,6 +2534,37 @@
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "service.TaskCreate": {
+            "type": "object",
+            "required": [
+                "built_in_method",
+                "cron_expr",
+                "enabled",
+                "method",
+                "name",
+                "type"
+            ],
+            "properties": {
+                "built_in_method": {
+                    "type": "string"
+                },
+                "cron_expr": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "method": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
                 }
             }
         },

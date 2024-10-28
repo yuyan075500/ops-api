@@ -39,6 +39,12 @@ func main() {
 		return
 	}
 
+	// 初始化定时任务
+	if err := middleware.TaskInit(); err != nil {
+		logger.Error("ERROR：", err.Error())
+		return
+	}
+
 	r := gin.Default()
 
 	// 加载跨域中间件

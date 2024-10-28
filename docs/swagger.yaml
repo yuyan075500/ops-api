@@ -1,4 +1,23 @@
 definitions:
+  dao.TaskUpdate:
+    properties:
+      built_in_method:
+        type: string
+      cron_expr:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      method:
+        type: integer
+      name:
+        type: string
+      type:
+        type: integer
+    required:
+    - id
+    type: object
   dao.UpdateSite:
     properties:
       address:
@@ -418,6 +437,28 @@ definitions:
     required:
     - id
     - users
+    type: object
+  service.TaskCreate:
+    properties:
+      built_in_method:
+        type: string
+      cron_expr:
+        type: string
+      enabled:
+        type: boolean
+      method:
+        type: integer
+      name:
+        type: string
+      type:
+        type: integer
+    required:
+    - built_in_method
+    - cron_expr
+    - enabled
+    - method
+    - name
+    - type
     type: object
   service.Token:
     properties:
@@ -1394,6 +1435,108 @@ paths:
       summary: SP Metadata解析
       tags:
       - SAML2认证
+  /api/v1/task:
+    post:
+      consumes:
+      - application/json
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 定时任务信息
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/service.TaskCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 创建定时任务
+      tags:
+      - 定时任务管理
+    put:
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 定时任务信息
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/dao.TaskUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新定时任务信息
+      tags:
+      - 定时任务管理
+  /api/v1/tasks:
+    get:
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 定时任务名称
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取定时任务列表
+      tags:
+      - 定时任务管理
+  /api/v1/tasks/{id}:
+    delete:
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 定时任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除定时任务
+      tags:
+      - 定时任务管理
   /api/v1/user:
     post:
       consumes:
