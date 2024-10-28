@@ -50,7 +50,7 @@ func AddOrUpdateTask(task model.ScheduledTask) error {
 	entryID, err := global.CornSchedule.AddFunc(task.CronExpr, func() {
 
 		// 执行任务逻辑
-		if task.Method == 1 {
+		if task.Type == 1 {
 			executeURLTask()
 		} else {
 			executeBuiltInMethod(task.BuiltInMethod)

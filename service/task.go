@@ -16,7 +16,6 @@ type TaskCreate struct {
 	Name          string `json:"name" binding:"required"`
 	Type          uint   `json:"type" binding:"required"`
 	CronExpr      string `json:"cron_expr" binding:"required"`
-	Method        uint   `json:"method" binding:"required"`
 	BuiltInMethod string `json:"built_in_method" binding:"required"`
 	Enabled       *bool  `json:"enabled" binding:"required"`
 }
@@ -28,7 +27,6 @@ func (t *task) AddTask(data *TaskCreate) (err error) {
 		Name:          data.Name,
 		Type:          data.Type,
 		CronExpr:      data.CronExpr,
-		Method:        data.Method,
 		BuiltInMethod: data.BuiltInMethod,
 		Enabled:       *data.Enabled,
 	}
@@ -58,7 +56,9 @@ func (t *task) DeleteTask(id int) (err error) {
 	}
 
 	// 删除已经加载的任务
-	global.CornSchedule.Remove(*task.EntryID)
+	if task.EntryID != nil {
+		global.CornSchedule.Remove(*task.EntryID)
+	}
 
 	// 删除任务本身
 	if err = dao.Task.DeleteTask(id); err != nil {
