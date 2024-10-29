@@ -248,8 +248,8 @@ func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (err error) {
 }
 
 // DeleteUser 删除
-func (u *user) DeleteUser(id int) (err error) {
-	if err := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{}).Error; err != nil {
+func (u *user) DeleteUser(tx *gorm.DB, id int) (err error) {
+	if err := tx.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{}).Error; err != nil {
 		return errors.New(err.Error())
 	}
 	return nil

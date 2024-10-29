@@ -244,10 +244,27 @@ func (u *user) DeleteUser(id int) (err error) {
 		return errors.New("超级管理员不允许删除")
 	}
 
-	err = dao.User.DeleteUser(id)
-	if err != nil {
+	// 开始事务
+	tx := global.MySQLClient.Begin()
+
+	// 删除用户关联分组
+	if err := tx.Model(&user).Association("Groups").Clear(); err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 删除用户
+	if err = dao.User.DeleteUser(tx, id); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 
