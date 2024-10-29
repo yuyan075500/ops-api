@@ -55,6 +55,7 @@ func MySQLInit() error {
 		&model.SsoOAuthTicket{},
 		&model.SsoCASTicket{},
 		&model.ScheduledTask{},
+		&model.ScheduledTaskExecLog{},
 	)
 
 	// 设置数据库连接池

@@ -9,6 +9,8 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"golang.org/x/text/encoding/unicode"
 	"ops-api/config"
+	"ops-api/dao"
+	"ops-api/model"
 	"strings"
 )
 
@@ -26,6 +28,17 @@ type LDAPConfig struct {
 	BindUserDN       string
 	BindUserPassword string
 	SearchDN         string
+}
+
+// UserList 用户同步结构体，用于LDAP用户同步
+type UserList struct {
+	Name        string `json:"name"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
+	IsActive    bool   `json:"is_active"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	UserFrom    string `json:"user_from"`
 }
 
 // Connect 建立LDAP连接
@@ -174,17 +187,19 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 }
 
 // LDAPUserSync 用户同步
-func (a *ad) LDAPUserSync() (users []UserSync, err error) {
-
-	var userList []UserSync
+func (a *ad) LDAPUserSync() (err error) {
+	var (
+		userList               []UserList
+		createOrUpdateUserList []*model.AuthUser
+	)
 
 	// 建立LDAP连接
 	l, err := a.Connect()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// 查找所有用户
+	// 获取所有用户
 	searchDN := strings.Split(config.Conf.LDAP.SearchDN, "&")
 	for _, dn := range searchDN {
 		// 构建查找请求
@@ -199,11 +214,13 @@ func (a *ad) LDAPUserSync() (users []UserSync, err error) {
 			[]string{},
 			nil,
 		)
+
 		// 执行查找
 		searchResult, err := l.Conn.Search(searchRequest)
 		if err != nil {
-			return nil, err
+			return err
 		}
+
 		// 获取查结果
 		for _, value := range searchResult.Entries {
 
@@ -217,7 +234,7 @@ func (a *ad) LDAPUserSync() (users []UserSync, err error) {
 			}
 
 			// 获取用户信息
-			userInfo := &UserSync{
+			userInfo := &UserList{
 				Name:        value.GetAttributeValue("cn"),
 				Username:    value.GetAttributeValue(config.Conf.LDAP.UserAttribute),
 				Password:    "",
@@ -231,5 +248,21 @@ func (a *ad) LDAPUserSync() (users []UserSync, err error) {
 		}
 	}
 
-	return userList, nil
+	// 同步所有用户
+	for _, user := range userList {
+		createOrUpdateUserList = append(createOrUpdateUserList, &model.AuthUser{
+			Username:    user.Username,
+			Name:        user.Name,
+			Email:       user.Email,
+			Password:    user.Password,
+			IsActive:    user.IsActive,
+			PhoneNumber: user.PhoneNumber,
+			UserFrom:    user.UserFrom,
+		})
+	}
+	if err := dao.User.SyncUsers(createOrUpdateUserList); err != nil {
+		return err
+	}
+
+	return nil
 }

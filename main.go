@@ -8,6 +8,7 @@ import (
 	"ops-api/controller/routers"
 	"ops-api/db"
 	"ops-api/middleware"
+	"ops-api/service"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	}
 
 	// 初始化定时任务
-	if err := middleware.TaskInit(); err != nil {
+	if err := service.TaskInit(); err != nil {
 		logger.Error("ERROR：", err.Error())
 		return
 	}

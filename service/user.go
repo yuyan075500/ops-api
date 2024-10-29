@@ -152,17 +152,6 @@ type RestPassword struct {
 	RePassword  string `json:"re_password" binding:"required"`
 }
 
-// UserSync 用户同步结构体，用于LDAP用户同步
-type UserSync struct {
-	Name        string `json:"name"`
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	IsActive    bool   `json:"is_active"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	UserFrom    string `json:"user_from"`
-}
-
 // GetUserListAll 获取用户列表（下拉框、穿梭框）
 func (u *user) GetUserListAll() (data *dao.UserListAll, err error) {
 	data, err = dao.User.GetUserListAll()
@@ -630,27 +619,8 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 }
 
 // UserSync LDAP用户同步
-func (u *user) UserSync() (err error) {
-	// 获取LDAP中的用户
-	users, err := AD.LDAPUserSync()
-	if err != nil {
-		return err
-	}
-
-	// 创建用户
-	var usersList []*model.AuthUser
-	for _, user := range users {
-		usersList = append(usersList, &model.AuthUser{
-			Username:    user.Username,
-			Name:        user.Name,
-			Email:       user.Email,
-			Password:    user.Password,
-			IsActive:    user.IsActive,
-			PhoneNumber: user.PhoneNumber,
-			UserFrom:    user.UserFrom,
-		})
-	}
-	if err := dao.User.SyncUsers(usersList); err != nil {
+func (u *user) UserSync() error {
+	if err := AD.LDAPUserSync(); err != nil {
 		return err
 	}
 	return nil
