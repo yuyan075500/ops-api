@@ -18,5 +18,7 @@ func initTaskRouters(router *gin.Engine) {
 		task.PUT("", controller.Task.UpdateTask)
 		// 删除定时任务
 		task.DELETE("/:id", controller.Task.DeleteTask)
+		// 获取定时任务执行日志列表（表格）
+		task.GET("/logs", controller.Task.GetTaskLogList)
 	}
 }

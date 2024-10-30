@@ -167,3 +167,44 @@ func (t *task) GetTaskList(c *gin.Context) {
 		"data": data,
 	})
 }
+
+// GetTaskLogList 获取定时任务执行日志列表
+// @Summary 获取定时任务执行日志列表
+// @Description 定时任务相关接口
+// @Tags 定时任务管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param page query int true "分页"
+// @Param limit query int true "分页大小"
+// @Param id query int true "定时ID"
+// @Success 200 {string} json "{"code": 0, "data": []}"
+// @Router /api/v1/task/logs [get]
+func (t *task) GetTaskLogList(c *gin.Context) {
+	params := new(struct {
+		Id    uint `form:"id" binding:"required"`
+		Page  int  `form:"page" binding:"required"`
+		Limit int  `form:"limit" binding:"required"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	data, err := service.Task.GetTaskLogList(params.Id, params.Page, params.Limit)
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"data": data,
+	})
+}

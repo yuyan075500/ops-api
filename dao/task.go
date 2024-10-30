@@ -9,10 +9,16 @@ var Task task
 
 type task struct{}
 
-// TaskList 返回给前端列表结构体
+// TaskList 任务列表
 type TaskList struct {
 	Items []*model.ScheduledTask `json:"items"`
 	Total int64                  `json:"total"`
+}
+
+// TaskLogList 任务执行日志列表
+type TaskLogList struct {
+	Items []*model.ScheduledTaskExecLog `json:"items"`
+	Total int64                         `json:"total"`
 }
 
 // TaskUpdate 更新构体
@@ -74,6 +80,36 @@ func (t *task) GetTaskList(name string, page, limit int) (data *TaskList, err er
 	}
 
 	return &TaskList{
+		Items: items,
+		Total: total,
+	}, nil
+}
+
+// GetTaskLogList 获取定时任务执行日志列表
+func (t *task) GetTaskLogList(id uint, page, limit int) (data *TaskLogList, err error) {
+
+	// 定义数据的起始位置
+	startSet := (page - 1) * limit
+
+	// 定义返回的内容
+	var (
+		items []*model.ScheduledTaskExecLog
+		total int64
+	)
+
+	// 获取菜单列表
+	tx := global.MySQLClient.Model(&model.ScheduledTaskExecLog{}).
+		Where("scheduled_task_id = ?", id).
+		Count(&total).
+		Limit(limit).
+		Offset(startSet).
+		Order("id desc").
+		Find(&items)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &TaskLogList{
 		Items: items,
 		Total: total,
 	}, nil

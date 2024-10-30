@@ -50,3 +50,4 @@ INSERT INTO `system_path` VALUES (30, 'GetTaskList', '/api/v1/tasks', 'GET', 'Co
 INSERT INTO `system_path` VALUES (31, 'AddTask', '/api/v1/site', 'POST', 'CornManagement', '新增定时任务');
 INSERT INTO `system_path` VALUES (32, 'UpdateTask', '/api/v1/site', 'PUT', 'CornManagement', '修改定时任务');
 INSERT INTO `system_path` VALUES (33, 'DeleteTask', '/api/v1/site/:id', 'DELETE', 'CornManagement', '删除定时任务');
+INSERT INTO `system_path` VALUES (34, 'GetTaskLogList', '/api/v1/task/logs', 'GET', 'CornManagement', '获取定时任务执行日志列表');

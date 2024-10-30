@@ -108,6 +108,15 @@ func (t *task) GetTaskList(name string, page, limit int) (data *dao.TaskList, er
 	return data, nil
 }
 
+// GetTaskLogList 获取定时任务执行日志列表
+func (t *task) GetTaskLogList(id uint, page, limit int) (data *dao.TaskLogList, err error) {
+	data, err = dao.Task.GetTaskLogList(id, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 // TaskInit 初始化任务调度器并加载数据库中的任务
 func TaskInit() error {
 	global.CornSchedule = cron.New(cron.WithChain())
@@ -197,9 +206,12 @@ func executeBuiltInMethod(task model.ScheduledTask, execLog *model.ScheduledTask
 	if task.BuiltInMethod == "user_sync" {
 		if err := AD.LDAPUserSync(); err != nil {
 			global.MySQLClient.Model(execLog).Update("result", err.Error())
+			global.MySQLClient.Model(&task).Update("LastRunResult", "失败")
 			logger.Warn("任务执行失败:", err.Error())
 		} else {
 			global.MySQLClient.Model(execLog).Update("result", "成功")
+			global.MySQLClient.Model(&task).Update("LastRunResult", "成功")
 		}
+
 	}
 }

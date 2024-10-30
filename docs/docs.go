@@ -1416,6 +1416,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/task/logs": {
+            "get": {
+                "description": "定时任务相关接口",
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "获取定时任务执行日志列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "定时ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tasks": {
             "get": {
                 "description": "定时任务相关接口",
@@ -2554,7 +2601,6 @@ const docTemplate = `{
                 "built_in_method",
                 "cron_expr",
                 "enabled",
-                "method",
                 "name",
                 "type"
             ],
@@ -2567,9 +2613,6 @@ const docTemplate = `{
                 },
                 "enabled": {
                     "type": "boolean"
-                },
-                "method": {
-                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

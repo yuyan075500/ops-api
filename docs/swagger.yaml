@@ -446,8 +446,6 @@ definitions:
         type: string
       enabled:
         type: boolean
-      method:
-        type: integer
       name:
         type: string
       type:
@@ -456,7 +454,6 @@ definitions:
     - built_in_method
     - cron_expr
     - enabled
-    - method
     - name
     - type
     type: object
@@ -1482,6 +1479,38 @@ paths:
           schema:
             type: string
       summary: 更新定时任务信息
+      tags:
+      - 定时任务管理
+  /api/v1/task/logs:
+    get:
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 定时ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取定时任务执行日志列表
       tags:
       - 定时任务管理
   /api/v1/tasks:
