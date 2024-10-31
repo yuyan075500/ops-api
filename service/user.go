@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/pquerna/otp/totp"
 	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/dao"
@@ -145,11 +146,12 @@ func (u UserLogin) GetState() string        { return u.State }
 
 // RestPassword 重置密码时用户信息绑定的结构体
 type RestPassword struct {
-	Username    string `json:"username" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required"`
-	Code        string `json:"code" binding:"required"`
-	Password    string `json:"password" binding:"required"`
-	RePassword  string `json:"re_password" binding:"required"`
+	Username     string `json:"username" binding:"required"`
+	PhoneNumber  string `json:"phone_number"`
+	ValidateType uint   `json:"validate_type" binding:"required"` // 验证类型：1：短信验证码，2：MFA验证码
+	Code         string `json:"code" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	RePassword   string `json:"re_password" binding:"required"`
 }
 
 // GetUserListAll 获取用户列表（下拉框、穿梭框）
@@ -365,18 +367,41 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 	)
 
 	// 获取用户信息
-	tx := global.MySQLClient.First(&user, "username = ? AND phone_number = ?", data.Username, data.PhoneNumber)
-	if tx.Error != nil {
-		return errors.New("用户名或手机号错误")
+	if err := global.MySQLClient.First(&user, "username", data.Username).Error; err != nil {
+		return errors.New("用户不存在")
 	}
 
-	// 验证码校验
-	result, err := global.RedisClient.Get(keyName).Result()
-	if err != nil {
-		return err
+	// 短信验证码校验
+	if data.ValidateType == 1 {
+
+		if data.PhoneNumber != user.PhoneNumber {
+			return errors.New("手机号与用户不匹配")
+		}
+
+		// 从缓存中获取验证码
+		result, err := global.RedisClient.Get(keyName).Result()
+		if err != nil {
+			return err
+		}
+		// 判断是否正确
+		if result != data.Code {
+			return errors.New("校验码错误")
+		}
 	}
-	if result != data.Code {
-		return errors.New("校验码错误")
+
+	// MFA验证码校验
+	if data.ValidateType == 2 {
+
+		// 获取Secret
+		if user.MFACode == nil {
+			return errors.New("您还未绑定MFA")
+		}
+
+		// 校验MFA
+		valid := totp.Validate(data.Code, *user.MFACode)
+		if !valid {
+			return errors.New("校验码错误")
+		}
 	}
 
 	// 执行密码重置

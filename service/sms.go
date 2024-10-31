@@ -27,7 +27,7 @@ func (s *sms) SMSSend(data *message.ResetPassword) (string, error) {
 	// 查询用户是否存在
 	tx := global.MySQLClient.First(&model.AuthUser{}, "username = ? AND phone_number = ?", data.Username, data.PhoneNumber)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-		return "", errors.New("用户名或手机号错误")
+		return "", errors.New("手机号与用户不匹配")
 	}
 
 	// 获取短信服务商
