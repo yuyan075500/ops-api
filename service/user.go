@@ -320,7 +320,7 @@ func (u *user) ResetUserMFA(id int) (err error) {
 }
 
 // GetVerificationCode 获取重置密码短信验证码
-func (u *user) GetVerificationCode(data *messages.ResetPassword, expirationTime int) (err error) {
+func (u *user) GetVerificationCode(data *messages.SendData, expirationTime int) (err error) {
 
 	var (
 		keyName = fmt.Sprintf("%s_rest_password_verification_code", data.Username)
@@ -345,6 +345,7 @@ func (u *user) GetVerificationCode(data *messages.ResetPassword, expirationTime 
 	}
 
 	// 发送短信验证码
+	data.Note = "密码重置"
 	code, err := SMS.SMSSend(data)
 	if err != nil {
 		return err

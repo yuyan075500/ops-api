@@ -51,3 +51,8 @@ INSERT INTO `system_path` VALUES (31, 'AddTask', '/api/v1/site', 'POST', 'CornMa
 INSERT INTO `system_path` VALUES (32, 'UpdateTask', '/api/v1/site', 'PUT', 'CornManagement', '修改定时任务');
 INSERT INTO `system_path` VALUES (33, 'DeleteTask', '/api/v1/site/:id', 'DELETE', 'CornManagement', '删除定时任务');
 INSERT INTO `system_path` VALUES (34, 'GetTaskLogList', '/api/v1/task/logs', 'GET', 'CornManagement', '获取定时任务执行日志列表');
+INSERT INTO `system_path` VALUES (35, 'AddAccount', '/api/v1/account', 'POST', 'AccountManagement', '新增账号');
+INSERT INTO `system_path` VALUES (36, 'UpdateAccount', '/api/v1/account', 'PUT', 'AccountManagement', '修改账号');
+INSERT INTO `system_path` VALUES (37, 'DeleteAccount', '/api/v1/account/:id', 'DELETE', 'AccountManagement', '删除账号');
+INSERT INTO `system_path` VALUES (38, 'GetAccountList', '/api/v1/accounts', 'GET', 'AccountManagement', '获取账号列表');
+INSERT INTO `system_path` VALUES (39, 'GetAccountPassword', '/api/v1/account/password/:id', 'GET', 'AccountManagement', '获取账号密码');

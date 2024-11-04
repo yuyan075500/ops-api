@@ -8,14 +8,15 @@ import (
 
 // Sender 发送短信接口
 type Sender interface {
-	SendSMS(data *ResetPassword, code string) (string, error)
+	SendSMS(data *SendData, code string) (string, error)
 	ProcessResponse(resp string) (smsMsgId string, err error)
 }
 
-// ResetPassword 重置密码
-type ResetPassword struct {
+// SendData 发送短信数据结构体
+type SendData struct {
 	Username    string `json:"username" binding:"required"`
 	PhoneNumber string `json:"phone_number" binding:"required"`
+	Note        string `json:"note"`
 }
 
 // SendDetail 发送详情
@@ -56,7 +57,7 @@ type HuaweiSMSSender struct{}
 type AliyunSMSSender struct{}
 
 // SendSMS 华为云短信发送
-func (s *HuaweiSMSSender) SendSMS(data *ResetPassword, code string) (string, error) {
+func (s *HuaweiSMSSender) SendSMS(data *SendData, code string) (string, error) {
 	return HuaweiSend(
 		config.Conf.SMS.ResetPassword.Sender,
 		config.Conf.SMS.ResetPassword.TemplateId,
@@ -68,7 +69,7 @@ func (s *HuaweiSMSSender) SendSMS(data *ResetPassword, code string) (string, err
 }
 
 // SendSMS 阿里云短信发送
-func (s *AliyunSMSSender) SendSMS(data *ResetPassword, code string) (string, error) {
+func (s *AliyunSMSSender) SendSMS(data *SendData, code string) (string, error) {
 	resp, err := AliyunSend(data.PhoneNumber, code)
 	if err != nil {
 		return "", err

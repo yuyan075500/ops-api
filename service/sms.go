@@ -19,7 +19,11 @@ var SMS sms
 type sms struct{}
 
 // SMSSend 发送短信
-func (s *sms) SMSSend(data *message.ResetPassword) (string, error) {
+func (s *sms) SMSSend(data *message.SendData) (string, error) {
+
+	if data.PhoneNumber == "" {
+		return "", errors.New("手机号不能为空")
+	}
 
 	// 定义验证码
 	var code = strconv.Itoa(utils.GenerateRandomNumber())
@@ -50,7 +54,7 @@ func (s *sms) SMSSend(data *message.ResetPassword) (string, error) {
 
 	// 记录短信发送日志
 	smsLog := &model.LogSMS{
-		Note:       "密码重置",
+		Note:       data.Note,
 		Signature:  config.Conf.SMS.ResetPassword.Signature,
 		TemplateId: config.Conf.SMS.ResetPassword.TemplateId,
 		Receiver:   data.PhoneNumber,

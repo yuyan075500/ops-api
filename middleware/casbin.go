@@ -81,6 +81,8 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/sso/cookie/auth",           // Cookie认证
 			"/api/v1/audit/sms/receipt",         // 获取短信回执
 			"/api/v1/tag/list",                  // 获取标签列表
+			"/api/v1/account/code_verification", // 密码查询验证码校验
+			"/api/v1/account/code",              // 获取密码查询验证码
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

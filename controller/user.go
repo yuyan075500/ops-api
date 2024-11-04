@@ -626,7 +626,7 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 func (u *user) GetVerificationCode(c *gin.Context) {
 
 	var (
-		data           = &message.ResetPassword{}
+		data           = &message.SendData{}
 		expirationTime = 5 // 指定验证码过期时间
 	)
 
