@@ -128,8 +128,86 @@ func (a *account) UpdateAccount(c *gin.Context) {
 	})
 }
 
-// GetAccountList 获取账号列表（自己的和别人分享的）
-// @Summary 获取账号列表（自己的和别人分享的）
+// UpdateAccountUser 用户分享
+// @Summary 用户分享
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param users body dao.AccountUpdateUser true "用户ID列表"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/account/users [put]
+func (a *account) UpdateAccountUser(c *gin.Context) {
+	var data = &dao.AccountUpdateUser{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	userId := c.GetUint("id")
+	if err := service.Account.UpdateAccountUser(data, userId); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}
+
+// UpdatePassword 更改密码
+// @Summary 更改密码
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param user body dao.AccountUpdatePassword true "用户信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/account/password [put]
+func (a *account) UpdatePassword(c *gin.Context) {
+	var data = &dao.AccountUpdatePassword{}
+
+	// 解析请求参数
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 更新用户信息
+	userId := c.GetUint("id")
+	if err := service.Account.UpdatePassword(data, userId); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}
+
+// GetAccountList 获取账号列表
+// @Summary 获取账号列表
 // @Description 账号相关接口
 // @Tags 账号管理
 // @Param Authorization header string true "Bearer 用户令牌"

@@ -14,8 +14,8 @@ type Account struct {
 	Username     string      `json:"username" gorm:"default:null"`
 	Password     string      `json:"password"`
 	Note         string      `json:"note" gorm:"default:null"`
-	OwnerUserID  uint        `json:"owner_user_id"`
 	OwnerUser    AuthUser    `gorm:"foreignKey:OwnerUserID"`
+	OwnerUserID  uint        `json:"owner_user_id"`
 	Users        []*AuthUser `json:"users" gorm:"many2many:account_users"`
 }
 

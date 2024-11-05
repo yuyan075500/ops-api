@@ -39,15 +39,14 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 	)
 
 	// 获取分组列表
-	tx := global.MySQLClient.Model(&model.AuthGroup{}).
+	if err := global.MySQLClient.Model(&model.AuthGroup{}).
 		Preload("Users").                   // 预加载用户信息
 		Where("name like ?", "%"+name+"%"). // 实现过滤
 		Count(&total).                      // 获取总数
 		Limit(limit).
 		Offset(startSet).
-		Find(&authGroup)
-	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		Find(&authGroup).Error; err != nil {
+		return nil, err
 	}
 
 	// 绑定最外层结构体的数据

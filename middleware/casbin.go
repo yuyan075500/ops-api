@@ -68,21 +68,14 @@ func PermissionCheck() gin.HandlerFunc {
 			"/api/v1/user/mfa_auth",             // MFA认证
 			"/api/v1/site/logoUpload",           // 站点图片上传
 			"/api/v1/site/guide",                // 获取导航站点信息
-			"/api/v1/sso/oauth/authorize",       // OAuth2.0客户端授权
-			"/api/v1/sso/oauth/token",           // OAuth2.0客户端获取Token
-			"/api/v1/sso/oauth/userinfo",        // OAuth2.0客户端获取用户信息
-			"/api/v1/sso/cas/authorize",         // CAS3.0客户端授权
 			"/p3/serviceValidate",               // CAS3.0票据校验
-			"/api/v1/sso/saml/metadata",         // SAML2元数据
-			"/api/v1/sso/saml/authorize",        // SP授权
-			"/api/v1/sso/saml/metadata",         // SP元数据解析
+			"/api/v1/sso/",                      // 单点登录相关接口
 			"/.well-known/openid-configuration", // OIDC配置
 			"/api/v1/sso/oidc/jwks",             // OIDC JWKS配置
 			"/api/v1/sso/cookie/auth",           // Cookie认证
 			"/api/v1/audit/sms/receipt",         // 获取短信回执
 			"/api/v1/tag/list",                  // 获取标签列表
-			"/api/v1/account/code_verification", // 密码查询验证码校验
-			"/api/v1/account/code",              // 获取密码查询验证码
+			"/api/v1/account",                   // 账号管理相关接口
 		}
 		for _, item := range ignorePath {
 			if strings.HasPrefix(path, item) {

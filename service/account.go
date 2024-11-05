@@ -32,18 +32,6 @@ type CodeVerification struct {
 	Code         string `json:"code" binding:"required"`
 }
 
-// CheckAccountOwnership 校验用户是否有权操作指定账号
-func (a *account) CheckAccountOwnership(accountID int, userID uint) error {
-	user, err := dao.Account.GetAccountOwner(accountID)
-	if err != nil {
-		return err
-	}
-	if user.ID != userID {
-		return errors.New("此账号你无权操作")
-	}
-	return nil
-}
-
 // AddAccount 创建账号
 func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
 
@@ -77,8 +65,13 @@ func (a *account) GetAccountList(name string, userID uint, page, limit int) (dat
 // DeleteAccount 删除账号
 func (a *account) DeleteAccount(id, userId int) error {
 
-	if err := a.CheckAccountOwnership(id, uint(userId)); err != nil {
+	// 判断是否有权限操作
+	owner, _, err := dao.Account.GetAccountOwnerAndUsers(id)
+	if err != nil {
 		return err
+	}
+	if owner.ID != uint(userId) {
+		return errors.New("此账号你无权操作")
 	}
 
 	return dao.Account.DeleteAccount(id)
@@ -87,18 +80,101 @@ func (a *account) DeleteAccount(id, userId int) error {
 // UpdateAccount 更新账号
 func (a *account) UpdateAccount(data *dao.AccountUpdate, userId uint) error {
 
-	if err := a.CheckAccountOwnership(int(data.ID), userId); err != nil {
+	// 判断是否有权限操作
+	owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(data.ID))
+	if err != nil {
 		return err
+	}
+	if owner.ID != userId {
+		return errors.New("此账号你无权操作")
 	}
 
 	return dao.Account.UpdateAccount(data)
 }
 
+// UpdateAccountUser 用户分享
+func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (err error) {
+
+	// 判断是否有权限操作
+	owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(data.ID))
+	if err != nil {
+		return err
+	}
+	if owner.ID != userId {
+		return errors.New("此账号你无权操作")
+	}
+
+	var (
+		users   []model.AuthUser
+		account = &model.Account{}
+	)
+
+	// 查询要修改的用户组
+	if err := global.MySQLClient.First(account, data.ID).Error; err != nil {
+		return err
+	}
+
+	// 查询出要更新的所有用户
+	if len(data.Users) == 0 {
+		users = []model.AuthUser{}
+	} else {
+		if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
+			return err
+		}
+	}
+
+	return dao.Account.UpdateAccountUser(account, users)
+}
+
+// UpdatePassword 更改密码
+func (a *account) UpdatePassword(data *dao.AccountUpdatePassword, userId uint) (err error) {
+
+	// 判断是否有权限操作
+	owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(data.ID))
+	if err != nil {
+		return err
+	}
+	if owner.ID != userId {
+		return errors.New("此账号你无权操作")
+	}
+
+	// 密码校验
+	if data.Password != data.RePassword {
+		return errors.New("两次输入的密码不匹配")
+	}
+	// 检查密码复杂度
+	//if err := check.PasswordCheck(data.Password); err != nil {
+	//	return err
+	//}
+
+	// 查询要修改的账号
+	account := &model.Account{}
+	if err := global.MySQLClient.First(account, data.ID).Error; err != nil {
+		return err
+	}
+
+	return dao.Account.UpdatePassword(account, data)
+}
+
 // GetAccountPassword 获取账号密码
 func (a *account) GetAccountPassword(id uint, username string, userId uint) (password *string, err error) {
 
-	if err := a.CheckAccountOwnership(int(id), userId); err != nil {
+	// 判断是否有权限操作
+	owner, users, err := dao.Account.GetAccountOwnerAndUsers(int(id))
+	if err != nil {
 		return nil, err
+	}
+	if owner.ID != userId {
+		hasAccess := false
+		for _, user := range users {
+			if user.ID == userId {
+				hasAccess = true
+				break
+			}
+		}
+		if !hasAccess {
+			return nil, errors.New("此账号你无权操作")
+		}
 	}
 
 	// 判断是否需要认证，Redis缓存中指定的Key是否存在，存在则不需要认证，否则需要认证

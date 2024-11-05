@@ -312,6 +312,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/account/password": {
+            "put": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "更改密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.AccountUpdatePassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/account/password/{id}": {
             "delete": {
                 "description": "账号相关接口",
@@ -338,6 +373,41 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/users": {
+            "put": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "用户分享",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID列表",
+                        "name": "users",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.AccountUpdateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -384,7 +454,7 @@ const docTemplate = `{
                 "tags": [
                     "账号管理"
                 ],
-                "summary": "获取账号列表（自己的和别人分享的）",
+                "summary": "获取账号列表",
                 "parameters": [
                     {
                         "type": "string",
@@ -2212,9 +2282,6 @@ const docTemplate = `{
                 "id"
             ],
             "properties": {
-                "auth_user_id": {
-                    "type": "integer"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -2230,8 +2297,48 @@ const docTemplate = `{
                 "note": {
                     "type": "string"
                 },
+                "owner_user_id": {
+                    "type": "integer"
+                },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "dao.AccountUpdatePassword": {
+            "type": "object",
+            "required": [
+                "id",
+                "password",
+                "re_password"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "re_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dao.AccountUpdateUser": {
+            "type": "object",
+            "required": [
+                "id",
+                "users"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

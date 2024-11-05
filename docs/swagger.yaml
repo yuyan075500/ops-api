@@ -1,8 +1,6 @@
 definitions:
   dao.AccountUpdate:
     properties:
-      auth_user_id:
-        type: integer
       id:
         type: integer
       login_address:
@@ -13,10 +11,37 @@ definitions:
         type: string
       note:
         type: string
+      owner_user_id:
+        type: integer
       username:
         type: string
     required:
     - id
+    type: object
+  dao.AccountUpdatePassword:
+    properties:
+      id:
+        type: integer
+      password:
+        type: string
+      re_password:
+        type: string
+    required:
+    - id
+    - password
+    - re_password
+    type: object
+  dao.AccountUpdateUser:
+    properties:
+      id:
+        type: integer
+      users:
+        items:
+          type: integer
+        type: array
+    required:
+    - id
+    - users
     type: object
   dao.TaskUpdate:
     properties:
@@ -822,6 +847,29 @@ paths:
       summary: 校验验证码
       tags:
       - 账号管理
+  /api/v1/account/password:
+    put:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dao.AccountUpdatePassword'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更改密码
+      tags:
+      - 账号管理
   /api/v1/account/password/{id}:
     delete:
       description: 账号相关接口
@@ -842,6 +890,29 @@ paths:
           schema:
             type: string
       summary: 获取账号密码
+      tags:
+      - 账号管理
+  /api/v1/account/users:
+    put:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户ID列表
+        in: body
+        name: users
+        required: true
+        schema:
+          $ref: '#/definitions/dao.AccountUpdateUser'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 用户分享
       tags:
       - 账号管理
   /api/v1/accounts:
@@ -872,7 +943,7 @@ paths:
           description: '{"code": 0, "data": []}'
           schema:
             type: string
-      summary: 获取账号列表（自己的和别人分享的）
+      summary: 获取账号列表
       tags:
       - 账号管理
   /api/v1/audit/login:
