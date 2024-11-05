@@ -1,4 +1,23 @@
 definitions:
+  dao.AccountUpdate:
+    properties:
+      auth_user_id:
+        type: integer
+      id:
+        type: integer
+      login_address:
+        type: string
+      login_method:
+        type: string
+      name:
+        type: string
+      note:
+        type: string
+      username:
+        type: string
+    required:
+    - id
+    type: object
   dao.TaskUpdate:
     properties:
       built_in_method:
@@ -95,6 +114,24 @@ definitions:
     required:
     - id
     type: object
+  service.AccountCreate:
+    properties:
+      login_address:
+        type: string
+      login_method:
+        type: string
+      name:
+        type: string
+      note:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - name
+    - password
+    type: object
   service.CASAuthorize:
     properties:
       service:
@@ -111,6 +148,17 @@ definitions:
     required:
     - service
     - ticket
+    type: object
+  service.CodeVerification:
+    properties:
+      code:
+        type: string
+      validate_type:
+        description: 验证类型：1：短信验证码，2：MFA验证码
+        type: integer
+    required:
+    - code
+    - validate_type
     type: object
   service.DingTalkLogin:
     properties:
@@ -355,12 +403,15 @@ definitions:
         type: string
       username:
         type: string
+      validate_type:
+        description: 验证类型：1：短信验证码，2：MFA验证码
+        type: integer
     required:
     - code
     - password
-    - phone_number
     - re_password
     - username
+    - validate_type
     type: object
   service.SiteCreate:
     properties:
@@ -660,6 +711,170 @@ paths:
       summary: 企业微信扫码认证
       tags:
       - 用户认证
+  /api/v1/account:
+    post:
+      consumes:
+      - application/json
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.AccountCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 新增账号
+      tags:
+      - 账号管理
+    put:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号信息
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/dao.AccountUpdate'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 更新账号信息
+      tags:
+      - 账号管理
+  /api/v1/account/{id}:
+    delete:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除账号
+      tags:
+      - 账号管理
+  /api/v1/account/code:
+    get:
+      consumes:
+      - application/json
+      description: 账号相关接口
+      parameters:
+      - description: 用户信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.RestPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "校验码已发送，5分钟之内有效"}'
+          schema:
+            type: string
+      summary: 获取验证码
+      tags:
+      - 账号管理
+  /api/v1/account/code_verification:
+    post:
+      description: 账号相关接口
+      parameters:
+      - description: 验证码信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.CodeVerification'
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "验证成功，本次验证有效期为10分钟"}'
+          schema:
+            type: string
+      summary: 校验验证码
+      tags:
+      - 账号管理
+  /api/v1/account/password/{id}:
+    delete:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取账号密码
+      tags:
+      - 账号管理
+  /api/v1/accounts:
+    get:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 分页
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: limit
+        required: true
+        type: integer
+      - description: 账号信息
+        in: query
+        name: name
+        type: string
+      responses:
+        "200":
+          description: '{"code": 0, "data": []}'
+          schema:
+            type: string
+      summary: 获取账号列表（自己的和别人分享的）
+      tags:
+      - 账号管理
   /api/v1/audit/login:
     get:
       description: 审计相关接口
@@ -1481,6 +1696,28 @@ paths:
       summary: 更新定时任务信息
       tags:
       - 定时任务管理
+  /api/v1/task/{id}:
+    delete:
+      description: 定时任务相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 定时任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "删除成功", "data": nil}'
+          schema:
+            type: string
+      summary: 删除定时任务
+      tags:
+      - 定时任务管理
   /api/v1/task/logs:
     get:
       description: 定时任务相关接口
@@ -1542,28 +1779,6 @@ paths:
           schema:
             type: string
       summary: 获取定时任务列表
-      tags:
-      - 定时任务管理
-  /api/v1/tasks/{id}:
-    delete:
-      description: 定时任务相关接口
-      parameters:
-      - description: Bearer 用户令牌
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: 定时任务ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: '{"code": 0, "msg": "删除成功", "data": nil}'
-          schema:
-            type: string
-      summary: 删除定时任务
       tags:
       - 定时任务管理
   /api/v1/user:

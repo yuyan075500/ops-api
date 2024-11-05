@@ -58,7 +58,7 @@ func (t *task) AddTask(c *gin.Context) {
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "定时任务ID"
 // @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
-// @Router /api/v1/tasks/{id} [delete]
+// @Router /api/v1/task/{id} [delete]
 func (t *task) DeleteTask(c *gin.Context) {
 
 	// 对ID进行类型转换

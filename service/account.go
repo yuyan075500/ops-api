@@ -32,6 +32,18 @@ type CodeVerification struct {
 	Code         string `json:"code" binding:"required"`
 }
 
+// CheckAccountOwnership 校验用户是否有权操作指定账号
+func (a *account) CheckAccountOwnership(accountID int, userID uint) error {
+	user, err := dao.Account.GetAccountOwner(accountID)
+	if err != nil {
+		return err
+	}
+	if user.ID != userID {
+		return errors.New("此账号你无权操作")
+	}
+	return nil
+}
+
 // AddAccount 创建账号
 func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
 
@@ -42,7 +54,7 @@ func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
 		LoginAddress: data.LoginAddress,
 		Note:         data.Note,
 		LoginMethod:  data.LoginMethod,
-		AuthUserID:   userId,
+		OwnerUserID:  userId,
 	}
 
 	// 创建数据库数据
@@ -62,8 +74,32 @@ func (a *account) GetAccountList(name string, userID uint, page, limit int) (dat
 	return data, nil
 }
 
+// DeleteAccount 删除账号
+func (a *account) DeleteAccount(id, userId int) error {
+
+	if err := a.CheckAccountOwnership(id, uint(userId)); err != nil {
+		return err
+	}
+
+	return dao.Account.DeleteAccount(id)
+}
+
+// UpdateAccount 更新账号
+func (a *account) UpdateAccount(data *dao.AccountUpdate, userId uint) error {
+
+	if err := a.CheckAccountOwnership(int(data.ID), userId); err != nil {
+		return err
+	}
+
+	return dao.Account.UpdateAccount(data)
+}
+
 // GetAccountPassword 获取账号密码
-func (a *account) GetAccountPassword(id uint, username string) (password *string, err error) {
+func (a *account) GetAccountPassword(id uint, username string, userId uint) (password *string, err error) {
+
+	if err := a.CheckAccountOwnership(int(id), userId); err != nil {
+		return nil, err
+	}
 
 	// 判断是否需要认证，Redis缓存中指定的Key是否存在，存在则不需要认证，否则需要认证
 	var keyName = fmt.Sprintf("%s_get_account_password_enabled", username)

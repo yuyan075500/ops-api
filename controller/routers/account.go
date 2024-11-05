@@ -14,6 +14,10 @@ func initAccountRouters(router *gin.Engine) {
 	{
 		// 新增账号
 		account.POST("", controller.Account.AddAccount)
+		// 删除定时任务
+		account.DELETE("/:id", controller.Account.DeleteAccount)
+		// 修改定时任务
+		account.PUT("", controller.Account.UpdateAccount)
 		// 获取账号密码
 		account.GET("/password/:id", controller.Account.GetAccountPassword)
 		// 获取短信验证码

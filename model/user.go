@@ -23,7 +23,6 @@ type AuthUser struct {
 	MFACode     *string      `json:"mfa_code"`
 	UserFrom    string       `json:"user_from" gorm:"default:本地"`
 	Groups      []*AuthGroup `json:"groups" gorm:"many2many:auth_user_groups"`
-	Accounts    []Account
 }
 
 func (*AuthUser) TableName() (name string) {

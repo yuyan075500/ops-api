@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
 	"net/http"
+	"ops-api/dao"
 	"ops-api/service"
 	"strconv"
 )
@@ -47,6 +48,82 @@ func (a *account) AddAccount(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "创建成功",
+		"data": nil,
+	})
+}
+
+// DeleteAccount 删除账号
+// @Summary 删除账号
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param id path int true "账号ID"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
+// @Router /api/v1/account/{id} [delete]
+func (a *account) DeleteAccount(c *gin.Context) {
+
+	// 获取账号ID
+	accountId, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		logger.Error("ERROR：", err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	// 获取用户ID
+	userID := c.GetUint("id")
+	if err := service.Account.DeleteAccount(accountId, int(userID)); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "删除成功",
+		"data": nil,
+	})
+}
+
+// UpdateAccount 更新账号信息
+// @Summary 更新账号信息
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param task body dao.AccountUpdate true "账号信息"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/account [put]
+func (a *account) UpdateAccount(c *gin.Context) {
+	var data = &dao.AccountUpdate{}
+
+	if err := c.ShouldBind(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	userID := c.GetUint("id")
+	if err := service.Account.UpdateAccount(data, userID); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
 		"data": nil,
 	})
 }
@@ -115,7 +192,8 @@ func (a *account) GetAccountPassword(c *gin.Context) {
 	}
 
 	username, _ := c.Get("username")
-	password, err := service.Account.GetAccountPassword(uint(accountID), username.(string))
+	userId := c.GetUint("id")
+	password, err := service.Account.GetAccountPassword(uint(accountID), username.(string), userId)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
 		c.JSON(http.StatusOK, gin.H{

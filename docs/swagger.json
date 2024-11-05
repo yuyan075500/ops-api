@@ -165,6 +165,254 @@
                 }
             }
         },
+        "/api/v1/account": {
+            "put": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "更新账号信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "账号信息",
+                        "name": "task",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dao.AccountUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "账号相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "新增账号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "账号信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.AccountCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"创建成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/code": {
+            "get": {
+                "description": "账号相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "获取验证码",
+                "parameters": [
+                    {
+                        "description": "用户信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.RestPassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"校验码已发送，5分钟之内有效\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/code_verification": {
+            "post": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "校验验证码",
+                "parameters": [
+                    {
+                        "description": "验证码信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.CodeVerification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"验证成功，本次验证有效期为10分钟\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/password/{id}": {
+            "delete": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "获取账号密码",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "账号ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/account/{id}": {
+            "delete": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "删除账号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "账号ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/accounts": {
+            "get": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "获取账号列表（自己的和别人分享的）",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "账号信息",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/audit/login": {
             "get": {
                 "description": "审计相关接口",
@@ -1452,6 +1700,39 @@
                 }
             }
         },
+        "/api/v1/task/{id}": {
+            "delete": {
+                "description": "定时任务相关接口",
+                "tags": [
+                    "定时任务管理"
+                ],
+                "summary": "删除定时任务",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "定时任务ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tasks": {
             "get": {
                 "description": "定时任务相关接口",
@@ -1491,39 +1772,6 @@
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"data\": []}",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/tasks/{id}": {
-            "delete": {
-                "description": "定时任务相关接口",
-                "tags": [
-                    "定时任务管理"
-                ],
-                "summary": "删除定时任务",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer 用户令牌",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "定时任务ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"code\": 0, \"msg\": \"删除成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -1947,6 +2195,35 @@
         }
     },
     "definitions": {
+        "dao.AccountUpdate": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "auth_user_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "login_address": {
+                    "type": "string"
+                },
+                "login_method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "dao.TaskUpdate": {
             "type": "object",
             "required": [
@@ -2089,6 +2366,33 @@
                 }
             }
         },
+        "service.AccountCreate": {
+            "type": "object",
+            "required": [
+                "name",
+                "password"
+            ],
+            "properties": {
+                "login_address": {
+                    "type": "string"
+                },
+                "login_method": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "service.CASAuthorize": {
             "type": "object",
             "required": [
@@ -2112,6 +2416,22 @@
                 },
                 "ticket": {
                     "type": "string"
+                }
+            }
+        },
+        "service.CodeVerification": {
+            "type": "object",
+            "required": [
+                "code",
+                "validate_type"
+            ],
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "validate_type": {
+                    "description": "验证类型：1：短信验证码，2：MFA验证码",
+                    "type": "integer"
                 }
             }
         },
@@ -2449,9 +2769,9 @@
             "required": [
                 "code",
                 "password",
-                "phone_number",
                 "re_password",
-                "username"
+                "username",
+                "validate_type"
             ],
             "properties": {
                 "code": {
@@ -2468,6 +2788,10 @@
                 },
                 "username": {
                     "type": "string"
+                },
+                "validate_type": {
+                    "description": "验证类型：1：短信验证码，2：MFA验证码",
+                    "type": "integer"
                 }
             }
         },
