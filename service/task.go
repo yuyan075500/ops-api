@@ -59,15 +59,32 @@ func (t *task) DeleteTask(id int) (err error) {
 		return err
 	}
 
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 删除任务执行日志
+	if err := dao.Task.DeleteTaskLogList(tx, id); err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	// 删除已经加载的任务
 	if task.EntryID != nil {
 		global.CornSchedule.Remove(*task.EntryID)
 	}
 
 	// 删除任务本身
-	if err = dao.Task.DeleteTask(id); err != nil {
+	if err = dao.Task.DeleteTask(tx, id); err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	return nil
 }
 

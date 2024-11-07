@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
 )
@@ -41,8 +42,8 @@ func (t *task) AddTask(data *model.ScheduledTask) (err error) {
 }
 
 // DeleteTask 删除定时任务
-func (t *task) DeleteTask(id int) (err error) {
-	if err := global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.ScheduledTask{}).Error; err != nil {
+func (t *task) DeleteTask(tx *gorm.DB, id int) (err error) {
+	if err := tx.Where("id = ?", id).Unscoped().Delete(&model.ScheduledTask{}).Error; err != nil {
 		return err
 	}
 	return nil
@@ -113,4 +114,9 @@ func (t *task) GetTaskLogList(id uint, page, limit int) (data *TaskLogList, err 
 		Items: items,
 		Total: total,
 	}, nil
+}
+
+// DeleteTaskLogList 删除定时任务执行日志
+func (t *task) DeleteTaskLogList(tx *gorm.DB, id int) error {
+	return tx.Where("scheduled_task_id = ?", id).Delete(&model.ScheduledTaskExecLog{}).Error
 }

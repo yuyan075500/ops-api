@@ -24,7 +24,7 @@
 
 5. **项目配置**：修改`conf/config.yaml`文件中相关配置，请参考 [配置文件说明](#配置文件说明)。
 
-   > **注意**：必须修改`externalUrl`的值为实际的访问地址，否则导致单点功能登录无法使用。另外MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与配置文件中指定的值相同即可。
+   > **注意**：必须修改`externalUrl`的值为实际的访问地址，否则导致单点功能登录无法使用。另外MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与`conf/config.yaml`配置文件中指定的值相同即可。
 
 6. **证书**：[创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
@@ -171,7 +171,7 @@ swagger: true
 * [x] url：短信服务地址，不同服务商的配置不同，阿里云参考[短信服务接入点](https://help.aliyun.com/zh/sms/developer-reference/api-dysmsapi-2017-05-25-endpoint "阿里云短信服务接入点")，华为云参考[API请求地址](https://support.huaweicloud.com/api-msgsms/sms_05_0000.html#section1 "API请求地址")。
 * [x] appKey: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
 * [x] appSecret: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
-* [x] callbackUrl：短信回调地址，用于接收短信发送状态，仅华为云需要配置，回调地址为`<externalUrl>/api/v1/sms/huawei/callback`。
+* [x] callbackUrl：短信回调地址，用于接收短信发送状态，仅华为云需要配置，回调地址为`<externalUrl>/api/v1/sms/huawei/callback`，如果平台的访问地址为内网地址，则无法接收回调信息。
 * [x] resetPassword.sender：重置密码短信通道号，仅华为云需要配置。
 * [x] resetPassword.templateId：重置密码短信模板ID。
 * [x] resetPassword.signature：重置密码短信签名名称。
