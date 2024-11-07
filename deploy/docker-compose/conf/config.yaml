@@ -20,7 +20,7 @@ mfa:
   enable: false
   issuer: "统一认证中心"
 oss:
-  endpoint: "minio:9000"
+  endpoint: "192.168.200.21:9000"
   accessKey: "mXBbXV8nhjmLs8Ho"
   secretKey: "Zicc4ifKsX8dGwZHwro1"
   bucketName: "ops-api"
