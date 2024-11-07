@@ -287,7 +287,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	avatar, err := c.FormFile("avatar")
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"code": 90400,
 			"msg":  err.Error(),
 		})
@@ -298,7 +298,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	src, err := avatar.Open()
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
 		})
@@ -313,7 +313,7 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	err = utils.FileUpload(avatarName, avatar.Header.Get("Content-Type"), src, avatar.Size)
 	if err != nil {
 		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": 90500,
 			"msg":  err.Error(),
 		})
