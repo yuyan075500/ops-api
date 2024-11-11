@@ -6,6 +6,11 @@
 |:------|:-----|
 | 前端   | https://github.com/yuyan075500/ops-web    |                                                                                                              |
 | 后端   | https://github.com/yuyan075500/ops-api    |
+如果你无法访问GitHub，可访问Gitee获取项目源代码：
+| 项目   | 项目地址 |
+|:------|:-----|
+| 前端   | https://gitee.com/yybluestorm/ops-web    |                                                                                                              |
+| 后端   | https://gitee.com/yybluestorm/ops-api    |
 ## 后端目录说明
 * config：全局配置。
 * controller：路由规则配置和接口的入参与响应。
@@ -70,9 +75,10 @@
 }
 ```
 ## 其它
-* 支持Swagger接口文档：访问地址：`/swagger/index.html`。
-* 支持用户密码自助更改：访问地址：`/reset_password`。
-* 企业网站导航：访问地址：`/sites`。
+* 支持Swagger接口文档：访问地址：`/swagger/index.html`，无需要登录。
+* 支持用户密码自助更改：访问地址：`/reset_password`，无需要登录。
+* 支持企业网站导航：访问地址：`/sites```，无需要登录。
+* 支持企业账号密码管理，登录后位于左侧【资产管理】-【账号管理】。
 # 项目部署
 参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
 # 开发环境搭建

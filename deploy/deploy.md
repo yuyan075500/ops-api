@@ -14,6 +14,10 @@
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
     ```
+   你也可以访问 [Gitee](https://gitee.com/yybluestorm/ops-api "Gitee") 获取项目源代码：
+   ```shell
+    git clone https://gitee.com/yybluestorm/ops-api
+    ```
 3. **切换工作目录**：
     ```shell
     cd ops-api/deploy/docker-compose
@@ -211,4 +215,4 @@ openssl req -new -x509 -key private.key -out certificate.crt -days 3650
 openssl rsa -in private.key -pubout -out public.key
 ```
 # IP地址库
-记录用户登录信息中的源IP来源于离线库文件，该文件位于项目`config/GeoLite2-City.mmdb`目录，最后更新日志为`2024-07-23`，最新库文件可从官方获取并替换即可。
+记录用户登录信息中的源IP来源于离线库文件，该文件位于项目`config/GeoLite2-City.mmdb`目录，最后更新日志为`2024-11-8`，最新库文件可从官方获取并替换即可。
