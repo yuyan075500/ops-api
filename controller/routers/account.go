@@ -10,6 +10,9 @@ func initAccountRouters(router *gin.Engine) {
 	// 获取账号列表（表格）
 	router.GET("/api/v1/accounts", controller.Account.GetAccountList)
 
+	// 批量新增账号
+	router.POST("/api/v1/accounts", controller.Account.AddAccounts)
+
 	account := router.Group("/api/v1/account")
 	{
 		// 新增账号

@@ -52,6 +52,45 @@ func (a *account) AddAccount(c *gin.Context) {
 	})
 }
 
+// AddAccounts 批量新增账号
+// @Summary 批量新增账号
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Accept application/json
+// @Produce application/json
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param user body service.BatchAccountCreate true "账号信息"
+// @Success 200 {string} json "{"code": 0, "msg": "创建成功", "data": nil}"
+// @Router /api/v1/accounts [post]
+func (a *account) AddAccounts(c *gin.Context) {
+	var account = &service.BatchAccountCreate{}
+
+	if err := c.ShouldBind(account); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	userID := c.GetUint("id")
+	if err := service.Account.AddAccounts(account.Accounts, userID); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "创建成功",
+		"data": nil,
+	})
+}
+
 // DeleteAccount 删除账号
 // @Summary 删除账号
 // @Description 账号相关接口

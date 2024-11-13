@@ -64,6 +64,11 @@ func (a *account) AddAccount(data *model.Account) (err error) {
 	return global.MySQLClient.Create(&data).Error
 }
 
+// AddAccounts 批量新增账号
+func (a *account) AddAccounts(accounts []model.Account) (err error) {
+	return global.MySQLClient.Create(&accounts).Error
+}
+
 // DeleteAccount 删除账号
 func (a *account) DeleteAccount(id int) (err error) {
 	return global.MySQLClient.Where("id = ?", id).Unscoped().Delete(&model.Account{}).Error

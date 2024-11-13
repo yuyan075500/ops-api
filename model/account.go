@@ -8,11 +8,11 @@ import (
 // Account 账号信息表
 type Account struct {
 	gorm.Model
-	Name         string      `json:"name"`
+	Name         string      `json:"name" binding:"required"`
 	LoginAddress string      `json:"login_address" gorm:"default:null"`
 	LoginMethod  string      `json:"login_method" gorm:"default:null"`
 	Username     string      `json:"username" gorm:"default:null"`
-	Password     string      `json:"password"`
+	Password     string      `json:"password" binding:"required"`
 	Note         string      `json:"note" gorm:"default:null"`
 	OwnerUser    AuthUser    `gorm:"foreignKey:OwnerUserID"`
 	OwnerUserID  uint        `json:"owner_user_id"`

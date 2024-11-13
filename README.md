@@ -79,7 +79,7 @@
 ## 其它
 * 支持Swagger接口文档：访问地址：`/swagger/index.html`，无需要登录。
 * 支持用户密码自助更改：访问地址：`/reset_password`，无需要登录。
-* 支持企业网站导航：访问地址：`/sites```，无需要登录。
+* 支持企业网站导航：访问地址：`/sites`，无需要登录。
 * 支持企业账号密码管理，登录后位于左侧【资产管理】-【账号管理】。
 # 项目部署
 参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。

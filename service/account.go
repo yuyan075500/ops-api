@@ -26,6 +26,11 @@ type AccountCreate struct {
 	Note         string `json:"note"`
 }
 
+// BatchAccountCreate 批量账号创建结构体
+type BatchAccountCreate struct {
+	Accounts []model.Account `json:"accounts" binding:"required,dive"`
+}
+
 // CodeVerification 获取密码结构体
 type CodeVerification struct {
 	ValidateType uint   `json:"validate_type" binding:"required"` // 验证类型：1：短信验证码，2：MFA验证码
@@ -45,12 +50,18 @@ func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
 		OwnerUserID:  userId,
 	}
 
-	// 创建数据库数据
-	err = dao.Account.AddAccount(account)
-	if err != nil {
-		return err
+	return dao.Account.AddAccount(account)
+}
+
+// AddAccounts 批量创建账号
+func (a *account) AddAccounts(accounts []model.Account, userId uint) (err error) {
+
+	// 设置每个账号的所有者
+	for i := range accounts {
+		accounts[i].OwnerUserID = userId
 	}
-	return nil
+
+	return dao.Account.AddAccounts(accounts)
 }
 
 // GetAccountList 获取账号列表（表格）

@@ -169,14 +169,14 @@ swagger: true
 > **注意**： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
 
 ## LDAP配置
-平台用户支持与Windows AD或OpenLDAP进行对接，实现用户认证，使配置说明如下：
+支持与Windows AD或OpenLDAP进行对接，实现用户认证，使配置说明如下：
 * [x] host：服务器地址，格式为：`ldap[s]://<host>:<port>`。
 * [x] bindUserDN：绑定的用户DN，格式为：`cn=admin,dc=example,dc=cn`。
 * [x] bindUserPassword：绑定的用户密码。
 * [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割，如：`ou=IT,dc=example,dc=cn&ou=HR,dc=example,dc=cn`。
 * [x] userAttribute：用户属性，如果是OpenLDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
 
-> 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限，Windows AD还要求使用`ldaps`协议进行连接。
+> 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限。如果是Windows AD还要求使用`ldaps`协议进行连接，`ldaps`协议的默认端口为`636`。
 
 ## 短信配置
 目前短信支持华为云和阿里云，具体配置如下所示：
