@@ -157,6 +157,8 @@ definitions:
     - name
     - password
     type: object
+  service.BatchAccountCreate:
+    type: object
   service.CASAuthorize:
     properties:
       service:
@@ -847,6 +849,36 @@ paths:
       summary: 校验验证码
       tags:
       - 账号管理
+  /api/v1/account/owners:
+    put:
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - collectionFormat: csv
+        description: 账号ID列表
+        in: query
+        items:
+          type: integer
+        name: account_ids
+        required: true
+        type: array
+      - description: 新所有者ID
+        in: query
+        name: new_owner_id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "更新成功", "data": nil}'
+          schema:
+            type: string
+      summary: 批量更新账号所有者
+      tags:
+      - 账号管理
   /api/v1/account/password:
     put:
       description: 账号相关接口
@@ -944,6 +976,32 @@ paths:
           schema:
             type: string
       summary: 获取账号列表
+      tags:
+      - 账号管理
+    post:
+      consumes:
+      - application/json
+      description: 账号相关接口
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 账号信息
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/service.BatchAccountCreate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code": 0, "msg": "创建成功", "data": nil}'
+          schema:
+            type: string
+      summary: 批量新增账号
       tags:
       - 账号管理
   /api/v1/audit/login:

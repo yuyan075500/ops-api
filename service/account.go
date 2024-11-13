@@ -103,6 +103,23 @@ func (a *account) UpdateAccount(data *dao.AccountUpdate, userId uint) error {
 	return dao.Account.UpdateAccount(data)
 }
 
+// BatchUpdateAccountOwner 批量修改账号所有者
+func (a *account) BatchUpdateAccountOwner(accounts []uint, oldOwnerId, newOwnerId uint) error {
+
+	// 判断是否有权限操作
+	for _, accountId := range accounts {
+		owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(accountId))
+		if err != nil {
+			return err
+		}
+		if owner.ID != oldOwnerId {
+			return errors.New("此账号你无权操作")
+		}
+	}
+
+	return dao.Account.BatchUpdateAccountOwner(accounts, newOwnerId)
+}
+
 // UpdateAccountUser 用户分享
 func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (err error) {
 

@@ -21,6 +21,8 @@ func initAccountRouters(router *gin.Engine) {
 		account.DELETE("/:id", controller.Account.DeleteAccount)
 		// 修改账号
 		account.PUT("", controller.Account.UpdateAccount)
+		// 批量修改账号所有者
+		account.PUT("/owners", controller.Account.BatchUpdateAccountOwner)
 		// 账号分享
 		account.PUT("/users", controller.Account.UpdateAccountUser)
 		// 获取账号密码

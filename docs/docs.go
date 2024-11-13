@@ -312,6 +312,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/account/owners": {
+            "put": {
+                "description": "账号相关接口",
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "批量更新账号所有者",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "账号ID列表",
+                        "name": "account_ids",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "新所有者ID",
+                        "name": "new_owner_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"更新成功\", \"data\": nil}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/account/password": {
             "put": {
                 "description": "账号相关接口",
@@ -487,6 +531,45 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "账号相关接口",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "账号管理"
+                ],
+                "summary": "批量新增账号",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "账号信息",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.BatchAccountCreate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"msg\": \"创建成功\", \"data\": nil}",
                         "schema": {
                             "type": "string"
                         }
@@ -2510,6 +2593,9 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "service.BatchAccountCreate": {
+            "type": "object"
         },
         "service.CASAuthorize": {
             "type": "object",

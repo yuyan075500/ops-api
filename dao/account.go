@@ -79,6 +79,26 @@ func (a *account) UpdateAccount(data *AccountUpdate) (err error) {
 	return global.MySQLClient.Model(&model.Account{}).Select("*").Where("id = ?", data.ID).Updates(data).Error
 }
 
+// BatchUpdateAccountOwner 批量修改账号所有者
+func (a *account) BatchUpdateAccountOwner(accounts []uint, ownerId uint) (err error) {
+
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 执行批量更新操作
+	for _, accountID := range accounts {
+		if err := tx.Model(&model.Account{}).
+			Where("id = ?", accountID).
+			Update("owner_user_id", ownerId).Error; err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	// 提交事务
+	return tx.Commit().Error
+}
+
 // UpdatePassword 更改密码
 func (a *account) UpdatePassword(account *model.Account, data *AccountUpdatePassword) (err error) {
 

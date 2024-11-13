@@ -167,6 +167,47 @@ func (a *account) UpdateAccount(c *gin.Context) {
 	})
 }
 
+// BatchUpdateAccountOwner 批量更新账号所有者
+// @Summary 批量更新账号所有者
+// @Description 账号相关接口
+// @Tags 账号管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param account_ids query []int true "账号ID列表"
+// @Param new_owner_id query int true "新所有者ID"
+// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Router /api/v1/account/owners [put]
+func (a *account) BatchUpdateAccountOwner(c *gin.Context) {
+	var data struct {
+		Accounts    []uint `json:"accounts" binding:"required"`
+		OwnerUserID uint   `json:"owner_user_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	oldOwnerID := c.GetUint("id")
+	if err := service.Account.BatchUpdateAccountOwner(data.Accounts, oldOwnerID, data.OwnerUserID); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"msg":  "更新成功",
+		"data": nil,
+	})
+}
+
 // UpdateAccountUser 用户分享
 // @Summary 用户分享
 // @Description 账号相关接口
