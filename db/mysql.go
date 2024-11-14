@@ -52,6 +52,7 @@ func MySQLInit() error {
 		&model.SystemPath{},
 		&model.LogSMS{},
 		&model.LogLogin{},
+		&model.LogOplog{},
 		&model.SsoOAuthTicket{},
 		&model.SsoCASTicket{},
 		&model.ScheduledTask{},

@@ -15,5 +15,7 @@ func initAuditRouters(router *gin.Engine) {
 		audit.GET("/sms/receipt", controller.Audit.GetSMSReceipt)
 		// 获取系统登录记录
 		audit.GET("/login", controller.Audit.GetLoginRecord)
+		// 获取系统操作记录
+		audit.GET("/oplog", controller.Audit.GetOplog)
 	}
 }

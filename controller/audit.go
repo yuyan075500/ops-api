@@ -132,3 +132,46 @@ func (l *audit) GetLoginRecord(c *gin.Context) {
 		"data": data,
 	})
 }
+
+// GetOplog 获取系统操作记录
+// @Summary 获取系统操作记录
+// @Description 审计相关接口
+// @Tags 操作日志管理
+// @Param Authorization header string true "Bearer 用户令牌"
+// @Param page query int true "分页"
+// @Param limit query int true "分页大小"
+// @Param name query string false "关键字"
+// @Success 200 {string} json "{"code": 0, "data": []}"
+// @Router /api/v1/audit/oplog [get]
+func (l *audit) GetOplog(c *gin.Context) {
+
+	params := new(struct {
+		Name  string `form:"name"`
+		Page  int    `form:"page" binding:"required"`
+		Limit int    `form:"limit" binding:"required"`
+	})
+	if err := c.Bind(params); err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90400,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	data, err := service.Audit.GetOplogList(params.Name, params.Page, params.Limit)
+
+	if err != nil {
+		logger.Error("ERROR：" + err.Error())
+		c.JSON(http.StatusOK, gin.H{
+			"code": 90500,
+			"msg":  err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"code": 0,
+		"data": data,
+	})
+}

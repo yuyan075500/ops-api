@@ -7,6 +7,7 @@ import (
 	"ops-api/config"
 	"ops-api/controller/routers"
 	"ops-api/db"
+	"ops-api/global"
 	"ops-api/middleware"
 	"ops-api/service"
 )
@@ -75,6 +76,8 @@ func main() {
 		Build())
 	// 加载权限中间件
 	r.Use(middleware.PermissionCheck())
+	// 加载记录日志中间件
+	r.Use(middleware.Oplog(global.MySQLClient))
 
 	// 注册路由
 	routers.Router.InitRouter(r)

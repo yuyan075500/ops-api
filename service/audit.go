@@ -135,6 +135,15 @@ func (a *audit) GetLoginRecordList(name string, page, limit int) (data *dao.Logi
 	return data, nil
 }
 
+// GetOplogList 获取系统操作
+func (a *audit) GetOplogList(name string, page, limit int) (data *dao.OplogList, err error) {
+	data, err = dao.Audit.GetOplogList(name, page, limit)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 // AddLoginRecord 新增系统登录记录
 func (a *audit) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod string, failedReason error, c *gin.Context) (err error) {
 	// 获取客户端Agent

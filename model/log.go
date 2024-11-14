@@ -38,6 +38,21 @@ func (*LogLogin) TableName() (name string) {
 	return "log_login"
 }
 
+type LogOplog struct {
+	gorm.Model
+	Username      string `json:"username"`
+	Endpoint      string `json:"endpoint"`
+	Method        string `json:"method"`
+	RequestParams string `json:"request_params"`
+	ResponseData  string `json:"response_data"`
+	ClientIP      string `json:"client_ip"`
+	UserAgent     string `json:"user_agent"`
+}
+
+func (*LogOplog) TableName() (name string) {
+	return "log_oplog"
+}
+
 // BeforeCreate 分析IP地址来源
 func (l *LogLogin) BeforeCreate(tx *gorm.DB) (err error) {
 	// 打开GeoLite2 City数据库

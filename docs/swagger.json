@@ -612,6 +612,52 @@
                 }
             }
         },
+        "/api/v1/audit/oplog": {
+            "get": {
+                "description": "审计相关接口",
+                "tags": [
+                    "操作日志管理"
+                ],
+                "summary": "获取系统操作记录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer 用户令牌",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "limit",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "关键字",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\": 0, \"data\": []}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/audit/sms": {
             "get": {
                 "description": "审计相关接口",
