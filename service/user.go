@@ -182,21 +182,21 @@ func (u *user) GetUser(userid uint) (user *dao.UserInfoWithMenu, err error) {
 }
 
 // AddUser 创建用户
-func (u *user) AddUser(data *dao.UserCreate) (err error) {
+func (u *user) AddUser(data *dao.UserCreate) (authUser *model.AuthUser, err error) {
 
 	// 字段校验
 	validate := validator.New()
 	// 注册自定义检验方法
 	if err := validate.RegisterValidation("phone", check.PhoneNumberCheck); err != nil {
-		return err
+		return nil, err
 	}
 	if err := validate.Struct(data); err != nil {
-		return err.(validator.ValidationErrors)
+		return nil, err.(validator.ValidationErrors)
 	}
 
 	// 检查密码是否复合要求
 	if err := check.PasswordCheck(data.Password); err != nil {
-		return err
+		return nil, err
 	}
 
 	user := &model.AuthUser{
@@ -209,12 +209,7 @@ func (u *user) AddUser(data *dao.UserCreate) (err error) {
 		UserFrom:    data.UserFrom,
 	}
 
-	// 创建数据库数据
-	err = dao.User.AddUser(user)
-	if err != nil {
-		return err
-	}
-	return nil
+	return dao.User.AddUser(user)
 }
 
 // DeleteUser 删除
@@ -352,11 +347,7 @@ func (u *user) GetVerificationCode(data *messages.SendData, expirationTime int) 
 	}
 
 	// 将验证码写入Redis缓存，如果已存在则会更新Key的值并刷新TTL
-	if err := global.RedisClient.Set(keyName, code, time.Duration(expirationTime)*time.Minute).Err(); err != nil {
-		return err
-	}
-
-	return nil
+	return global.RedisClient.Set(keyName, code, time.Duration(expirationTime)*time.Minute).Err()
 }
 
 // UpdateSelfPassword 用户重置密码
@@ -411,11 +402,7 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 		Password:   data.Password,
 		RePassword: data.RePassword,
 	}
-	if err := u.UpdateUserPassword(userInfo); err != nil {
-		return err
-	}
-
-	return nil
+	return u.UpdateUserPassword(userInfo)
 }
 
 // DingTalkLogin 钉钉扫码认证
@@ -646,20 +633,13 @@ func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri stri
 
 // UserSync LDAP用户同步
 func (u *user) UserSync() error {
-	if err := AD.LDAPUserSync(); err != nil {
-		return err
-	}
-	return nil
+	return AD.LDAPUserSync()
 }
 
 // UpdateUserLoginTime 更新用户最后登录时间
 func (u *user) UpdateUserLoginTime(tx *gorm.DB, user model.AuthUser) (err error) {
 
-	if err := tx.Model(&model.AuthUser{}).Where("id = ?", user.ID).Update("last_login_at", time.Now()).Error; err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Model(&model.AuthUser{}).Where("id = ?", user.ID).Update("last_login_at", time.Now()).Error
 }
 
 // AuthenticateUser 用户认证

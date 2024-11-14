@@ -260,9 +260,5 @@ func (a *ad) LDAPUserSync() (err error) {
 			UserFrom:    user.UserFrom,
 		})
 	}
-	if err := dao.User.SyncUsers(createOrUpdateUserList); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.User.SyncUsers(createOrUpdateUserList)
 }

@@ -93,9 +93,5 @@ func (s *sms) SMSCallback(data string) error {
 	}
 
 	// 将回调数据写入数据库
-	if err := dao.Audit.SMSCallback(callback); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Audit.SMSCallback(callback)
 }

@@ -97,7 +97,7 @@ func (s *site) GetSiteGuideList(name string) (data *SiteGuideList, err error) {
 		Preload("Sites.Tags").
 		Find(&siteGroups)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	// 通过遍历结果集过滤掉没有站点的分组
@@ -180,7 +180,7 @@ func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *S
 		Offset(startSet).
 		Find(&siteGroups)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	// 最外层结构体数据绑定（由于需要对站点URL特殊处理，所以不能直接返回siteGroups结果）
@@ -252,35 +252,29 @@ func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *S
 }
 
 // AddGroup 新增站点分组
-func (s *site) AddGroup(data *model.SiteGroup) (err error) {
+func (s *site) AddGroup(data *model.SiteGroup) (siteGroup *model.SiteGroup, err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 // AddSite 新增站点
-func (s *site) AddSite(tx *gorm.DB, data *model.Site) (err error) {
+func (s *site) AddSite(tx *gorm.DB, data *model.Site) (site *model.Site, err error) {
 	if err := tx.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 // UpdateGroup 修改站点分组
 func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
-	if err := global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error
 }
 
 // UpdateSite 修改站点
 func (s *site) UpdateSite(tx *gorm.DB, site *model.Site, data *UpdateSite) (err error) {
-	if err := tx.Model(&site).Omit("Tags").Updates(data).Error; err != nil {
-		return err
-	}
-	return nil
+	return tx.Model(&site).Omit("Tags").Updates(data).Error
 }
 
 // DeleteGroup 删除站点分组
@@ -294,7 +288,7 @@ func (s *site) DeleteGroup(group *model.SiteGroup) (err error) {
 			return errors.New("请确保分组中不包含站点")
 		}
 
-		return errors.New(err.Error())
+		return err
 	}
 	return nil
 }
@@ -367,38 +361,22 @@ func (s *site) GetSamlSite(issuer string) (data *model.Site, err error) {
 
 // UpdateSiteUser 更新站点用户
 func (s *site) UpdateSiteUser(site *model.Site, users []model.AuthUser) (err error) {
-	if err := global.MySQLClient.Model(&site).Association("Users").Replace(users); err != nil {
-		return errors.New(err.Error())
-	}
-
-	return nil
+	return global.MySQLClient.Model(&site).Association("Users").Replace(users)
 }
 
 // UpdateSiteTag 更新站点标签
 func (s *site) UpdateSiteTag(tx *gorm.DB, site *model.Site, tags []model.Tag) (err error) {
-	if err := tx.Model(&site).Association("Tags").Replace(tags); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Model(&site).Association("Tags").Replace(tags)
 }
 
 // ClearSiteUser 清空站点用户
 func (s *site) ClearSiteUser(site *model.Site) (err error) {
-	if err := global.MySQLClient.Model(&site).Association("Users").Clear(); err != nil {
-		return err
-	}
-
-	return nil
+	return global.MySQLClient.Model(&site).Association("Users").Clear()
 }
 
 // ClearSiteTag 清空站点标签
 func (s *site) ClearSiteTag(site *model.Site) (err error) {
-	if err := global.MySQLClient.Model(&site).Association("Tags").Clear(); err != nil {
-		return err
-	}
-
-	return nil
+	return global.MySQLClient.Model(&site).Association("Tags").Clear()
 }
 
 // IsUserInSite 判断用户是否在站点中

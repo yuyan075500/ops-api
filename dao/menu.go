@@ -45,7 +45,7 @@ func (m *menu) GetMenuListAll() (data *MenuList, err error) {
 		Order("sort").
 		Find(&menus)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &MenuList{
@@ -78,7 +78,7 @@ func (m *menu) GetMenuList(title string, page, limit int) (data *MenuList, err e
 		Order("sort"). // 使用sort字段进行排序
 		Find(&menus)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &MenuList{
@@ -97,7 +97,7 @@ func (m *menu) GetUserMenu(tx *gorm.DB, username string) (data []*MenuItem, err 
 
 	// 获取一级菜单
 	if err := tx.Order("sort").Find(&menus).Error; err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 
 	for _, menu := range menus {
@@ -120,7 +120,7 @@ func (m *menu) GetUserMenu(tx *gorm.DB, username string) (data []*MenuItem, err 
 			// 获取一级菜单对应的二级菜单
 			var subMenus []*model.SubMenu
 			if err := tx.Where("menu_id = ?", menu.Id).Order("sort").Find(&subMenus).Error; err != nil {
-				return nil, errors.New(err.Error())
+				return nil, err
 			}
 			for _, subMenu := range subMenus {
 				// 判断用户是否拥有该菜单权限
@@ -165,13 +165,13 @@ func (m *menu) GetMenuTitle(menuName string) (title *string, err error) {
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
 		tx := global.MySQLClient.Where("name = ?", menuName).First(&subMenu)
 		if tx.Error != nil {
-			return nil, errors.New(tx.Error.Error())
+			return nil, err
 		}
 		return &subMenu.Title, nil
 	}
 
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &menu.Title, nil

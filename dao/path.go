@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"errors"
 	"ops-api/global"
 	"ops-api/model"
 	"ops-api/utils"
@@ -41,7 +40,7 @@ func (p *path) GetPathList(menuName string, page, limit int) (data *PathList, er
 		Offset(startSet).
 		Find(&pathList)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &PathList{
@@ -59,7 +58,7 @@ func (p *path) GetPathListAll() (data []MenuPaths, err error) {
 
 	// 获取用户列表
 	if err := global.MySQLClient.Model(&model.SystemPath{}).Find(&paths).Error; err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 
 	// 按名称分类
@@ -106,7 +105,7 @@ func (p *path) GetPathInfo(name string) (data *model.SystemPath, err error) {
 
 	tx := global.MySQLClient.Where("name = ?", name).First(&path)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return path, nil
@@ -121,7 +120,7 @@ func (p *path) GetPathName(path, method string) (title *string, err error) {
 		Where("path = ? AND method = ?", path, method).
 		First(&systemPath)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &systemPath.Name, nil

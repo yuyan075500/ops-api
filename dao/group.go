@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"errors"
 	"gorm.io/gorm"
 	"ops-api/global"
 	"ops-api/model"
@@ -100,19 +99,16 @@ func (u *group) GetGroupList(name string, page, limit int) (data *GroupList, err
 }
 
 // AddGroup 新增
-func (u *group) AddGroup(data *model.AuthGroup) (err error) {
+func (u *group) AddGroup(data *model.AuthGroup) (authGroup *model.AuthGroup, err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 // UpdateGroup 修改
 func (u *group) UpdateGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
-	if err := tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error
 }
 
 // DeleteGroup 删除
@@ -125,25 +121,17 @@ func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
 
 	// 删除分组
 	if err := tx.Unscoped().Delete(&group).Error; err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 	return nil
 }
 
 // UpdateGroupUser 更新组用户
 func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []model.AuthUser) (err error) {
-	if err := tx.Model(&group).Association("Users").Replace(users); err != nil {
-		return errors.New(err.Error())
-	}
-
-	return nil
+	return tx.Model(&group).Association("Users").Replace(users)
 }
 
 // ClearGroupUser 清空组用户
 func (u *group) ClearGroupUser(tx *gorm.DB, group *model.AuthGroup) (err error) {
-	if err := tx.Model(&group).Association("Users").Clear(); err != nil {
-		return errors.New(err.Error())
-	}
-
-	return nil
+	return tx.Model(&group).Association("Users").Clear()
 }

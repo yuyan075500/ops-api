@@ -47,19 +47,14 @@ func (u *group) GetGroupList(name string, page, limit int) (data *dao.GroupList,
 }
 
 // AddGroup 创建分组
-func (u *group) AddGroup(data *GroupCreate) (err error) {
+func (u *group) AddGroup(data *GroupCreate) (authGroup *model.AuthGroup, err error) {
 
 	group := &model.AuthGroup{
 		Name:        data.Name,
 		IsRoleGroup: data.IsRoleGroup,
 	}
 
-	// 创建数据库数据
-	if err := dao.Group.AddGroup(group); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Group.AddGroup(group)
 }
 
 // DeleteGroup 删除分组

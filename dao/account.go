@@ -60,13 +60,19 @@ type AccountUpdatePassword struct {
 }
 
 // AddAccount 新增账号
-func (a *account) AddAccount(data *model.Account) (err error) {
-	return global.MySQLClient.Create(&data).Error
+func (a *account) AddAccount(data *model.Account) (account *model.Account, err error) {
+	if err := global.MySQLClient.Create(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 // AddAccounts 批量新增账号
-func (a *account) AddAccounts(accounts []model.Account) (err error) {
-	return global.MySQLClient.Create(&accounts).Error
+func (a *account) AddAccounts(accounts []model.Account) (account []model.Account, err error) {
+	if err := global.MySQLClient.Create(&accounts).Error; err != nil {
+		return nil, err
+	}
+	return accounts, nil
 }
 
 // DeleteAccount 删除账号

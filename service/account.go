@@ -38,7 +38,7 @@ type CodeVerification struct {
 }
 
 // AddAccount 创建账号
-func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
+func (a *account) AddAccount(data *AccountCreate, userId uint) (res *model.Account, err error) {
 
 	account := &model.Account{
 		Name:         data.Name,
@@ -54,7 +54,7 @@ func (a *account) AddAccount(data *AccountCreate, userId uint) (err error) {
 }
 
 // AddAccounts 批量创建账号
-func (a *account) AddAccounts(accounts []model.Account, userId uint) (err error) {
+func (a *account) AddAccounts(accounts []model.Account, userId uint) (res []model.Account, err error) {
 
 	// 设置每个账号的所有者
 	for i := range accounts {
@@ -324,9 +324,5 @@ func (a *account) CodeVerification(userId uint, data *CodeVerification) (err err
 	}
 
 	// 写入允许用户获取密码的Redis缓存
-	if err := global.RedisClient.Set(fmt.Sprintf("%s_get_account_password_enabled", user.Username), true, 10*time.Minute).Err(); err != nil {
-		return err
-	}
-
-	return nil
+	return global.RedisClient.Set(fmt.Sprintf("%s_get_account_password_enabled", user.Username), true, 10*time.Minute).Err()
 }

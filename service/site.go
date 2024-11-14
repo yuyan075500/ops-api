@@ -69,22 +69,17 @@ func (s *site) GetSiteGuideList(name string) (data *dao.SiteGuideList, err error
 }
 
 // AddGroup 创建站点分组
-func (s *site) AddGroup(data *SiteGroupCreate) (err error) {
+func (s *site) AddGroup(data *SiteGroupCreate) (siteGroup *model.SiteGroup, err error) {
 
 	group := &model.SiteGroup{
 		Name: data.Name,
 	}
 
-	// 创建数据库数据
-	if err := dao.Site.AddGroup(group); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Site.AddGroup(group)
 }
 
 // AddSite 创建站点
-func (s *site) AddSite(data *SiteCreate) (err error) {
+func (s *site) AddSite(data *SiteCreate) (site *model.Site, err error) {
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
@@ -105,18 +100,19 @@ func (s *site) AddSite(data *SiteCreate) (err error) {
 	}
 
 	// 创建数据库数据
-	if err := dao.Site.AddSite(tx, group); err != nil {
+	result, err := dao.Site.AddSite(tx, group)
+	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 // UpdateGroup 更新站点分组
@@ -130,11 +126,7 @@ func (s *site) UpdateGroup(data *SiteGroupUpdate) error {
 
 	// 更新分组名称
 	group.Name = data.Name
-	if err := dao.Site.UpdateGroup(group); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Site.UpdateGroup(group)
 }
 
 // UpdateSite 更新站点
@@ -172,11 +164,7 @@ func (s *site) DeleteGroup(id int) (err error) {
 	}
 
 	// 删除分组
-	if err := dao.Site.DeleteGroup(group); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Site.DeleteGroup(group)
 }
 
 // DeleteSite 删除站点
@@ -188,11 +176,7 @@ func (s *site) DeleteSite(id int) (err error) {
 	}
 
 	// 删除站点
-	if err := dao.Site.DeleteSite(site); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Site.DeleteSite(site)
 }
 
 // UpdateSiteUser 更新站点用户

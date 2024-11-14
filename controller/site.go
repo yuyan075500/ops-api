@@ -109,28 +109,17 @@ func (s *site) AddGroup(c *gin.Context) {
 	var group = &service.SiteGroupCreate{}
 
 	if err := c.ShouldBind(group); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
-	if err := service.Site.AddGroup(group); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	siteGroup, err := service.Site.AddGroup(group)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "创建成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", siteGroup)
 }
 
 // AddSite 创建站点
@@ -144,31 +133,20 @@ func (s *site) AddGroup(c *gin.Context) {
 // @Success 200 {string} json "{"code": 0, "msg": "创建成功", "data": nil}"
 // @Router /api/v1/site [post]
 func (s *site) AddSite(c *gin.Context) {
-	var group = &service.SiteCreate{}
+	var data = &service.SiteCreate{}
 
-	if err := c.ShouldBind(group); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+	if err := c.ShouldBind(data); err != nil {
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
-	if err := service.Site.AddSite(group); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	site, err := service.Site.AddSite(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "创建成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", site)
 }
 
 // DeleteGroup 删除站点分组
@@ -177,36 +155,24 @@ func (s *site) AddSite(c *gin.Context) {
 // @Tags 站点管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "分组ID"
-// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功"}"
 // @Router /api/v1/site/group/{id} [delete]
 func (s *site) DeleteGroup(c *gin.Context) {
 
 	// 对ID进行类型转换
 	groupID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Site.DeleteGroup(groupID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "删除成功",
-		"data": nil,
-	})
+	utils.SendResponse(c, 0, "删除成功")
 }
 
 // DeleteSite 删除站点
@@ -215,36 +181,24 @@ func (s *site) DeleteGroup(c *gin.Context) {
 // @Tags 站点管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "分组ID"
-// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功"}"
 // @Router /api/v1/site/{id} [delete]
 func (s *site) DeleteSite(c *gin.Context) {
 
 	// 对ID进行类型转换
 	siteID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Site.DeleteSite(siteID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "删除成功",
-		"data": nil,
-	})
+	utils.SendResponse(c, 0, "删除成功")
 }
 
 // UpdateGroup 更新分组信息

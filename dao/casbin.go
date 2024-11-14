@@ -55,7 +55,7 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 	// 查询当前角色中所有用户列表
 	var oldUsernames []string
 	if err := tx.Model(&model.CasbinRule{}).Select("v0").Where("ptype = ? AND v1 = ?", "g", groupName).Pluck("v0", &oldUsernames).Error; err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 
 	// 当前角色，前端传入的用户列表中有，数据库中没有，则添加
@@ -66,7 +66,7 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 				V0:    username,
 				V1:    groupName,
 			}).Error; err != nil {
-				return errors.New(err.Error())
+				return err
 			}
 		}
 	}
@@ -75,7 +75,7 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 	for _, existingUser := range oldUsernames {
 		if !utils.Contains(users, existingUser) {
 			if err := tx.Where("ptype = ? AND v0 = ? AND v1 = ?", "g", existingUser, groupName).Delete(&model.CasbinRule{}).Error; err != nil {
-				return errors.New(err.Error())
+				return err
 			}
 		}
 	}
@@ -87,11 +87,11 @@ func (c *casbin) UpdateRoleUser(tx *gorm.DB, groupName string, users []string) (
 func (c *casbin) UpdateRoleName(tx *gorm.DB, oldName, newName string) (err error) {
 
 	if err := tx.Model(&model.CasbinRule{}).Where("ptype = ? AND v1 = ?", "g", oldName).Update("v1", newName).Error; err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 
 	if err := tx.Model(&model.CasbinRule{}).Where("ptype = ? AND v0 = ?", "p", oldName).Update("v0", newName).Error; err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 
 	return nil
@@ -100,11 +100,7 @@ func (c *casbin) UpdateRoleName(tx *gorm.DB, oldName, newName string) (err error
 // DeleteRole 删除，删除所有与角色相关的记录
 func (c *casbin) DeleteRole(tx *gorm.DB, groupName string) (err error) {
 
-	if err := tx.Where("v0 = ? OR v1 = ?", groupName, groupName).Delete(&model.CasbinRule{}).Error; err != nil {
-		return errors.New(err.Error())
-	}
-
-	return nil
+	return tx.Where("v0 = ? OR v1 = ?", groupName, groupName).Delete(&model.CasbinRule{}).Error
 }
 
 // GetUserPermissions 获取用户拥有的权限，返回权限对应的中文名称列表

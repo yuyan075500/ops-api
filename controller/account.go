@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"ops-api/dao"
 	"ops-api/service"
+	"ops-api/utils"
 	"strconv"
 )
 
@@ -27,29 +28,18 @@ func (a *account) AddAccount(c *gin.Context) {
 	var account = &service.AccountCreate{}
 
 	if err := c.ShouldBind(account); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
-	if err := service.Account.AddAccount(account, userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	data, err := service.Account.AddAccount(account, userID)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "创建成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", data)
 }
 
 // AddAccounts 批量新增账号
@@ -66,29 +56,18 @@ func (a *account) AddAccounts(c *gin.Context) {
 	var account = &service.BatchAccountCreate{}
 
 	if err := c.ShouldBind(account); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
-	if err := service.Account.AddAccounts(account.Accounts, userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	accounts, err := service.Account.AddAccounts(account.Accounts, userID)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "创建成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", accounts)
 }
 
 // DeleteAccount 删除账号
@@ -97,37 +76,25 @@ func (a *account) AddAccounts(c *gin.Context) {
 // @Tags 账号管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "账号ID"
-// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功"}"
 // @Router /api/v1/account/{id} [delete]
 func (a *account) DeleteAccount(c *gin.Context) {
 
 	// 获取账号ID
 	accountId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
 	// 获取用户ID
 	userID := c.GetUint("id")
 	if err := service.Account.DeleteAccount(accountId, int(userID)); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "删除成功",
-		"data": nil,
-	})
+	utils.SendResponse(c, 0, "删除成功")
 }
 
 // UpdateAccount 更新账号信息

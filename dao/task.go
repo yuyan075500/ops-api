@@ -34,27 +34,21 @@ type TaskUpdate struct {
 }
 
 // AddTask 新增定时任务
-func (t *task) AddTask(data *model.ScheduledTask) (err error) {
+func (t *task) AddTask(data *model.ScheduledTask) (task *model.ScheduledTask, err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 // DeleteTask 删除定时任务
 func (t *task) DeleteTask(tx *gorm.DB, id int) (err error) {
-	if err := tx.Where("id = ?", id).Unscoped().Delete(&model.ScheduledTask{}).Error; err != nil {
-		return err
-	}
-	return nil
+	return tx.Where("id = ?", id).Unscoped().Delete(&model.ScheduledTask{}).Error
 }
 
 // UpdateTask 修改定时任务
 func (t *task) UpdateTask(data *TaskUpdate) (err error) {
-	if err := global.MySQLClient.Model(&model.ScheduledTask{}).Select("*").Where("id = ?", data.ID).Updates(data).Error; err != nil {
-		return err
-	}
-	return nil
+	return global.MySQLClient.Model(&model.ScheduledTask{}).Select("*").Where("id = ?", data.ID).Updates(data).Error
 }
 
 // GetTaskList 获取定时任务列表

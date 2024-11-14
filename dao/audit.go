@@ -96,7 +96,7 @@ func (a *audit) GetOplogList(name string, page, limit int) (data *OplogList, err
 		Order("id desc").
 		Find(&record)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &OplogList{
@@ -126,7 +126,7 @@ func (a *audit) GetSMSRecordList(receiver string, page, limit int) (data *SMSRec
 		Order("id desc").
 		Find(&record)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &SMSRecordList{
@@ -137,10 +137,7 @@ func (a *audit) GetSMSRecordList(receiver string, page, limit int) (data *SMSRec
 
 // AddSMSRecord 新增短信发送记录
 func (a *audit) AddSMSRecord(data *model.LogSMS) (err error) {
-	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Create(&data).Error
 }
 
 // GetSendDetail 获取短信发送详情
@@ -157,16 +154,10 @@ func (a *audit) GetSendDetail(conditions interface{}) (*model.LogSMS, error) {
 
 // SMSCallback 短信回执
 func (a *audit) SMSCallback(data *Callback) (err error) {
-	if err := global.MySQLClient.Model(&model.LogSMS{}).Where("sms_msg_id = ?", data.SmsMsgId).Updates(data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Model(&model.LogSMS{}).Where("sms_msg_id = ?", data.SmsMsgId).Updates(data).Error
 }
 
 // AddLoginRecord 新增用户登录记录
 func (a *audit) AddLoginRecord(tx *gorm.DB, data *model.LogLogin) (err error) {
-	if err := tx.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return tx.Create(&data).Error
 }

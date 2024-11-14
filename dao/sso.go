@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"errors"
 	"ops-api/global"
 	"ops-api/model"
 	"time"
@@ -13,18 +12,12 @@ type sso struct{}
 
 // CreateAuthorizeCode 创建授权码（OAuth2.0）
 func (l *sso) CreateAuthorizeCode(data *model.SsoOAuthTicket) (err error) {
-	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Create(&data).Error
 }
 
 // CreateAuthorizeTicket 创建授权票据（CAS3.0）
 func (l *sso) CreateAuthorizeTicket(data *model.SsoCASTicket) (err error) {
-	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Create(&data).Error
 }
 
 // GetAuthorizeCode 仅获取有效授权码（OAuth2.0）

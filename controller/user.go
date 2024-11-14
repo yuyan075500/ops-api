@@ -438,28 +438,17 @@ func (u *user) AddUser(c *gin.Context) {
 	var user = &dao.UserCreate{}
 
 	if err := c.ShouldBind(user); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
-	if err := service.User.AddUser(user); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	authUser, err := service.User.AddUser(user)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "创建成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", authUser)
 }
 
 // DeleteUser 删除用户
@@ -468,36 +457,24 @@ func (u *user) AddUser(c *gin.Context) {
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param id path int true "用户ID"
-// @Success 200 {string} json "{"code": 0, "msg": "删除成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "删除成功"}"
 // @Router /api/v1/user/{id} [delete]
 func (u *user) DeleteUser(c *gin.Context) {
 
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.User.DeleteUser(userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "删除成功",
-		"data": nil,
-	})
+	utils.SendResponse(c, 0, "删除成功")
 }
 
 // UpdateUser 更新用户信息

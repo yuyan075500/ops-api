@@ -25,7 +25,7 @@ type TaskCreate struct {
 }
 
 // AddTask 创建定时任务
-func (t *task) AddTask(data *TaskCreate) (err error) {
+func (t *task) AddTask(data *TaskCreate) (job *model.ScheduledTask, err error) {
 
 	task := &model.ScheduledTask{
 		Name:          data.Name,
@@ -36,18 +36,19 @@ func (t *task) AddTask(data *TaskCreate) (err error) {
 	}
 
 	// 数据库中新增任务
-	if err := dao.Task.AddTask(task); err != nil {
-		return err
+	result, err := dao.Task.AddTask(task)
+	if err != nil {
+		return nil, err
 	}
 
 	// 如果任务未启用，则停止任务，否则更新任务
 	if task.Enabled {
 		if err := AddOrUpdateTask(*task); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return nil
+	return result, nil
 }
 
 // DeleteTask 删除定时任务

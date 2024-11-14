@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"errors"
 	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/global"
@@ -88,7 +87,7 @@ func (u *user) GetUserListAll() (data *UserListAll, err error) {
 	if err := global.MySQLClient.Model(&model.AuthUser{}).
 		Select("id, name").
 		Find(&userBasicInfo).Error; err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 
 	return &UserListAll{
@@ -115,7 +114,7 @@ func (u *user) GetUserList(name string, page, limit int) (data *UserList, err er
 		Offset(startSet).
 		Find(&userList)
 	if tx.Error != nil {
-		return nil, errors.New(tx.Error.Error())
+		return nil, err
 	}
 
 	return &UserList{
@@ -150,7 +149,7 @@ func (u *user) GetUserInfo(userid uint) (userinfo *UserInfoWithMenu, err error) 
 
 	// 获取用户信息
 	if err := tx.Model(&model.AuthUser{}).Where("id = ?", userid).Find(&userInfo).Error; err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 
 	// 从OSS中获取头像临时访问URL，临时URL的过期时间与用户Token过期时间保持一致
@@ -164,13 +163,13 @@ func (u *user) GetUserInfo(userid uint) (userinfo *UserInfoWithMenu, err error) 
 	// 获取用户菜单
 	menus, err := Menu.GetUserMenu(tx, userInfo.Username)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 
 	// 获取用户角色
 	err = tx.Preload("Groups", "is_role_group = ?", true).Where("username = ?", userInfo.Username).First(&user).Error
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, err
 	}
 	for _, group := range user.Groups {
 		roles = append(roles, group.Name)
@@ -193,11 +192,11 @@ func (u *user) GetUserInfo(userid uint) (userinfo *UserInfoWithMenu, err error) 
 }
 
 // AddUser 新增
-func (u *user) AddUser(data *model.AuthUser) (err error) {
+func (u *user) AddUser(data *model.AuthUser) (user *model.AuthUser, err error) {
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
-		return errors.New(err.Error())
+		return nil, err
 	}
-	return nil
+	return data, nil
 }
 
 // SyncUsers 用户同步
@@ -241,18 +240,12 @@ func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (err error) {
 	}
 
 	// 当is_active=0，需要使用Select选中对应字段进行更新，否则无法设置为0
-	if err := global.MySQLClient.Model(&user).Select("*").Updates(userinfo).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Model(&user).Select("*").Updates(userinfo).Error
 }
 
 // DeleteUser 删除
 func (u *user) DeleteUser(tx *gorm.DB, id int) (err error) {
-	if err := tx.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{}).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return tx.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{}).Error
 }
 
 // UpdateUserPassword 更改密码
@@ -265,18 +258,12 @@ func (u *user) UpdateUserPassword(user *model.AuthUser, data *UserPasswordUpdate
 	}
 
 	// 更新密码
-	if err := global.MySQLClient.Model(&user).Update("password", cipherText).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Model(&user).Update("password", cipherText).Error
 }
 
 // ResetUserMFA 重置MFA
 func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 
 	// 将MFA重置为nil
-	if err := global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil).Error; err != nil {
-		return errors.New(err.Error())
-	}
-	return nil
+	return global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil).Error
 }

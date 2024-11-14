@@ -110,11 +110,7 @@ func (a *audit) GetSMSReceipt(smsId int) (err error) {
 	}
 
 	// 将回调数据写入数据库
-	if err := dao.Audit.SMSCallback(callback); err != nil {
-		return err
-	}
-
-	return nil
+	return dao.Audit.SMSCallback(callback)
 }
 
 // GetSMSRecordList 获取短信发送记录
@@ -166,8 +162,5 @@ func (a *audit) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod st
 	}
 
 	// 记录登录客户端信息
-	if err := dao.Audit.AddLoginRecord(tx, loginRecord); err != nil {
-		return err
-	}
-	return nil
+	return dao.Audit.AddLoginRecord(tx, loginRecord)
 }
