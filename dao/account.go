@@ -82,28 +82,54 @@ func (a *account) DeleteAccount(id int) (err error) {
 }
 
 // UpdateAccount 修改账号
-func (a *account) UpdateAccount(data *AccountUpdate) (err error) {
-	return global.MySQLClient.Model(&model.Account{}).Select("*").Where("id = ?", data.ID).Updates(data).Error
+func (a *account) UpdateAccount(data *AccountUpdate) (*model.Account, error) {
+
+	account := &model.Account{}
+
+	if err := global.MySQLClient.Model(account).Select("*").Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		return nil, err
+	}
+
+	// 查询更新后的账号信息并返回
+	if err := global.MySQLClient.First(account, data.ID).Error; err != nil {
+		return nil, err
+	}
+	return account, nil
 }
 
 // BatchUpdateAccountOwner 批量修改账号所有者
-func (a *account) BatchUpdateAccountOwner(accounts []uint, ownerId uint) (err error) {
+func (a *account) BatchUpdateAccountOwner(accounts []uint, ownerId uint) ([]*model.Account, error) {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
+	var updatedAccounts []*model.Account
+
 	// 执行批量更新操作
 	for _, accountID := range accounts {
+		// 更新每个账户的所有者
 		if err := tx.Model(&model.Account{}).
 			Where("id = ?", accountID).
 			Update("owner_user_id", ownerId).Error; err != nil {
 			tx.Rollback()
-			return err
+			return nil, err
 		}
+
+		// 查询更新后的账号信息并加入返回值列表
+		var updatedAccount model.Account
+		if err := tx.Where("id = ?", accountID).First(&updatedAccount).Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		updatedAccounts = append(updatedAccounts, &updatedAccount)
 	}
 
 	// 提交事务
-	return tx.Commit().Error
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return updatedAccounts, nil
 }
 
 // UpdatePassword 更改密码
@@ -118,14 +144,20 @@ func (a *account) UpdatePassword(account *model.Account, data *AccountUpdatePass
 }
 
 // UpdateAccountUser 账号分享
-func (a *account) UpdateAccountUser(account *model.Account, users []model.AuthUser) (err error) {
+func (a *account) UpdateAccountUser(account *model.Account, users []model.AuthUser) (*model.Account, error) {
 
 	// 用户为空，则清空关联
 	if len(users) == 0 {
-		return global.MySQLClient.Model(&account).Association("Users").Clear()
+		if err := global.MySQLClient.Model(&account).Association("Users").Clear(); err != nil {
+			return nil, err
+		}
+		return account, nil
 	}
 
-	return global.MySQLClient.Model(&account).Association("Users").Replace(users)
+	if err := global.MySQLClient.Model(&account).Association("Users").Replace(users); err != nil {
+		return nil, err
+	}
+	return account, nil
 }
 
 // GetAccountList 获取账号列表

@@ -107,8 +107,19 @@ func (u *group) AddGroup(data *model.AuthGroup) (authGroup *model.AuthGroup, err
 }
 
 // UpdateGroup 修改
-func (u *group) UpdateGroup(tx *gorm.DB, data *model.AuthGroup) (err error) {
-	return tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error
+func (u *group) UpdateGroup(tx *gorm.DB, data *model.AuthGroup) (*model.AuthGroup, error) {
+	if err := tx.Model(&model.AuthGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		return nil, err
+	}
+
+	// 获取最新的数据库记录，确保UpdatedAt是最新的
+	var updatedGroup model.AuthGroup
+	if err := tx.First(&updatedGroup, data.ID).Error; err != nil {
+		return nil, err
+	}
+
+	// 返回更新后的数据
+	return &updatedGroup, nil
 }
 
 // DeleteGroup 删除
@@ -127,8 +138,11 @@ func (u *group) DeleteGroup(tx *gorm.DB, group *model.AuthGroup) (err error) {
 }
 
 // UpdateGroupUser 更新组用户
-func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []model.AuthUser) (err error) {
-	return tx.Model(&group).Association("Users").Replace(users)
+func (u *group) UpdateGroupUser(tx *gorm.DB, group *model.AuthGroup, users []model.AuthUser) (*model.AuthGroup, error) {
+	if err := tx.Model(&group).Association("Users").Replace(users); err != nil {
+		return nil, err
+	}
+	return group, nil
 }
 
 // ClearGroupUser 清空组用户

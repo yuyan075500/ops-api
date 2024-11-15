@@ -47,8 +47,11 @@ func (t *task) DeleteTask(tx *gorm.DB, id int) (err error) {
 }
 
 // UpdateTask 修改定时任务
-func (t *task) UpdateTask(data *TaskUpdate) (err error) {
-	return global.MySQLClient.Model(&model.ScheduledTask{}).Select("*").Where("id = ?", data.ID).Updates(data).Error
+func (t *task) UpdateTask(task *model.ScheduledTask, data *TaskUpdate) (*model.ScheduledTask, error) {
+	if err := global.MySQLClient.Model(task).Select("*").Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
 // GetTaskList 获取定时任务列表

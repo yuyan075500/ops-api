@@ -230,7 +230,7 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 }
 
 // UpdateUser 修改
-func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (err error) {
+func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (*model.AuthUser, error) {
 
 	var userinfo = data
 
@@ -240,7 +240,11 @@ func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (err error) {
 	}
 
 	// 当is_active=0，需要使用Select选中对应字段进行更新，否则无法设置为0
-	return global.MySQLClient.Model(&user).Select("*").Updates(userinfo).Error
+	if err := global.MySQLClient.Model(user).Select("*").Updates(data).Error; err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 // DeleteUser 删除

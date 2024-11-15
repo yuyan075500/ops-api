@@ -116,12 +116,12 @@ func (s *site) AddSite(data *SiteCreate) (site *model.Site, err error) {
 }
 
 // UpdateGroup 更新站点分组
-func (s *site) UpdateGroup(data *SiteGroupUpdate) error {
+func (s *site) UpdateGroup(data *SiteGroupUpdate) (*model.SiteGroup, error) {
 
 	// 查询要修改的分组
 	group := &model.SiteGroup{}
 	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// 更新分组名称
@@ -130,7 +130,7 @@ func (s *site) UpdateGroup(data *SiteGroupUpdate) error {
 }
 
 // UpdateSite 更新站点
-func (s *site) UpdateSite(data *dao.UpdateSite) error {
+func (s *site) UpdateSite(data *dao.UpdateSite) (*model.Site, error) {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
@@ -138,21 +138,22 @@ func (s *site) UpdateSite(data *dao.UpdateSite) error {
 	// 查询要修改的站点
 	site := &model.Site{}
 	if err := global.MySQLClient.First(site, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := dao.Site.UpdateSite(tx, site, data); err != nil {
+	result, err := dao.Site.UpdateSite(tx, site, data)
+	if err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 // DeleteGroup 删除站点分组
@@ -180,85 +181,71 @@ func (s *site) DeleteSite(id int) (err error) {
 }
 
 // UpdateSiteUser 更新站点用户
-func (s *site) UpdateSiteUser(data *SiteUserUpdate) (err error) {
+func (s *site) UpdateSiteUser(data *SiteUserUpdate) (*model.Site, error) {
 
 	// 查询要修改的用户组
 	site := &model.Site{}
 	if err := global.MySQLClient.First(site, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// Users=0需要执行清空操作
 	if len(data.Users) == 0 {
 		// 清除站点内所有用户
-		if err := dao.Site.ClearSiteUser(site); err != nil {
-			return err
-		}
+		return dao.Site.ClearSiteUser(site)
 	} else {
 
 		// 查询出要更新的所有用户
 		var users []model.AuthUser
 		if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
-			return err
+			return nil, err
 		}
 
 		// 更新组内用户信息
-		if err := dao.Site.UpdateSiteUser(site, users); err != nil {
-			return err
-		}
+		return dao.Site.UpdateSiteUser(site, users)
 	}
-
-	return nil
 }
 
 // UpdateSiteTag 更新站点标签
-func (s *site) UpdateSiteTag(data *SiteTagUpdate) (err error) {
+func (s *site) UpdateSiteTag(data *SiteTagUpdate) (*model.Site, error) {
 
 	// 查询要修改的用户组
 	site := &model.Site{}
 	if err := global.MySQLClient.First(site, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// Tags=0需要执行清空操作
 	if len(data.Tags) == 0 {
 		// 清除站点所有标签
-		if err := dao.Site.ClearSiteTag(site); err != nil {
-			return err
-		}
-	} else {
-
-		// 开启事务
-		tx := global.MySQLClient.Begin()
-
-		// 创建标签
-		var tags []model.Tag
-		for _, tagName := range data.Tags {
-			tag, err := dao.Tag.FirstCreateTag(tx, tagName)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-			tags = append(tags, *tag)
-		}
-
-		// 查询出要更新的所有标签
-		//var tags []model.Tag
-		//if err := global.MySQLClient.Find(&tags, data.Tags).Error; err != nil {
-		//	return err
-		//}
-
-		// 更新组内用户信息
-		if err := dao.Site.UpdateSiteTag(tx, site, tags); err != nil {
-			return err
-		}
-
-		// 提交事务
-		if err := tx.Commit().Error; err != nil {
-			tx.Rollback()
-			return err
-		}
+		return dao.Site.ClearSiteTag(site)
 	}
 
-	return nil
+	// 开启事务
+	tx := global.MySQLClient.Begin()
+
+	// 创建标签
+	var tags []model.Tag
+	for _, tagName := range data.Tags {
+		tag, err := dao.Tag.FirstCreateTag(tx, tagName)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		tags = append(tags, *tag)
+	}
+
+	// 更新组内用户信息
+	result, err := dao.Site.UpdateSiteTag(tx, site, tags)
+	if err != nil {
+		return nil, err
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	return result, nil
 }

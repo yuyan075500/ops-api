@@ -10,10 +10,12 @@ import (
 // excludedFields 不记录日志的字段
 var excludedFields = map[string]struct{}{
 	"password":      {},
+	"re_password":   {},
 	"client_id":     {},
 	"client_secret": {},
 	"certificate":   {},
 	"mfa_code":      {},
+	"DeletedAt":     {},
 }
 
 // FilterFields 递归过滤敏感字段
@@ -21,8 +23,8 @@ func FilterFields(data map[string]interface{}) {
 	for key, value := range data {
 		// 检查是否为敏感字段
 		if _, ok := excludedFields[key]; ok {
-			// 将敏感字段置为nil
-			data[key] = nil
+			// 删除敏感字段
+			delete(data, key)
 		} else if nestedMap, ok := value.(map[string]interface{}); ok {
 			// 递归处理嵌套 map
 			FilterFields(nestedMap)
@@ -86,20 +88,24 @@ func SendResponse(c *gin.Context, code int, msg string) {
 }
 
 // SendCreateOrUpdateResponse 创建或更新请求的响应
+// SendCreateOrUpdateResponse 创建或更新请求的响应
 func SendCreateOrUpdateResponse(c *gin.Context, code int, msg string, data interface{}) {
 
-	// 将结构体转换为map或[]map
-	responseData, _ := StructToMap(data)
+	var responseData interface{}
+	if data != nil {
+		// 将结构体转换为 map 或 []map
+		responseData, _ = StructToMap(data)
 
-	// 检查responseData 的类型
-	switch v := responseData.(type) {
-	case map[string]interface{}:
-		// 如果是单个对象，直接过滤敏感信息
-		FilterFields(v)
-	case []map[string]interface{}:
-		// 如果是数组，遍历每个元素并过滤敏感信息
-		for _, item := range v {
-			FilterFields(item)
+		// 检查 responseData 的类型
+		switch v := responseData.(type) {
+		case map[string]interface{}:
+			// 如果是单个对象，直接过滤敏感信息
+			FilterFields(v)
+		case []map[string]interface{}:
+			// 如果是数组，遍历每个元素并过滤敏感信息
+			for _, item := range v {
+				FilterFields(item)
+			}
 		}
 	}
 

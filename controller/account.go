@@ -2,8 +2,6 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/wonderivan/logger"
-	"net/http"
 	"ops-api/dao"
 	"ops-api/service"
 	"ops-api/utils"
@@ -109,29 +107,18 @@ func (a *account) UpdateAccount(c *gin.Context) {
 	var data = &dao.AccountUpdate{}
 
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
-	if err := service.Account.UpdateAccount(data, userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	account, err := service.Account.UpdateAccount(data, userID)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", account)
 }
 
 // BatchUpdateAccountOwner 批量更新账号所有者
@@ -150,29 +137,18 @@ func (a *account) BatchUpdateAccountOwner(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	oldOwnerID := c.GetUint("id")
-	if err := service.Account.BatchUpdateAccountOwner(data.Accounts, oldOwnerID, data.OwnerUserID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	accounts, err := service.Account.BatchUpdateAccountOwner(data.Accounts, oldOwnerID, data.OwnerUserID)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", accounts)
 }
 
 // UpdateAccountUser 用户分享
@@ -188,30 +164,19 @@ func (a *account) UpdateAccountUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	userId := c.GetUint("id")
-	if err := service.Account.UpdateAccountUser(data, userId); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	account, err := service.Account.UpdateAccountUser(data, userId)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", account)
 }
 
 // UpdatePassword 更改密码
@@ -223,34 +188,22 @@ func (a *account) UpdateAccountUser(c *gin.Context) {
 // @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
 // @Router /api/v1/account/password [put]
 func (a *account) UpdatePassword(c *gin.Context) {
-	var data = &dao.AccountUpdatePassword{}
+	var account = &dao.AccountUpdatePassword{}
 
 	// 解析请求参数
-	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+	if err := c.ShouldBind(&account); err != nil {
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	userId := c.GetUint("id")
-	if err := service.Account.UpdatePassword(data, userId); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	if err := service.Account.UpdatePassword(account, userId); err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", nil)
 }
 
 // GetAccountList 获取账号列表
@@ -270,22 +223,14 @@ func (a *account) GetAccountList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
 	data, err := service.Account.GetAccountList(params.Name, userID, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -308,11 +253,7 @@ func (a *account) GetAccountPassword(c *gin.Context) {
 	// 获取账号ID
 	accountID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：", err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -320,11 +261,7 @@ func (a *account) GetAccountPassword(c *gin.Context) {
 	userId := c.GetUint("id")
 	password, err := service.Account.GetAccountPassword(uint(accountID), username.(string), userId)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -349,11 +286,7 @@ func (a *account) GetSMSCode(c *gin.Context) {
 	// 获取短信验证码
 	userID := c.GetUint("id")
 	if err := service.Account.GetSMSCode(userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -375,22 +308,14 @@ func (a *account) CodeVerification(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	userID := c.GetUint("id")
 	if err := service.Account.CodeVerification(userID, data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 

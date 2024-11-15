@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/wonderivan/logger"
 	"net/http"
 	"ops-api/dao"
 	"ops-api/service"
@@ -35,21 +34,13 @@ func (s *site) GetSiteList(c *gin.Context) {
 		Limit     int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Site.GetSiteList(params.GroupName, params.SiteName, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -71,21 +62,13 @@ func (s *site) GetSiteGuideList(c *gin.Context) {
 		Name string `form:"name"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Site.GetSiteGuideList(params.Name)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -214,29 +197,18 @@ func (s *site) UpdateGroup(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新站点分组信息
-	if err := service.Site.UpdateGroup(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	group, err := service.Site.UpdateGroup(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", group)
 }
 
 // UpdateSite 更新站点信息
@@ -252,29 +224,18 @@ func (s *site) UpdateSite(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新站点信息
-	if err := service.Site.UpdateSite(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	site, err := service.Site.UpdateSite(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
 }
 
 // UploadLogo 站点图片上传
@@ -289,22 +250,14 @@ func (s *site) UploadLogo(c *gin.Context) {
 	// 获取上传的Logo
 	logo, err := c.FormFile("icon")
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 打开上传的图片
 	src, err := logo.Open()
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -323,11 +276,7 @@ func (s *site) UploadLogo(c *gin.Context) {
 
 	err = utils.FileUpload(logoPath, logo.Header.Get("Content-Type"), src, logo.Size)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -351,29 +300,18 @@ func (s *site) UpdateSiteUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
-	if err := service.Site.UpdateSiteUser(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	site, err := service.Site.UpdateSiteUser(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
 }
 
 // UpdateSiteTag 更新站点标签
@@ -389,27 +327,16 @@ func (s *site) UpdateSiteTag(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
-	if err := service.Site.UpdateSiteTag(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	site, err := service.Site.UpdateSiteTag(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
 }

@@ -255,22 +255,22 @@ func (u *user) DeleteUser(id int) (err error) {
 }
 
 // UpdateUser 更新
-func (u *user) UpdateUser(data *dao.UserUpdate) error {
+func (u *user) UpdateUser(data *dao.UserUpdate) (*model.AuthUser, error) {
 
 	// 字段校验
 	validate := validator.New()
 	// 注册自定义检验方法
 	if err := validate.RegisterValidation("phone", check.PhoneNumberCheck); err != nil {
-		return err
+		return nil, err
 	}
 	if err := validate.Struct(data); err != nil {
-		return err.(validator.ValidationErrors)
+		return nil, err.(validator.ValidationErrors)
 	}
 
 	// 查询要修改的用户
 	user := &model.AuthUser{}
 	if err := global.MySQLClient.First(user, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	return dao.User.UpdateUser(user, data)
@@ -303,7 +303,7 @@ func (u *user) UpdateUserPassword(data *dao.UserPasswordUpdate) (err error) {
 }
 
 // ResetUserMFA 重置MFA
-func (u *user) ResetUserMFA(id int) (err error) {
+func (u *user) ResetUserMFA(id int) error {
 
 	// 查询要重置的用户
 	user := &model.AuthUser{}

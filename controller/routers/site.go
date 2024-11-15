@@ -30,7 +30,7 @@ func initSiteRouters(router *gin.Engine) {
 		site.DELETE("/group/:id", controller.Site.DeleteGroup)
 		// 修改站点用户
 		site.PUT("/users", controller.Site.UpdateSiteUser)
-		// 修改站点标准
+		// 修改站点标签
 		site.PUT("/tags", controller.Site.UpdateSiteTag)
 	}
 }

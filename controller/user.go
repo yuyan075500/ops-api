@@ -35,11 +35,7 @@ func (u *user) Login(c *gin.Context) {
 	var params = &service.UserLogin{}
 
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -47,19 +43,11 @@ func (u *user) Login(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo(2, "账号密码", params.Username, nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
+			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -111,11 +99,7 @@ func (u *user) FeishuLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -124,19 +108,11 @@ func (u *user) FeishuLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo(2, "飞书扫码", "", nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
+			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -160,11 +136,7 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -173,19 +145,11 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo(2, "钉钉扫码", "", nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
+			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -209,11 +173,7 @@ func (u *user) WeChatLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -222,19 +182,11 @@ func (u *user) WeChatLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo(2, "企业微信扫码", "", nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
+			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -260,11 +212,7 @@ func (u *user) Logout(c *gin.Context) {
 	// 将Token存入Redis缓存
 	err := global.RedisClient.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -280,7 +228,7 @@ func (u *user) Logout(c *gin.Context) {
 // @Tags 个人信息管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param avatar formData file true "头像"
-// @Success 200 {string} json "{"code": 0, "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "头像更新成功"}"
 // @Router /api/v1/user/avatarUpload [post]
 func (u *user) UploadAvatar(c *gin.Context) {
 	// 获取上传的头像
@@ -327,7 +275,6 @@ func (u *user) UploadAvatar(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"msg":  "头像更新成功",
-		"data": nil,
 	})
 }
 
@@ -343,11 +290,7 @@ func (u *user) GetUser(c *gin.Context) {
 	// 获取用户信息
 	data, err := service.User.GetUser(c.GetUint("id"))
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -369,11 +312,7 @@ func (u *user) GetUserListAll(c *gin.Context) {
 
 	data, err := service.User.GetUserListAll()
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -400,21 +339,13 @@ func (u *user) GetUserList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.User.GetUserList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -490,29 +421,18 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
-	if err := service.User.UpdateUser(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+	user, err := service.User.UpdateUser(data)
+	if err != nil {
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", user)
 }
 
 // UpdateUserPassword 密码更新
@@ -521,36 +441,24 @@ func (u *user) UpdateUser(c *gin.Context) {
 // @Tags 用户管理
 // @Param Authorization header string true "Bearer 用户令牌"
 // @Param user body dao.UserPasswordUpdate true "用户信息"
-// @Success 200 {string} json "{"code": 0, "msg": "更新成功", "data": nil}"
+// @Success 200 {string} json "{"code": 0, "msg": "重置成功", "data": nil}"
 // @Router /api/v1/user/reset_password [put]
 func (u *user) UpdateUserPassword(c *gin.Context) {
 	var data = &dao.UserPasswordUpdate{}
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
-	// 更新用户信息
+	// 密码更新
 	if err := service.User.UpdateUserPassword(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "更新成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "重置成功", nil)
 }
 
 // ResetUserMFA MFA重置
@@ -566,29 +474,17 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	if err := service.User.ResetUserMFA(userID); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "重置成功",
-		"data": nil,
-	})
+	utils.SendCreateOrUpdateResponse(c, 0, "重置成功", nil)
 }
 
 // GetVerificationCode 获取验证码
@@ -609,21 +505,13 @@ func (u *user) GetVerificationCode(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 获取短信验证码
 	if err := service.User.GetVerificationCode(data, expirationTime); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -645,21 +533,13 @@ func (u *user) UpdateSelfPassword(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	if err := service.User.UpdateSelfPassword(data); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -680,11 +560,7 @@ func (u *user) UserSyncAd(c *gin.Context) {
 
 	// 同步用户
 	if err := service.User.UserSync(); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -706,22 +582,14 @@ func (u *user) GetGoogleQrcode(c *gin.Context) {
 		Token string `form:"token"`
 	})
 	if err := c.Bind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
 	// 获取二维码
 	qrcode, err := service.MFA.GetGoogleQrcode(params.Token)
 	if err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
@@ -746,11 +614,7 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90400,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90400, err.Error())
 		return
 	}
 
@@ -759,19 +623,11 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo(2, "双因子", params.Username, nil, err, c); err != nil {
-			logger.Error("ERROR：" + err.Error())
-			c.JSON(http.StatusOK, gin.H{
-				"code": 90500,
-				"msg":  err.Error(),
-			})
+			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
-		logger.Error("ERROR：" + err.Error())
-		c.JSON(http.StatusOK, gin.H{
-			"code": 90500,
-			"msg":  err.Error(),
-		})
+		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 

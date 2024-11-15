@@ -89,31 +89,31 @@ func (a *account) DeleteAccount(id, userId int) error {
 }
 
 // UpdateAccount 更新账号
-func (a *account) UpdateAccount(data *dao.AccountUpdate, userId uint) error {
+func (a *account) UpdateAccount(data *dao.AccountUpdate, userId uint) (*model.Account, error) {
 
 	// 判断是否有权限操作
 	owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(data.ID))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if owner.ID != userId {
-		return errors.New("此账号你无权操作")
+		return nil, errors.New("此账号你无权操作")
 	}
 
 	return dao.Account.UpdateAccount(data)
 }
 
 // BatchUpdateAccountOwner 批量修改账号所有者
-func (a *account) BatchUpdateAccountOwner(accounts []uint, oldOwnerId, newOwnerId uint) error {
+func (a *account) BatchUpdateAccountOwner(accounts []uint, oldOwnerId, newOwnerId uint) ([]*model.Account, error) {
 
 	// 判断是否有权限操作
 	for _, accountId := range accounts {
 		owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(accountId))
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if owner.ID != oldOwnerId {
-			return errors.New("此账号你无权操作")
+			return nil, errors.New("此账号你无权操作")
 		}
 	}
 
@@ -121,15 +121,15 @@ func (a *account) BatchUpdateAccountOwner(accounts []uint, oldOwnerId, newOwnerI
 }
 
 // UpdateAccountUser 用户分享
-func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (err error) {
+func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (*model.Account, error) {
 
 	// 判断是否有权限操作
 	owner, _, err := dao.Account.GetAccountOwnerAndUsers(int(data.ID))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if owner.ID != userId {
-		return errors.New("此账号你无权操作")
+		return nil, errors.New("此账号你无权操作")
 	}
 
 	var (
@@ -139,7 +139,7 @@ func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (e
 
 	// 查询要修改的用户组
 	if err := global.MySQLClient.First(account, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// 查询出要更新的所有用户
@@ -147,7 +147,7 @@ func (a *account) UpdateAccountUser(data *dao.AccountUpdateUser, userId uint) (e
 		users = []model.AuthUser{}
 	} else {
 		if err := global.MySQLClient.Find(&users, data.Users).Error; err != nil {
-			return err
+			return nil, err
 		}
 	}
 

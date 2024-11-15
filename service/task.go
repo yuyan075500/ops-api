@@ -90,23 +90,24 @@ func (t *task) DeleteTask(id int) (err error) {
 }
 
 // UpdateTask 更新定时任务
-func (t *task) UpdateTask(data *dao.TaskUpdate) error {
-
-	// 更新任务本身
-	if err := dao.Task.UpdateTask(data); err != nil {
-		return err
-	}
+func (t *task) UpdateTask(data *dao.TaskUpdate) (*model.ScheduledTask, error) {
 
 	// 查询更新的任务
 	task := &model.ScheduledTask{}
 	if err := global.MySQLClient.Where("id = ?", data.ID).First(task).Error; err != nil {
-		return err
+		return nil, err
+	}
+
+	// 更新任务本身
+	result, err := dao.Task.UpdateTask(task, data)
+	if err != nil {
+		return nil, err
 	}
 
 	// 如果任务未启用，则停止任务，否则更新任务
 	if task.Enabled {
 		if err := AddOrUpdateTask(*task); err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		if task.EntryID != nil {
@@ -114,7 +115,7 @@ func (t *task) UpdateTask(data *dao.TaskUpdate) error {
 		}
 	}
 
-	return nil
+	return result, nil
 }
 
 // GetTaskList 获取定时任务列表

@@ -96,7 +96,7 @@ func (u *group) DeleteGroup(id int) (err error) {
 }
 
 // UpdateGroup 更新
-func (u *group) UpdateGroup(data *GroupUpdate) error {
+func (u *group) UpdateGroup(data *GroupUpdate) (*model.AuthGroup, error) {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
@@ -104,32 +104,33 @@ func (u *group) UpdateGroup(data *GroupUpdate) error {
 	// 查询要修改的分组
 	group := &model.AuthGroup{}
 	if err := global.MySQLClient.First(group, data.ID).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	// 如果是角色用户组，同步更新名称到CasBin策略表
 	if err := dao.CasBin.UpdateRoleName(tx, group.Name, data.Name); err != nil {
-		return err
+		return nil, err
 	}
 
 	// 更新分组名称
 	group.Name = data.Name
-	if err := dao.Group.UpdateGroup(tx, group); err != nil {
-		return err
+	result, err := dao.Group.UpdateGroup(tx, group)
+	if err != nil {
+		return nil, err
 	}
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// 重新加载策略
 	if err := global.CasBinServer.LoadPolicy(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 // UpdateGroupPermission 更新组权限
@@ -159,7 +160,7 @@ func (u *group) UpdateGroupPermission(data *GroupUpdatePermission) (err error) {
 }
 
 // UpdateGroupUser 更新组内用户，如果是角色用户组则支持同步用户信息到CasBin策略表
-func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
+func (u *group) UpdateGroupUser(data *GroupUpdateUser) (*model.AuthGroup, error) {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
@@ -168,62 +169,51 @@ func (u *group) UpdateGroupUser(data *GroupUpdateUser) (err error) {
 	group := &model.AuthGroup{}
 	if err := tx.First(group, data.ID).Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// Users=0需要执行清空操作
 	if len(data.Users) == 0 {
-		return errors.New("角色分组需要至少保留一个用户")
-		// 清除分组内所有用户
-		//if err := dao.Group.ClearGroupUser(tx, group); err != nil {
-		//	tx.Rollback()
-		//	return err
-		//}
+		return nil, errors.New("角色分组需要至少保留一个用户")
+	}
 
-		// 清除CasBin策略表内角色相关信息（相当于删除角色）
-		//if err := dao.CasBin.DeleteRole(tx, group.Name); err != nil {
-		//	tx.Rollback()
-		//	return err
-		//}
-	} else {
+	// 查询出要更新的所有用户
+	var users []model.AuthUser
+	if err := tx.Find(&users, data.Users).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 
-		// 查询出要更新的所有用户
-		var users []model.AuthUser
-		if err := tx.Find(&users, data.Users).Error; err != nil {
+	// 更新组内用户信息
+	result, err := dao.Group.UpdateGroupUser(tx, group, users)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	// 同步角色用户组信息到CasBin策略表
+	if group.IsRoleGroup {
+		// 根据用户ID列表，将列表中的内容转换为用户名列表
+		usernames, _ := GetUserNamesFromIDs(tx, data.Users)
+
+		if err := dao.CasBin.UpdateRoleUser(tx, group.Name, usernames); err != nil {
 			tx.Rollback()
-			return err
-		}
-
-		// 更新组内用户信息
-		if err := dao.Group.UpdateGroupUser(tx, group, users); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// 同步角色用户组信息到CasBin策略表
-		if group.IsRoleGroup {
-			// 根据用户ID列表，将列表中的内容转换为用户名列表
-			usernames, _ := GetUserNamesFromIDs(tx, data.Users)
-
-			if err := dao.CasBin.UpdateRoleUser(tx, group.Name, usernames); err != nil {
-				tx.Rollback()
-				return err
-			}
+			return nil, err
 		}
 	}
 
 	// 提交事务
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	// 重新加载策略
 	if err := global.CasBinServer.LoadPolicy(); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return result, nil
 }
 
 // GetUserNamesFromIDs 根据用户ID列表返回对应的用户名列表

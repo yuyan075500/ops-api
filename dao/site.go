@@ -268,13 +268,19 @@ func (s *site) AddSite(tx *gorm.DB, data *model.Site) (site *model.Site, err err
 }
 
 // UpdateGroup 修改站点分组
-func (s *site) UpdateGroup(data *model.SiteGroup) (err error) {
-	return global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error
+func (s *site) UpdateGroup(data *model.SiteGroup) (*model.SiteGroup, error) {
+	if err := global.MySQLClient.Model(&model.SiteGroup{}).Where("id = ?", data.ID).Updates(data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }
 
 // UpdateSite 修改站点
-func (s *site) UpdateSite(tx *gorm.DB, site *model.Site, data *UpdateSite) (err error) {
-	return tx.Model(&site).Omit("Tags").Updates(data).Error
+func (s *site) UpdateSite(tx *gorm.DB, site *model.Site, data *UpdateSite) (*model.Site, error) {
+	if err := tx.Model(&site).Omit("Tags").Updates(data).Error; err != nil {
+		return nil, err
+	}
+	return site, nil
 }
 
 // DeleteGroup 删除站点分组
@@ -360,23 +366,35 @@ func (s *site) GetSamlSite(issuer string) (data *model.Site, err error) {
 }
 
 // UpdateSiteUser 更新站点用户
-func (s *site) UpdateSiteUser(site *model.Site, users []model.AuthUser) (err error) {
-	return global.MySQLClient.Model(&site).Association("Users").Replace(users)
+func (s *site) UpdateSiteUser(site *model.Site, users []model.AuthUser) (*model.Site, error) {
+	if err := global.MySQLClient.Model(&site).Association("Users").Replace(users); err != nil {
+		return nil, err
+	}
+	return site, nil
 }
 
 // UpdateSiteTag 更新站点标签
-func (s *site) UpdateSiteTag(tx *gorm.DB, site *model.Site, tags []model.Tag) (err error) {
-	return tx.Model(&site).Association("Tags").Replace(tags)
+func (s *site) UpdateSiteTag(tx *gorm.DB, site *model.Site, tags []model.Tag) (*model.Site, error) {
+	if err := tx.Model(&site).Association("Tags").Replace(tags); err != nil {
+		return nil, err
+	}
+	return site, nil
 }
 
 // ClearSiteUser 清空站点用户
-func (s *site) ClearSiteUser(site *model.Site) (err error) {
-	return global.MySQLClient.Model(&site).Association("Users").Clear()
+func (s *site) ClearSiteUser(site *model.Site) (*model.Site, error) {
+	if err := global.MySQLClient.Model(&site).Association("Users").Clear(); err != nil {
+		return nil, err
+	}
+	return site, nil
 }
 
 // ClearSiteTag 清空站点标签
-func (s *site) ClearSiteTag(site *model.Site) (err error) {
-	return global.MySQLClient.Model(&site).Association("Tags").Clear()
+func (s *site) ClearSiteTag(site *model.Site) (*model.Site, error) {
+	if err := global.MySQLClient.Model(&site).Association("Tags").Clear(); err != nil {
+		return nil, err
+	}
+	return site, nil
 }
 
 // IsUserInSite 判断用户是否在站点中
