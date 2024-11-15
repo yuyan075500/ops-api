@@ -20,6 +20,7 @@ var ExcludedPaths = map[string]bool{
 	"/api/auth/dingtalk_login":          true,
 	"/api/auth/feishu_login":            true,
 	"/api/v1/user/avatarUpload":         true,
+	"/api/v1/user/sync/ad":              true,
 	"/api/v1/reset_password":            true,
 	"/api/v1/site/logoUpload":           true,
 	"/api/v1/sms/huawei/callback":       true,

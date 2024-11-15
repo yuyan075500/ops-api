@@ -64,6 +64,7 @@ func (a *account) AddAccount(data *model.Account) (account *model.Account, err e
 	if err := global.MySQLClient.Create(&data).Error; err != nil {
 		return nil, err
 	}
+	data.OwnerUser = nil
 	return data, nil
 }
 
@@ -216,5 +217,5 @@ func (a *account) GetAccountOwnerAndUsers(id int) (owner *model.AuthUser, users 
 		return nil, nil, err
 	}
 
-	return &account.OwnerUser, account.Users, nil
+	return account.OwnerUser, account.Users, nil
 }
