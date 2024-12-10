@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"errors"
-	"github.com/gin-gonic/gin"
 	"github.com/pquerna/otp/totp"
 	"gorm.io/gorm"
 	"image/png"
@@ -72,7 +71,7 @@ func (m *mfa) GetGoogleQrcode(token string) (image []byte, err error) {
 }
 
 // GoogleQrcodeValidate Google MFA认证校验
-func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToken, redirectUri string, err error) {
+func (m *mfa) GoogleQrcodeValidate(params *MFAValidate) (jwtToken, redirectUri, application string, err error) {
 
 	var (
 		user   model.AuthUser
@@ -82,14 +81,14 @@ func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToke
 	// 获取登录用户信息
 	tx := global.MySQLClient.First(&user, "username = ?", params.Username)
 	if errors.Is(tx.Error, gorm.ErrRecordNotFound) {
-		return "", "", errors.New("用户不存在")
+		return "", "", "", errors.New("用户不存在")
 	}
 
 	// 获取Secret，如果用户还没有绑定MFA，则从Redis中获取Secret
 	if user.MFACode == nil {
 		srt, err := global.RedisClient.Get(params.Token).Result()
 		if err != nil {
-			return "", "", err
+			return "", "", "", err
 		}
 		secret = srt
 	} else {
@@ -99,25 +98,20 @@ func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToke
 	// 校验MFA
 	valid := totp.Validate(params.Code, secret)
 	if !valid {
-		return "", "", errors.New("验证码错误")
+		return "", "", "", errors.New("验证码错误")
 	}
 
 	// 生成用户Token
 	jwtToken, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", "", err
-	}
-
-	// 记录登录信息
-	if err := User.RecordLoginInfo(1, "双因子", user.Username, &user, nil, c); err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	// 更新用户MFA绑定信息
 	if user.MFACode == nil {
 		user.MFACode = &secret
 		if err := tx.Save(&user).Error; err != nil {
-			return "", "", err
+			return "", "", "", err
 		}
 	}
 
@@ -136,13 +130,13 @@ func (m *mfa) GoogleQrcodeValidate(params *MFAValidate, c *gin.Context) (jwtToke
 			Signature:    params.Signature,
 		}
 
-		callbackData, err := SSO.Login(loginParams, user)
+		callbackData, siteName, err := SSO.Login(loginParams, user)
 		if err != nil {
-			return "", "", err
+			return "", "", siteName, err
 		}
-		return jwtToken, callbackData, nil
+		return jwtToken, callbackData, siteName, nil
 	}
 
-	return jwtToken, "", nil
+	return jwtToken, "", "", nil
 
 }

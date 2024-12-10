@@ -32,6 +32,7 @@ type LogLogin struct {
 	FailedReason string `json:"failed_reason"`
 	AuthMethod   string `json:"auth_method"`
 	City         string `json:"city"`
+	Application  string `json:"application"`
 }
 
 func (*LogLogin) TableName() (name string) {

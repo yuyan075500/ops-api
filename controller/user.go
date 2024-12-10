@@ -39,24 +39,33 @@ func (u *user) Login(c *gin.Context) {
 		return
 	}
 
-	token, redirectUri, redirect, err := service.User.Login(params, c)
+	// 获取客户端Agent
+	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
+	clientIP := c.ClientIP()
+
+	token, redirectUri, application, nextPage, err := service.User.Login(params)
 	if err != nil {
-		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "账号密码", params.Username, nil, err, c); err != nil {
+		// 记录登录失败信息
+		if err := service.User.RecordLoginInfo("账号密码", params.Username, userAgent, clientIP, application, err); err != nil {
 			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
-
+		utils.SendResponse(c, 90500, err.Error())
+		return
+	}
+	// 记录登录成功信息
+	if err := service.User.RecordLoginInfo("账号密码", params.Username, userAgent, clientIP, application, nil); err != nil {
 		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
 
-	// 如果开启MFA认证需要返回重定向的页面
-	if redirect != nil {
+	// 如果开启MFA认证需要携带临时Token和MFA对应页面，前端会跳转至指定的页面进行MFA认证（MFA_AUTH）或开启MFA认证（MFA_ENABLE）
+	if nextPage != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":     0,
 			"token":    token,
-			"redirect": redirect,
+			"redirect": nextPage,
 		})
 		return
 	}
@@ -103,15 +112,24 @@ func (u *user) FeishuLogin(c *gin.Context) {
 		return
 	}
 
+	// 获取客户端Agent
+	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
+	clientIP := c.ClientIP()
+
 	// 获取JWT Token
-	token, redirectUri, err := service.User.FeishuLogin(params, c)
+	token, redirectUri, username, application, err := service.User.FeishuLogin(params)
 	if err != nil {
-		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "飞书扫码", "", nil, err, c); err != nil {
+		// 记录登录失败信息
+		if err := service.User.RecordLoginInfo("飞书扫码", username, userAgent, clientIP, application, err); err != nil {
 			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
-
+		utils.SendResponse(c, 90500, err.Error())
+		return
+	}
+	// 记录登录成功信息
+	if err := service.User.RecordLoginInfo("飞书扫码", username, userAgent, clientIP, application, nil); err != nil {
 		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
@@ -140,15 +158,25 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 		return
 	}
 
+	// 获取客户端Agent
+	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
+	clientIP := c.ClientIP()
+
 	// 获取JWT Token
-	token, redirectUri, err := service.User.DingTalkLogin(params, c)
+	token, redirectUri, username, application, err := service.User.DingTalkLogin(params)
 	if err != nil {
-		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "钉钉扫码", "", nil, err, c); err != nil {
+		// 记录登录失败信息
+		if err := service.User.RecordLoginInfo("钉钉扫码", username, userAgent, clientIP, application, err); err != nil {
 			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
+		utils.SendResponse(c, 90500, err.Error())
+		return
+	}
+	// 记录登录成功信息
+	if err := service.User.RecordLoginInfo("钉钉扫码", username, userAgent, clientIP, application, nil); err != nil {
 		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
@@ -177,15 +205,25 @@ func (u *user) WeChatLogin(c *gin.Context) {
 		return
 	}
 
+	// 获取客户端Agent
+	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
+	clientIP := c.ClientIP()
+
 	// 获取JWT Token
-	token, redirectUri, err := service.User.WeChatLogin(params, c)
+	token, redirectUri, username, application, err := service.User.WeChatLogin(params)
 	if err != nil {
 		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "企业微信扫码", "", nil, err, c); err != nil {
+		if err := service.User.RecordLoginInfo("企业微信扫码", username, userAgent, clientIP, application, err); err != nil {
 			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
+		utils.SendResponse(c, 90500, err.Error())
+		return
+	}
+	// 记录登录成功信息
+	if err := service.User.RecordLoginInfo("企业微信扫码", username, userAgent, clientIP, application, nil); err != nil {
 		utils.SendResponse(c, 90500, err.Error())
 		return
 	}
@@ -618,15 +656,25 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 		return
 	}
 
+	// 获取客户端Agent
+	userAgent := c.Request.UserAgent()
+	// 获取客户端IP
+	clientIP := c.ClientIP()
+
 	// MFA校验
-	token, redirectUri, err := service.MFA.GoogleQrcodeValidate(params, c)
+	token, redirectUri, application, err := service.MFA.GoogleQrcodeValidate(params)
 	if err != nil {
 		// 记录登录信息
-		if err := service.User.RecordLoginInfo(2, "双因子", params.Username, nil, err, c); err != nil {
+		if err := service.User.RecordLoginInfo("双因子", params.Username, userAgent, clientIP, application, err); err != nil {
 			utils.SendResponse(c, 90500, err.Error())
 			return
 		}
 
+		utils.SendResponse(c, 90500, err.Error())
+		return
+	}
+	// 记录登录成功信息
+	if err := service.User.RecordLoginInfo("双因子", params.Username, userAgent, clientIP, application, nil); err != nil {
 		utils.SendResponse(c, 90500, err.Error())
 		return
 	}

@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/pquerna/otp/totp"
 	"gorm.io/gorm"
@@ -406,24 +405,24 @@ func (u *user) UpdateSelfPassword(data *RestPassword) (err error) {
 }
 
 // DingTalkLogin 钉钉扫码认证
-func (u *user) DingTalkLogin(params *DingTalkLogin, c *gin.Context) (token, redirectUri string, err error) {
+func (u *user) DingTalkLogin(params *DingTalkLogin) (token, redirectUri, username, application string, err error) {
 
 	// 初始化钉钉客户端
 	dingClient, err := NewDingTalkClient()
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 获取用户Token
 	userAccessToken, err := dingClient.GetUserAccessToken(params.AuthCode)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 获取用户信息
 	userInfo, err := dingClient.GetUserInfo(userAccessToken)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 定义用户匹配条件
@@ -435,50 +434,45 @@ func (u *user) DingTalkLogin(params *DingTalkLogin, c *gin.Context) (token, redi
 	// 在本地数据库中查找匹配的用户
 	user, err := dao.User.GetUser(conditions)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 判断用户是否禁用
 	if !user.IsActive {
-		return "", "", errors.New("拒绝登录，请联系管理员")
+		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", "", err
-	}
-
-	// 记录登录信息
-	if err := u.RecordLoginInfo(1, "钉钉扫码", user.Username, user, nil, c); err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 处理单点登录请求
 	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
-		callbackData, err := SSO.Login(params, *user)
+		callbackData, siteName, err := SSO.Login(params, *user)
 		if err != nil {
-			return "", "", err
+			return "", "", "", siteName, err
 		}
 		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
-		return token, callbackData, nil
+		return token, callbackData, user.Username, siteName, nil
 	}
 
-	return token, "", nil
+	return token, "", user.Username, "", nil
 }
 
 // FeishuLogin 飞书扫码认证
-func (u *user) FeishuLogin(params *FeishuLogin, c *gin.Context) (token, redirectUri string, err error) {
+func (u *user) FeishuLogin(params *FeishuLogin) (token, redirectUri, username, application string, err error) {
 
 	client, err := NewFeishuClient()
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 获取用户访问Token
 	resp, err := client.GetUserAccessToken(params.Code)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 获取用户信息
@@ -495,50 +489,45 @@ func (u *user) FeishuLogin(params *FeishuLogin, c *gin.Context) (token, redirect
 	// 在本地数据库中查找匹配的用户
 	user, err := dao.User.GetUser(conditions)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 判断用户是否禁用
 	if !user.IsActive {
-		return "", "", errors.New("拒绝登录，请联系管理员")
+		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", "", err
-	}
-
-	// 记录登录信息
-	if err := u.RecordLoginInfo(1, "飞书扫码", user.Username, user, nil, c); err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 处理单点登录请求
 	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
-		callbackData, err := SSO.Login(params, *user)
+		callbackData, siteName, err := SSO.Login(params, *user)
 		if err != nil {
-			return "", "", err
+			return "", "", "", siteName, err
 		}
 		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
-		return token, callbackData, nil
+		return token, callbackData, user.Username, siteName, nil
 	}
 
-	return token, "", nil
+	return token, "", user.Username, "", nil
 }
 
 // WeChatLogin 企业微信扫码认证
-func (u *user) WeChatLogin(params *WeChatLogin, c *gin.Context) (token, redirectUri string, err error) {
+func (u *user) WeChatLogin(params *WeChatLogin) (token, redirectUri, username, application string, err error) {
 
 	wechatClient, err := NewWeChatClient()
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 获取用户ID
 	userId, err := wechatClient.GetUserId(params.Code)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 定义用户匹配条件
@@ -549,86 +538,76 @@ func (u *user) WeChatLogin(params *WeChatLogin, c *gin.Context) (token, redirect
 	// 在本地数据库中查找匹配的用户
 	user, err := dao.User.GetUser(conditions)
 	if err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 判断用户是否禁用
 	if !user.IsActive {
-		return "", "", errors.New("拒绝登录，请联系管理员")
+		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", "", err
-	}
-
-	// 记录登录信息
-	if err := u.RecordLoginInfo(1, "企业微信扫码", user.Username, user, nil, c); err != nil {
-		return "", "", err
+		return "", "", "", "", err
 	}
 
 	// 处理单点登录请求
 	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
-		callbackData, err := SSO.Login(params, *user)
+		callbackData, siteName, err := SSO.Login(params, *user)
 		if err != nil {
-			return "", "", err
+			return "", "", "", siteName, err
 		}
 		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
-		return token, callbackData, nil
+		return token, callbackData, user.Username, siteName, nil
 	}
 
-	return token, "", nil
+	return token, "", user.Username, "", nil
 }
 
-// Login 用户登录（支持CAS3.0和OAuth2.0）
-func (u *user) Login(params *UserLogin, c *gin.Context) (token, redirectUri string, redirect *string, err error) {
+// Login 用户登录（支持CAS3.0、OAuth2.0、OIDC和SAML2）
+func (u *user) Login(params *UserLogin) (token, redirectUri, application string, mfaPage *string, err error) {
 
 	var user model.AuthUser
 
 	// 用户认证
 	if err := u.AuthenticateUser(params, &user); err != nil {
-		return "", "", nil, err
+		return "", "", "", nil, err
 	}
 
 	// 判断用户是否禁用
 	if !user.IsActive {
-		return "", "", nil, errors.New("拒绝登录，请联系管理员")
+		return "", "", "", nil, errors.New("拒绝登录，请联系管理员")
 	}
 
 	// 判断系统是否启用MFA认证
 	if config.Conf.MFA.Enable {
-		token, redirect, err := handleMFA(user)
+		token, nextPage, err := handleMFA(user)
 		if err != nil {
-			return "", "", nil, err
+			return "", "", "", nil, err
 		}
-		if redirect != nil {
-			return token, "", redirect, nil
+		if nextPage != nil {
+			return token, "", "", nextPage, nil
 		}
 	}
 
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
-		return "", "", nil, err
-	}
-
-	// 记录登录信息
-	if err := u.RecordLoginInfo(1, "账号密码", user.Username, &user, nil, c); err != nil {
-		return "", "", nil, err
+		return "", "", "", nil, err
 	}
 
 	// 处理单点登录请求
 	if params.SAMLRequest != "" || params.Service != "" || params.ClientId != "" {
-		callbackData, err := SSO.Login(params, user)
+		callbackData, siteName, err := SSO.Login(params, user)
 		if err != nil {
-			return "", "", nil, err
+			return "", "", siteName, nil, err
 		}
 		// 这里的callbackData，如果是SAML2认证则为html，如果是其它认证则为回调地址
-		return token, callbackData, nil, nil
+		return token, callbackData, siteName, nil, nil
 	}
 
-	return token, "", nil, nil
+	return token, "", "", nil, nil
 }
 
 // UserSync LDAP用户同步
@@ -637,9 +616,9 @@ func (u *user) UserSync() error {
 }
 
 // UpdateUserLoginTime 更新用户最后登录时间
-func (u *user) UpdateUserLoginTime(tx *gorm.DB, user model.AuthUser) (err error) {
+func (u *user) UpdateUserLoginTime(tx *gorm.DB, userId uint) (err error) {
 
-	return tx.Model(&model.AuthUser{}).Where("id = ?", user.ID).Update("last_login_at", time.Now()).Error
+	return tx.Model(&model.AuthUser{}).Where("id = ?", userId).Update("last_login_at", time.Now()).Error
 }
 
 // AuthenticateUser 用户认证
@@ -667,23 +646,37 @@ func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
 }
 
 // RecordLoginInfo 记录用户登录信息
-func (u *user) RecordLoginInfo(status int, loginMethod, userName string, user *model.AuthUser, failedReason error, c *gin.Context) error {
+func (u *user) RecordLoginInfo(loginMethod, username, userAgent, clientIP, application string, failedReason error) error {
 
 	// 开启事务
 	tx := global.MySQLClient.Begin()
 
-	// 更新用户最后登录时间
-	if status == 1 {
-		if err := u.UpdateUserLoginTime(tx, *user); err != nil {
+	// 更新用户登录时间
+	conditions := map[string]interface{}{
+		"username": username,
+	}
+	user, err := dao.User.GetUser(conditions)
+	if err == nil {
+
+		if err := u.UpdateUserLoginTime(tx, user.ID); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	// 新增登录记录
-	if err := Audit.AddLoginRecord(tx, status, userName, loginMethod, failedReason, c); err != nil {
-		tx.Rollback()
-		return err
+	// failedReason为空，则表示用户登录成功
+	if failedReason == nil {
+		// 记录登录成功信息
+		if err := Audit.AddLoginSuccessRecord(tx, username, userAgent, clientIP, loginMethod, application); err != nil {
+			tx.Rollback()
+			return err
+		}
+	} else {
+		// 记录登录失败信息
+		if err := Audit.AddLoginFailedRecord(tx, username, userAgent, clientIP, loginMethod, application, failedReason); err != nil {
+			tx.Rollback()
+			return err
+		}
 	}
 
 	// 提交事务
@@ -696,7 +689,7 @@ func (u *user) RecordLoginInfo(status int, loginMethod, userName string, user *m
 }
 
 // handleMFA 双因素认证返回
-func handleMFA(user model.AuthUser) (string, *string, error) {
+func handleMFA(user model.AuthUser) (temToken string, nextPage *string, err error) {
 
 	// 生成一个32位长度的随机字符串作为临时token
 	token := utils.GenerateRandomString(32)

@@ -161,18 +161,18 @@ func (s *sso) GetOIDCConfig() (configuration *OIDCConfig, err error) {
 }
 
 // GetCASAuthorize CAS3.0客户端授权
-func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) (callbackUrl string, err error) {
+func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) (callbackUrl, siteName string, err error) {
 
 	// 获取客户端应用
 	site, err := dao.Site.GetCASSite(data.Service)
 	if err != nil {
-		return "", errors.New("应用未注册或配置错误")
+		return "", "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
 	if !site.AllOpen {
 		if !dao.Site.IsUserInSite(userId, site) {
-			return "", errors.New("您无权访问该应用")
+			return "", site.Name, errors.New("您无权访问该应用")
 		}
 	}
 
@@ -193,12 +193,12 @@ func (s *sso) GetCASAuthorize(data *CASAuthorize, userId uint, username string) 
 		ExpiresAt: time.Now().Add(10 * time.Second), // 票据的有效期为10秒
 	}
 	if err = dao.SSO.CreateAuthorizeTicket(ticket); err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 返回票据
 	redirectURI := fmt.Sprintf("%s?ticket=%s", site.CallbackUrl, st)
-	return redirectURI, nil
+	return redirectURI, site.Name, nil
 }
 
 // ServiceValidate CAS3.0客户端票据校验
@@ -260,18 +260,18 @@ func (s *sso) ServiceValidate(param *CASServiceValidate) (data *CASServiceRespon
 }
 
 // GetOAuthAuthorize OAuth2.0客户端授权
-func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl string, err error) {
+func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl, siteName string, err error) {
 
 	// 获取客户端应用
 	site, err := dao.Site.GetOAuthSite(data.ClientId)
 	if err != nil {
-		return "", errors.New("应用未注册或配置错误")
+		return "", "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
 	if !site.AllOpen {
 		if !dao.Site.IsUserInSite(userId, site) {
-			return "", errors.New("您无权访问该应用")
+			return "", site.Name, errors.New("您无权访问该应用")
 		}
 	}
 
@@ -280,7 +280,7 @@ func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl 
 	// 字符串加密，用于返回给客户端授权码
 	code, err := utils.Encrypt(str)
 	if err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 将授权票据写入数据库
@@ -291,12 +291,12 @@ func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl 
 		ExpiresAt:   time.Now().Add(10 * time.Second), // 票据的有效期为10秒
 	}
 	if err = dao.SSO.CreateAuthorizeCode(ticket); err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 返回授权码
 	redirectURI := fmt.Sprintf("%s?code=%s&state=%s", site.CallbackUrl, code, data.State)
-	return redirectURI, nil
+	return redirectURI, site.Name, nil
 }
 
 // GetToken OAuth2.0客户端Token获取
@@ -505,39 +505,39 @@ func (s *sso) GetSampleAuthnRequest(samlRequest *SAMLRequest) url.Values {
 }
 
 // GetSPAuthorize SP授权
-func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string, err error) {
+func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html, siteName string, err error) {
 
 	var b bytes.Buffer
 
 	// 获取SAMLRequest数据
 	requestData, err := utils.ParseSAMLRequest(samlRequest.SAMLRequest)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// 获取SP应用
 	site, err := dao.Site.GetSamlSite(requestData.Issuer.Value)
 	if err != nil {
-		return "", errors.New("应用未注册或配置错误")
+		return "", "", errors.New("应用未注册或配置错误")
 	}
 
 	// 判断用户是否有权限访问
 	if !site.AllOpen {
 		if !dao.Site.IsUserInSite(userId, site) {
-			return "", errors.New("您无权访问该应用")
+			return "", site.Name, errors.New("您无权访问该应用")
 		}
 	}
 
 	// 获取IDP私钥
 	IDPKey, err := utils.ReadFileString("config/certs/private.key")
 	if err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 获取IDP证书
 	IDPCert, err := utils.ReadFileString("config/certs/certificate.crt")
 	if err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 获取SP证书（给证书加上头尾）
@@ -549,7 +549,7 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	// 获取用户信息
 	userinfo, err := dao.User.GetUserInfo(userId)
 	if err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
 	// 初始化IDP实（注：也可以在结构体中使用IDPCertFilePath和IDPKeyFilePath从指定路径中读取IDP的证书和私钥，但经测试有Bug）
@@ -590,13 +590,13 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 	// SAMLRequest请求校验,由于IDP的Metadata元数据中指定的SP Binding方法为HTTPRedirectBinding, 所以这里传入的时候是GET方法
 	_, validationError := idp.ValidateAuthnRequest("GET", s.GetSampleAuthnRequest(samlRequest), url.Values{})
 	if validationError != nil {
-		return "", validationError.Error
+		return "", site.Name, validationError.Error
 	}
 
 	// 生成签名后XML数据
 	signedXML, signedXMLErr := idp.NewSignedLoginResponse()
 	if signedXMLErr != nil {
-		return "", signedXMLErr.Error
+		return "", site.Name, signedXMLErr.Error
 	}
 
 	// 生成HTML响应
@@ -606,16 +606,19 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html string
 		RelayState:   idp.RelayState,
 	}
 	if err := samlPostFormTemplate.Execute(&b, htmlData); err != nil {
-		return "", err
+		return "", site.Name, err
 	}
 
-	return b.String(), nil
+	return b.String(), site.Name, nil
 }
 
 // Login 单点登录
-func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackData string, err error) {
+func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackData, appName string, err error) {
 
-	var data string
+	var (
+		data        string
+		application string
+	)
 
 	if queryParams.GetResponseType() != "" && queryParams.GetClientId() != "" && queryParams.GetRedirectURI() != "" {
 		// OAuth认证返回
@@ -626,21 +629,23 @@ func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackDa
 			Scope:        queryParams.GetScope(),
 			State:        queryParams.GetState(),
 		}
-		callbackUrl, err := s.GetOAuthAuthorize(params, user.ID)
+		callbackUrl, siteName, err := s.GetOAuthAuthorize(params, user.ID)
 		if err != nil {
-			return "", err
+			return "", siteName, err
 		}
 		data = callbackUrl
+		application = siteName
 	} else if queryParams.GetService() != "" {
 		// CAS认证返回
 		params := &CASAuthorize{
 			Service: queryParams.GetService(),
 		}
-		callbackUrl, err := s.GetCASAuthorize(params, user.ID, user.Username)
+		callbackUrl, siteName, err := s.GetCASAuthorize(params, user.ID, user.Username)
 		if err != nil {
-			return "", err
+			return "", siteName, err
 		}
 		data = callbackUrl
+		application = siteName
 	} else if queryParams.GetSAMLRequest() != "" {
 		// SAML2认证返回
 		params := &SAMLRequest{
@@ -649,12 +654,13 @@ func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackDa
 			SigAlg:      queryParams.GetSigAlg(),
 			Signature:   queryParams.GetSignature(),
 		}
-		html, err := s.GetSPAuthorize(params, user.ID)
+		html, siteName, err := s.GetSPAuthorize(params, user.ID)
 		if err != nil {
-			return "", err
+			return "", siteName, err
 		}
 		data = html
+		application = siteName
 	}
 
-	return data, nil
+	return data, application, nil
 }

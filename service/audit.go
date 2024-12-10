@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"ops-api/config"
 	"ops-api/dao"
@@ -140,25 +139,34 @@ func (a *audit) GetOplogList(name string, page, limit int) (data *dao.OplogList,
 	return data, nil
 }
 
-// AddLoginRecord 新增系统登录记录
-func (a *audit) AddLoginRecord(tx *gorm.DB, status int, username, loginMethod string, failedReason error, c *gin.Context) (err error) {
-	// 获取客户端Agent
-	userAgent := c.Request.UserAgent()
-	// 获取客户端IP
-	clientIP := c.ClientIP()
+// AddLoginFailedRecord 新增系统登录失败记录
+func (a *audit) AddLoginFailedRecord(tx *gorm.DB, username, userAgent, clientIP, loginMethod, application string, failedReason error) (err error) {
 
-	// 数据封装，Status=1表示成功
 	loginRecord := &model.LogLogin{
-		Username:   username,
-		SourceIP:   clientIP,
-		UserAgent:  userAgent,
-		Status:     status,
-		AuthMethod: loginMethod,
+		Username:     username,
+		SourceIP:     clientIP,
+		UserAgent:    userAgent,
+		AuthMethod:   loginMethod,
+		Application:  application,
+		Status:       2,                    // Status=2，表示失败
+		FailedReason: failedReason.Error(), // 记录错误原因
 	}
 
-	// 如果是登录失败，则记录登录失败原因
-	if status != 1 {
-		loginRecord.FailedReason = failedReason.Error()
+	// 记录登录客户端信息
+	return dao.Audit.AddLoginRecord(tx, loginRecord)
+}
+
+// AddLoginSuccessRecord 新增系统登录成功记录
+func (a *audit) AddLoginSuccessRecord(tx *gorm.DB, username, userAgent, clientIP, loginMethod, application string) (err error) {
+
+	// Status=1表示成功
+	loginRecord := &model.LogLogin{
+		Username:    username,
+		SourceIP:    clientIP,
+		UserAgent:   userAgent,
+		AuthMethod:  loginMethod,
+		Application: application,
+		Status:      1,
 	}
 
 	// 记录登录客户端信息
