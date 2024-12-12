@@ -123,6 +123,7 @@ ldap:
   bindUserPassword: ""
   searchDN: ""
   userAttribute: ""
+  maxPasswordAge: 90
 sms:
   provider: ""
   url: ""
@@ -175,6 +176,7 @@ swagger: true
 * [x] bindUserPassword：绑定的用户密码。
 * [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割，如：`ou=IT,dc=example,dc=cn&ou=HR,dc=example,dc=cn`。
 * [x] userAttribute：用户属性，如果是OpenLDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
+* [ ] maxPasswordAge：密码最大有效期，该参数仅对Windows AD有效，需要与实际的密码有效期保持一致。
 
 > 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限。如果是Windows AD还要求使用`ldaps`协议进行连接，`ldaps`协议的默认端口为`636`。
 

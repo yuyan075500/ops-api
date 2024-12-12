@@ -29,16 +29,17 @@ type UserInfoWithMenu struct {
 
 // UserInfo 用户信息结构体
 type UserInfo struct {
-	ID          int        `json:"id"`
-	Name        string     `json:"name"`
-	Username    string     `json:"username"`
-	WwId        string     `json:"ww_id"`
-	PhoneNumber string     `json:"phone_number"`
-	IsActive    bool       `json:"is_active"`
-	Email       string     `json:"email"`
-	Avatar      string     `json:"avatar"`
-	LastLoginAt *time.Time `json:"last_login_at"`
-	UserFrom    string     `json:"user_from"`
+	ID                int        `json:"id"`
+	Name              string     `json:"name"`
+	Username          string     `json:"username"`
+	WwId              string     `json:"ww_id"`
+	PhoneNumber       string     `json:"phone_number"`
+	IsActive          bool       `json:"is_active"`
+	Email             string     `json:"email"`
+	Avatar            string     `json:"avatar"`
+	LastLoginAt       *time.Time `json:"last_login_at"`
+	PasswordExpiredAt *time.Time `json:"password_expired_at"`
+	UserFrom          string     `json:"user_from"`
 }
 
 // UserListAll 返回给前端下拉框或穿梭框的数据结构体
@@ -52,13 +53,22 @@ type UserBasicInfo struct {
 	Name string `json:"name"`
 }
 
+// PasswordExpiredUserList 密码过期的用户结构体
+type PasswordExpiredUserList struct {
+	Name              string    `json:"name"`
+	Username          string    `json:"username"`
+	Email             string    `json:"email"`
+	PasswordExpiredAt time.Time `json:"password_expired_at"`
+}
+
 // UserUpdate 更新构体，定义更新时的字段信息
 type UserUpdate struct {
-	ID          uint    `json:"id" binding:"required"`
-	WwId        *string `json:"ww_id"`
-	PhoneNumber string  `json:"phone_number" validate:"omitempty,phone"`
-	Email       string  `json:"email" validate:"omitempty,email"`
-	IsActive    bool    `json:"is_active" validate:"omitempty"`
+	ID                uint       `json:"id" binding:"required"`
+	WwId              *string    `json:"ww_id"`
+	PhoneNumber       string     `json:"phone_number" validate:"omitempty,phone"`
+	Email             string     `json:"email" validate:"omitempty,email"`
+	IsActive          bool       `json:"is_active" validate:"omitempty"`
+	PasswordExpiredAt *time.Time `json:"password_expired_at"`
 }
 
 // UserPasswordUpdate 更改密码结构体
@@ -70,12 +80,13 @@ type UserPasswordUpdate struct {
 
 // UserCreate 创建结构体，定义新增时的字段信息
 type UserCreate struct {
-	Name        string `json:"name" binding:"required"`
-	Username    string `json:"username" gorm:"unique" binding:"required"`
-	Password    string `json:"password" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required" validate:"phone"`
-	Email       string `json:"email" binding:"required" validate:"email"`
-	UserFrom    string `json:"user_from"`
+	Name              string     `json:"name" binding:"required"`
+	Username          string     `json:"username" gorm:"unique" binding:"required"`
+	Password          string     `json:"password" binding:"required"`
+	PhoneNumber       string     `json:"phone_number" binding:"required" validate:"phone"`
+	Email             string     `json:"email" binding:"required" validate:"email"`
+	PasswordExpiredAt *time.Time `json:"password_expired_at"`
+	UserFrom          string     `json:"user_from"`
 }
 
 // GetUserListAll 获取所有用户
@@ -212,7 +223,7 @@ func (u *user) SyncUsers(users []*model.AuthUser) (err error) {
 				// 如果用户已存在则更新
 				if utils.IsDuplicateEntryError(err) {
 					// 仅更新来源为LDAP的用户，则进行用户更新
-					if err := tx.Select("*").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
+					if err := tx.Select("email", "phone_number", "password_expired_at", "is_active").Where("username = ? AND user_from = ?", user.Username, user.UserFrom).Updates(user).Error; err != nil {
 						return err
 					}
 				} else {
@@ -247,6 +258,11 @@ func (u *user) UpdateUser(user *model.AuthUser, data *UserUpdate) (*model.AuthUs
 	return user, nil
 }
 
+// UpdateUserPasswordExpiredAt 修改用户密码过期时间
+func (u *user) UpdateUserPasswordExpiredAt(userId uint, passwordExpiredAt *time.Time) (err error) {
+	return global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", userId).Update("password_expired_at", passwordExpiredAt).Error
+}
+
 // DeleteUser 删除
 func (u *user) DeleteUser(tx *gorm.DB, id int) (err error) {
 	return tx.Where("id = ?", id).Unscoped().Delete(&model.AuthUser{}).Error
@@ -270,4 +286,23 @@ func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 
 	// 将MFA重置为nil
 	return global.MySQLClient.Model(&model.AuthUser{}).Where("id = ?", data.ID).Update("mfa_code", nil).Error
+}
+
+// GetPasswordExpiredUserList 获取密码过期用户列表
+func (u *user) GetPasswordExpiredUserList() (userList []*PasswordExpiredUserList, err error) {
+	var (
+		results []*PasswordExpiredUserList
+		now     = time.Now()
+	)
+
+	if err := global.MySQLClient.Model(&model.AuthUser{}).Select("name, username, email, password_expired_at").
+		Where("is_active = ?", true).
+		Where("password_expired_at IS NOT NULL AND password_expired_at < ?", now).
+		Where("email IS NOT NULL").
+		Find(&results).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }

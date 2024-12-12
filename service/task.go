@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/robfig/cron/v3"
@@ -140,6 +141,11 @@ func (t *task) GetTaskLogList(id uint, page, limit int) (data *dao.TaskLogList, 
 func TaskInit() error {
 	global.CornSchedule = cron.New(cron.WithChain())
 
+	// 清空所有任务的EntryID，这里WHERE 1 = 1 是为了避免条件为空的情况
+	if err := global.MySQLClient.Model(&model.ScheduledTask{}).Where("1 = 1").Update("entry_id", nil).Error; err != nil {
+		return errors.New(fmt.Sprintf("failed to reset entry IDs: %v", err))
+	}
+
 	// 加载数据库中的启用任务
 	var tasks []model.ScheduledTask
 	if err := global.MySQLClient.Where("enabled = ?", true).Find(&tasks).Error; err != nil {
@@ -193,12 +199,14 @@ func AddOrUpdateTask(task model.ScheduledTask) error {
 		}
 
 		// 更新任务信息
-		global.MySQLClient.Model(&task).Updates(map[string]interface{}{
+		if err := global.MySQLClient.Model(&task).Updates(map[string]interface{}{
 			"last_run_at":     startTime,
 			"next_run_at":     global.CornSchedule.Entry(entryID).Next,
 			"entry_id":        entryID,
 			"execution_count": task.ExecutionCount + 1,
-		})
+		}).Error; err != nil {
+			return
+		}
 	})
 
 	if err != nil {
@@ -232,5 +240,20 @@ func executeBuiltInMethod(task model.ScheduledTask, execLog *model.ScheduledTask
 			global.MySQLClient.Model(&task).Update("LastRunResult", "成功")
 		}
 
+	}
+
+	// 密码过期提醒
+	if task.BuiltInMethod == "password_expire_notify" {
+		result, err := User.PasswordExpiredNotice()
+		if err != nil {
+			global.MySQLClient.Model(execLog).Update("result", err.Error())
+			global.MySQLClient.Model(&task).Update("LastRunResult", "失败")
+			logger.Warn("任务执行失败:", err.Error())
+		} else {
+			jsonData, _ := json.Marshal(result)
+			// 任务成功记录
+			global.MySQLClient.Model(execLog).Update("result", fmt.Sprintf("%v", string(jsonData)))
+			global.MySQLClient.Model(&task).Update("LastRunResult", "成功")
+		}
 	}
 }

@@ -46,7 +46,7 @@ func (e *EmailInfo) SendMsg(to, cc, files []string, subject, body, sendType stri
 	// 创建一个邮件对象
 	e.msg = gomail.NewMessage()
 
-	// 设置发信人
+	// 设置发件人
 	e.msg.SetHeader("From", config.Conf.Mail.From)
 	// 设置收件人
 	e.msg.SetHeader("To", to...)

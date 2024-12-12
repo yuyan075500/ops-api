@@ -37,6 +37,7 @@ data:
       bindUserPassword: ""
       searchDN: ""
       userAttribute: "uid"
+      maxPasswordAge: 90
     sms:
       provider: ""
       url: ""

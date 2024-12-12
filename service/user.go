@@ -13,6 +13,7 @@ import (
 	"ops-api/model"
 	"ops-api/utils"
 	"ops-api/utils/check"
+	"ops-api/utils/mail"
 	messages "ops-api/utils/sms"
 	"time"
 )
@@ -198,14 +199,17 @@ func (u *user) AddUser(data *dao.UserCreate) (authUser *model.AuthUser, err erro
 		return nil, err
 	}
 
+	fmt.Printf("Name: %v, Type: %T\n", data.PasswordExpiredAt, data.PasswordExpiredAt)
+
 	user := &model.AuthUser{
-		Name:        data.Name,
-		Username:    data.Username,
-		Password:    data.Password,
-		PhoneNumber: data.PhoneNumber,
-		IsActive:    true,
-		Email:       data.Email,
-		UserFrom:    data.UserFrom,
+		Name:              data.Name,
+		Username:          data.Username,
+		Password:          data.Password,
+		PhoneNumber:       data.PhoneNumber,
+		IsActive:          true,
+		Email:             data.Email,
+		UserFrom:          data.UserFrom,
+		PasswordExpiredAt: data.PasswordExpiredAt,
 	}
 
 	return dao.User.AddUser(user)
@@ -636,7 +640,7 @@ func (u *user) AuthenticateUser(params *UserLogin, user *model.AuthUser) error {
 	if user.UserFrom == "LDAP" {
 		// LDAP用户认证
 		if _, err := AD.LDAPUserAuthentication(params.Username, params.Password); err != nil {
-			return errors.New("用户密码错误或系统错误")
+			return err
 		}
 	} else if !user.CheckPassword(params.Password) {
 		return errors.New("用户密码错误")
@@ -708,4 +712,71 @@ func handleMFA(user model.AuthUser) (temToken string, nextPage *string, err erro
 	}
 
 	return token, &redirect, nil
+}
+
+// PasswordExpiredNotice 用户密码过期通知
+func (u *user) PasswordExpiredNotice() (map[string]interface{}, error) {
+
+	users, err := dao.User.GetPasswordExpiredUserList()
+	if err != nil {
+		return nil, err
+	}
+
+	// 初始化结果集合
+	result := map[string]interface{}{
+		"success": []string{},
+		"failed":  []map[string]string{},
+	}
+
+	for _, user := range users {
+
+		// 格式化密码过期时间
+		expiredAt := user.PasswordExpiredAt.Format("2006-01-02 15:04:05")
+
+		// 生成HTML内容
+		htmlBody := PasswordExpiredNoticeHTML(user.Name, user.Username, expiredAt)
+
+		// 发送邮件函数
+		if err := mail.Email.SendMsg([]string{user.Email}, nil, nil, "密码过期提醒", htmlBody, "html"); err != nil {
+			// 添加到失败列表
+			result["failed"] = append(result["failed"].([]map[string]string), map[string]string{
+				"email": user.Email,
+				"error": err.Error(),
+			})
+		} else {
+			// 添加到成功列表
+			result["success"] = append(result["success"].([]string), user.Email)
+		}
+	}
+
+	return result, nil
+}
+
+// PasswordExpiredNoticeHTML 密码过期通知正文
+func PasswordExpiredNoticeHTML(name, username, expiredAt string) string {
+
+	url := config.Conf.ExternalUrl
+	if url != "" && url[len(url)-1] != '/' {
+		url += "/"
+	}
+
+	resetPasswordURL := url + "reset_password"
+
+	return fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="UTF-8">
+			<title>密码到期提醒</title>
+		</head>
+		<body>
+			<p>亲爱的同事：</p>
+			<p>您好，目前检测到您的账户（<strong>%s</strong>）将于<strong>%s</strong>过期。</p>
+			<p>为了保护您的账号安全，请在此日期前登录【<a href="%s" target="_blank">密码修改自助平台</a>】修改密码，若逾期未修改则会导致您的账户无法登录到相关的平台。</p>
+			<br>
+			<p>此致，<br>%s</p>
+			<p style="color: red">此邮件为系统自动发送，请不要回复此邮件。</p>
+		</body>
+		</html>
+	`, username, expiredAt, resetPasswordURL, config.Conf.MFA.Issuer)
 }

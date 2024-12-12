@@ -72,6 +72,7 @@ type LDAP struct {
 	BindUserPassword string `yaml:"bindUserPassword"`
 	SearchDN         string `yaml:"searchDN"`
 	UserAttribute    string `yaml:"userAttribute"`
+	MaxPasswordAge   int    `yaml:"maxPasswordAge"`
 }
 
 type Redis struct {
