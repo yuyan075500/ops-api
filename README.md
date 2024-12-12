@@ -1,4 +1,4 @@
-# IDSphere统一认证平台项目介绍
+# IDSphere 统一认证平台项目介绍
 仅需一次认证，即可访问所有授权访问的应用系统，为企业办公人员提供高效、便捷的访问体验。
 ## 架构设计
 项目采用前后端分离架构设计，项目地址如下：
@@ -14,26 +14,26 @@
 |:----|:--------------------------------------|
 | 前端  | https://gitee.com/yybluestorm/ops-web |                                                                                                              |
 | 后端  | https://gitee.com/yybluestorm/ops-api |
-## 后端项目目录说明
+## 目录说明
 * config：全局配置。
 * controller：路由规则配置和接口的入参与响应。
-* service：接口的处理逻辑。
+* service：接口处理逻辑。
 * dao：数据库操作。
 * model：数据库模型定义。
-* db：数据库、缓存等客户端初始化。
-* middleware：中间件层，作用于全局，如跨域、JWT认证、权限校验等。
-* utils：工具层，如Token解析，文件操作等。
-## 后端项目返回Code状态码说明
+* db：数据库、缓存以及文件存储客户端初始化。
+* middleware：全局中间件层，如跨域、JWT认证、权限校验等。
+* utils：全局工具层，如Token解析、文件操作、字符串操作以及加解密等。
+## Code状态码说明
 * 0：请求成功。
 * 90400：请求参数错误。
 * 90401：认证失败。
 * 90403：拒绝访问。
 * 90404：访问的对象或资源不存在。
-* 90500：其它错误。
 * 90514：Token过期或无效。
-# 项目功能概览
+* 90500：其它服务器错误。
+# 项目功能介绍
 ## 认证相关
-* **SSO单点登录**：支持`CAS 3.0`、`OAuth 2.0`、`OIDC`和`SAML2`协议，使用方法可以参考 [客户端配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md "配置指南") 和 [已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
+* **SSO单点登录**：支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`SAML2` 协议的客户端进行对接，对接方法可以参考 [客户端配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md "配置指南") 和 [已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
 * **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置") 和本地账号认证。前端登录页面支持个性化配置，显示某个平台扫码登录选项，具体可以参考 [前端配置指南](https://github.com/yuyan075500/ops-web "前端配置")。
 * **双因素认证**：支持使用Google Authenticator（Google身份验证器）、阿里云APP和华为云APP进行双因素认证。
 
