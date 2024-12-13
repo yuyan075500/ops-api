@@ -48,13 +48,13 @@
 * [x] Redis 5.x。
 * [x] MinIO 或华为云 OBS 对象存储。
 ### 部署
-1. **克隆项目**：<br><br>
+1. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
     或
     git clone https://gitee.com/yybluestorm/ops-api
     ```
-2. **切换工作目录**：<br><br>
+2. **切换工作目录**：
     ```shell
     cd ops-api/deploy/kubernetes
     ```
@@ -62,19 +62,16 @@
    创建 [项目证书](#项目证书)，证书创建完成后需要使用新的证书替换 `templates/configmap.yaml` 文件中对应的内容。<br><br>
 4. **修改项目配置**：<br><br>
    配置文件位于 `templates/configmap.yaml`，修改方法参考 [配置文件说明](#配置文件说明)。<br><br>
-5. **部署**：<br><br>
+5. **部署**：
    ```shell
    helm install <APP_NAME> --namespace <NAMESPACE_NAME> .
    ```
-
-   > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。如果有使用[钉钉](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")、[企业微信](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")或[飞书](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")扫码认证，请按要求对前端项目进行单独构建打包，并修改`value.yaml`文件对中应前端的镜像配置。
-
 6. **数据初始化**：<br><br>
    需要将 `deploy/data.sql` 文件中的 SQL 导入到 MySQL 数据库中，请确保数据库使用的字符集为 `utf8mb4`，排序规则为 `utf8mb4_general_ci`。<br><br>
-7. **系统登录**：
+7. **系统登录**：<br><br>
    部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。<br><br>
 
-   **PS：如果需要高可用可以自行调整应用的副本数即可。**
+   **PS：如果需要高可以自行调整应用的副本数。**
 
 # 配置文件说明
 ```yaml
