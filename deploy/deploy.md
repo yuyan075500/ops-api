@@ -1,39 +1,31 @@
 # 项目部署
-项目支持使用 [Docker Compose一键部署](#docker-compose部署) 和 [Kubernetes部署](#Kubernetes部署)，生产环境推荐使用Kubernetes部署。
+支持使用 [Docker Compose一键部署](#docker-compose部署) 和 [Kubernetes部署](#Kubernetes部署)，生产环境推荐使用 Kubernetes 部署。
 ## Docker Compose部署
-如果你想快速拥有一个简易的环境用于测试、演示，对性能、稳定性以及安全性没有任何求的，那么推荐使用该部署方式。  
-1. **部署环境准备**：你需要准备一台Linux服务器，并安装以下组件。
+如果你想快速拥有一个简易的环境用于测试、演示，且对性能、稳定性和安全性没有任何求的，那么推荐使用该部署方式。  
+1. **部署环境准备**：你需要准备一台 Linux 服务器，并安装以下组件。
    * [x] Docker。
    * [x] Docker Compose。
-   * [ ] MySQL 8.0。
-   * [ ] Redis 5.x。
-   * [ ] MinIO。
 
-    `Docker`和`Docker Compose`是部署环境必须的，其它的都可以使用`docker-compose.yaml`指定的，也可以使用独立的。
+    `Docker`和`Docker Compose`是部署毅必须准备的，其它组件在 `docker-compose.yaml` 配置清单中已指定。
 2. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
-    ```
-   你也可以访问 [Gitee](https://gitee.com/yybluestorm/ops-api "Gitee") 获取项目源代码：
-   ```shell
+    或
     git clone https://gitee.com/yybluestorm/ops-api
     ```
 3. **切换工作目录**：
     ```shell
     cd ops-api/deploy/docker-compose
     ```
-4. **环境变量配置**：修改`.env`文件中环境变量，如果你使用`docker-compose.yaml`指定的`MySQL`、`Redis`、`MinIO`，则可以跳过此步骤。
-
-   > **注意**：如果有使用[钉钉](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")、[企业微信](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")或[飞书](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")扫码认证，请按要求对前端项目进行单独构建打包，并修改`.env`文件对中应前端的镜像配置。
-
-5. **项目配置**：修改`conf/config.yaml`文件中相关配置，请参考 [配置文件说明](#配置文件说明)。
-
-   > **注意**：
-   > * 必须修改`externalUrl`的值为实际的访问地址，否则导致单点功能登录无法使用。
-   > * 另外MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与`conf/config.yaml`配置文件中指定的值相同即可，默认值可以自行修改。
-   > * Minio的`endpoint`项配置的地址必须确保使用该平台的客户端电脑可以访问，否则图片上传成功后将无法访问。
-
-6. **证书**：[创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件。如果是测试环境你也可以跳过此步骤使用项目自带的证书。
+4. **配置环境变量**：修改 `.env` 文件中环境变量。<br>
+   此配置文件中主要指定了数据库、缓存、MinIO 等组件的初始化以及项目启动的系统版本，该步骤可以跳过，也可以按需要修改。
+5. **修改项目配置**：修改`conf/config.yaml`文件中相关配置。<br>
+   参考 [配置文件说明](#配置文件说明)，以下配置必须修改：
+   * `externalUrl` 需要更改为 IDSphere 统一认证平台在浏览器实际的访问地址，否则导致单点功能等相关功能无法正常使用。
+   * `oss.accessKey` 和 `oss.secretKey` 中指定的 `AK` 和 `SK` 需要在 Minio 启动完成后登录到后台手动创建。
+   * `oss.endpoint` 配置的地址必须确保使用 IDSphere 统一认证平台的客户端电脑可以访问，如果实际的地址协议为 `HTTPS` 则需要将 `oss.ssl` 更改为 `true`。
+6. **创建证书**。<br>
+   参考 [创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件，测试环境可以跳过此步骤。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
     mkdir -p data/minio
@@ -47,7 +39,7 @@
 
    > **注意**：如果使用的外部数据库，请确保数据库使用的字符集为`utf8mb4`，排序规则为`utf8mb4_general_ci`。如果你使用的默认数据库，`data.sql`文件已经打包进容器`ops-mysql`的`/root/data.sql`路径，可以直接导入。
 
-10. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+   1. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
 你需要自行准备以下相关资源：
 * [x] [Kubernetes](https://kubernetes.io "Kubernetes") 运行环境。
@@ -176,7 +168,7 @@ swagger: true
 * [x] bindUserPassword：绑定的用户密码。
 * [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割，如：`ou=IT,dc=example,dc=cn&ou=HR,dc=example,dc=cn`。
 * [x] userAttribute：用户属性，如果是OpenLDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
-* [ ] maxPasswordAge：密码最大有效期，该参数仅对Windows AD有效，需要与实际的密码有效期保持一致。
+* [ ] maxPasswordAge：密码最大有效期，该参数仅针对 `Windows AD`，需要与实际的域控用户密码有效期保持一致。
 
 > 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限。如果是Windows AD还要求使用`ldaps`协议进行连接，`ldaps`协议的默认端口为`636`。
 

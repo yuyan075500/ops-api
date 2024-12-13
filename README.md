@@ -34,8 +34,8 @@
 # 项目功能介绍
 ## 认证相关
 * **SSO单点登录**：支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`SAML2` 协议的客户端进行对接，对接方法可以参考 [客户端配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md "配置指南") 和 [已测试客户端列表](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#%E5%B7%B2%E6%B5%8B%E8%AF%95%E9%80%9A%E8%BF%87%E7%9A%84%E5%AE%A2%E6%88%B7%E7%AB%AF "客户端列表")。
-* **用户认证**：同时支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP认证、Windows AD认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置") 和本地账号认证。前端登录页面支持个性化配置，显示某个平台扫码登录选项，具体可以参考 [前端配置指南](https://github.com/yuyan075500/ops-web "前端配置")。
-* **双因素认证**：支持使用Google Authenticator（Google身份验证器）、阿里云APP和华为云APP进行双因素认证。
+* **用户认证**：支持 [钉钉扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "扫码配置")、[企业微信扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")、[飞书扫码登录](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书扫码配置")、[OpenLDAP 账号密码认证、Windows AD 账号密码认证](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置") 和本地用户密码认证方式登录。另外前端登录页面支持个性化配置，隐藏或显示必要的登录选项，可以参考 [前端配置指南](https://github.com/yuyan075500/ops-web "前端配置")。
+* **双因素认证**：支持使用 Google Authenticator、阿里云和华为云手机 APP 进行双因素认证，双因素认证仅在使用账号密码认证时生效。
 
     <br>
     <img src="deploy/sso_example/img/login-1.gif" alt="img" width="350" height="200"/>
@@ -45,14 +45,14 @@
 ### 用户登录策略
 ✅支持，🟡敬请期待，❌不支持
 
-| 用户来源       | 用户登录 | 账号同步 | 用户密码修改 | 用户信息修改（电话、邮箱、密码过期时间） | 双因素认证 | 单点登录 | [NGINX鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "NGINX鉴权") |
-|:-----------|:-----|:-----|:-------|:---------------------|:------|:-----|:------------------------------------------------------------------------------------------------------------------------------|
-| 本地         | ✅    | ✅    | ✅      | ✅                    | ✅     | ✅    | ✅                                                                                                                             |
-| Windows AD | ✅    | ✅    | ✅      | 🟡                   | ✅     | ✅    | ✅                                                                                                                             |
-| OpenLDAP   | ✅    | ✅    | ✅      | 🟡                   | ✅     | ✅    | ✅                                                                                                                             |
-| 钉钉         | ✅    | ❌    | ❌      | ❌                    | ❌     | ✅    | 🟡                                                                                                                            | 
-| 企业微信       | ✅    | ❌    | ❌      | ❌                    | ❌     | ✅    | 🟡                                                                                                                            | 
-| 飞书         | ✅    | ❌    | ❌      | ❌                    | ❌     | ✅    | 🟡                                                                                                                            | 
+| 登录方法          | 本地登录 | 双因素认证 | SSO 登录 | [NGINX鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "NGINX鉴权") |
+|:--------------|:-----|:------|:-------|:------------------------------------------------------------------------------------------------------------------------------|
+| 本地账号          | ✅    | ✅     | ✅      | ✅                                                                                                                             |
+| Windows AD 账号 | ✅    | ✅     | ✅      | ✅                                                                                                                             |
+| OpenLDAP 账号   | ✅    | ✅     | ✅      | ✅                                                                                                                             |
+| 钉钉扫码          | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
+| 企业微信扫码        | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
+| 飞书扫码          | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
 ### 账号同步规则
 无论使用哪一种用户认证方式，都需要确保本地系统中用户存在，所以当配置好Windows AD或OpenLDAP后，需要登录平台点击【用户管理】-【分组管理】-【LDAP账号同步】执行一次用户同步，用户的同步规则如下：
 1. 如果本地系统中没有，LDAP中有，则创建。
