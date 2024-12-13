@@ -6,21 +6,21 @@
    你需要准备一台 Linux 服务器，并安装以下组件。
    * [x] Docker。
    * [x] Docker Compose。
-   `Docker`和`Docker Compose`是部署毅必须准备的，其它组件在 `docker-compose.yaml` 配置清单中已指定。<br><br>
-2. **克隆项目**：
+   `Docker`和`Docker Compose`是部署必须准备的，其它组件在 `docker-compose.yaml` 配置清单中已指定。<br><br>
+2. **克隆项目**：<br><br>
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
     或
     git clone https://gitee.com/yybluestorm/ops-api
     ```
-3. **切换工作目录**：
+3. **切换工作目录**：<br><br>
     ```shell
     cd ops-api/deploy/docker-compose
     ```
 4. **配置环境变量**：<br><br>
-   配置文件位于项目根目录下的 `.env`，此配置文件中主要指定了 MySQL 数据库、Redis 缓存、MinIO 的初始化配置和项目启动的版本，该步骤可以跳过。<br><br>
+   配置文件位于 `.env`，此配置文件中主要指定了 MySQL 数据库、Redis 缓存、MinIO 的初始化配置和项目启动的版本，该步骤可以跳过。<br><br>
 5. **修改项目配置**：<br><br>
-   配置文件位于项目根目录下的 `conf/config.yaml`，修改方法参考 [配置文件说明](#配置文件说明)，以下配置必修改项：
+   配置文件位于 `conf/config.yaml`，修改方法参考 [配置文件说明](#配置文件说明)，以下配置必修改项：
    * `externalUrl` 需要更改为 IDSphere 统一认证平台在浏览器实际的访问地址，否则导致单点功能等相关功能无法正常使用。
    * `oss.accessKey` 和 `oss.secretKey` 中指定的 `AK` 和 `SK` 需要在 Minio 启动完成后登录到后台手动创建。
    * `oss.endpoint` 配置的地址必须确保使用 IDSphere 统一认证平台的客户端电脑可以访问，如果实际的地址协议为 `HTTPS` 则需要将 `oss.ssl` 更改为 `true`。<br><br>
@@ -32,52 +32,49 @@
    mkdir -p data/minio
    chown -R 1001:1001 data/minio
    ```
-8. **执行部署**：
+8. **执行部署**：<br><br>
     ```shell
     docker-compose up -d
     ```
 9. **数据初始化**：<br><br>
-   需要将 `deploy/data.sql` 文件中的SQL导入到 MySQL 数据库中，默认已经将 SQL 文件 `data.sql` 已经打包进 `ops-mysql` 容器的 `/root/data.sql` 路径，可以直接导入。<br><br>
+   需要将 `deploy/data.sql` 文件中的 SQL 导入到 MySQL 数据库中，默认已经将 SQL 文件 `data.sql` 已经打包进 `ops-mysql` 容器的 `/root/data.sql` 路径，可以直接导入。<br><br>
 10. **系统登录**：<br><br>
    部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
-你需要自行准备以下相关资源：
-* [x] [Kubernetes](https://kubernetes.io "Kubernetes") 运行环境。
-* [x] [Helm](https://helm.sh "Helm") 客户端，确保能访问Kubernetes集群。
+生产环境推荐使用此种部署方法，你需要准备以下相关资源：
+* [x] [Kubernetes](https://kubernetes.io "Kubernetes") 软件运行必要环境。
+* [x] [Helm](https://helm.sh "Helm") 部署客户端工具，此工具需要能访问到 Kubernetes 集群。
 * [x] MySQL 8.0。
 * [x] Redis 5.x。
-* [x] MinIO或华为云OBS。
+* [x] MinIO 或华为云 OBS 对象存储。
 ### 部署
-1. **克隆项目**：将项目克隆到本地Helm客户端所在服务器。
+1. **克隆项目**：<br><br>
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
+    或
+    git clone https://gitee.com/yybluestorm/ops-api
     ```
-2. **切换工作目录**：
+2. **切换工作目录**：<br><br>
     ```shell
     cd ops-api/deploy/kubernetes
     ```
-3. **证书**：创建 [项目证书](#项目证书)，证书创建完成后使用新的证书替换`templates/configmap.yaml`文件中对应的内容。
-4. **项目配置**：修改`templates/configmap.yaml`文件中`config.yaml`项的相关配置，请参考 [配置文件说明](#配置文件说明)。
-
-   > **注意**：
-   > * 必须修改`externalUrl`的值为实际的访问地址，否则导致单点功能登录无法使用。
-   > * 另外MinIO的`accessKey`和`secretKey`需要在部署成功后登录进MinIO控制台手动创建，确保与`conf/config.yaml`配置文件中指定的值相同即可，默认值可以自行修改。
-   > * Minio的`endpoint`项配置的地址必须确保使用该平台的客户端电脑可以访问，否则图片上传成功后将无法访问。
-
-5. **部署**：
+3. **创建证书**：<br><br>
+   创建 [项目证书](#项目证书)，证书创建完成后需要使用新的证书替换 `templates/configmap.yaml` 文件中对应的内容。<br><br>
+4. **修改项目配置**：<br><br>
+   配置文件位于 `templates/configmap.yaml`，修改方法参考 [配置文件说明](#配置文件说明)。<br><br>
+5. **部署**：<br><br>
    ```shell
-   helm install <自定义应用名> --namespace <名称空间> .
+   helm install <APP_NAME> --namespace <NAMESPACE_NAME> .
    ```
 
    > 说明：如果你使用Kubernetes之外的代理程序，那么你需要将`Service`类型修改为`NodePort`，并参考`templates/ingress.yaml`模板文件中的转发规则进行相关配置。如果有使用[钉钉](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")、[企业微信](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")或[飞书](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")扫码认证，请按要求对前端项目进行单独构建打包，并修改`value.yaml`文件对中应前端的镜像配置。
 
-6. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
+6. **数据初始化**：<br><br>
+   需要将 `deploy/data.sql` 文件中的 SQL 导入到 MySQL 数据库中，请确保数据库使用的字符集为 `utf8mb4`，排序规则为 `utf8mb4_general_ci`。<br><br>
+7. **系统登录**：
+   部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。<br><br>
 
-   > **注意**：请确保数据库使用的字符集为`utf8mb4`，排序规则为`utf8mb4_general_ci`。
-
-7. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
-
-   > 说明：如果需要高可用只需调整应用的副本数即可，数据库和中间件的高可用需要自行完成。
+   **PS：如果需要高可用可以自行调整应用的副本数即可。**
 
 # 配置文件说明
 ```yaml
