@@ -6,25 +6,37 @@ IDSphere 统一认证平台支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`S
 以下方法将提供自定义接入所必须的接口及使用方法，适用于企业自研应用接入。在开始接入前需要在 IDSphere 统一认证平台上创建好对应的站点信息，站点创建好后包含应用接入所必须地相关配置信息，如：`client_id`、`client_secret`等。
 # CAS3.0 客户端接入指南
 
-| 接口名称 | 接口地址                                       | 请求方法 | <div style="width:400px;">请求参数</div>              | 请求参数类型 | 返回参数                                                                              | 
-|------|--------------------------------------------|------|---------------------------------------------------|--------|-----------------------------------------------------------------------------------|
-| 登录地址 | `https://<externalUrl>/login`              | GET  | service：客户端应用回调地址，必选。                             | Query  | 在URL中携带 `ticket` 信息，重定向至客户端应用指定的回调地址，如：<br>`https://a.com/callback?ticket=xxxxxx` |
-| 票据授权 | `https://<externalUrl>/p3/serviceValidate` | GET  | service：客户端应用回调地址，必选。<br>ticket：登录成功后获取到的票据信息，必选。 | Query  | XML编码后的用户信息。                                                                      |
+| 接口名称 | 接口地址                                       | 请求方法 | <div style="width:400px;">请求参数</div>                  | 请求参数类型 | 返回参数                                                                                  | 
+|------|--------------------------------------------|------|-------------------------------------------------------|--------|---------------------------------------------------------------------------------------|
+| 登录地址 | `https://<externalUrl>/login`              | GET  | `service`：客户端应用回调地址，必选。                               | Query  | 在 `URL` 中携带 `ticket` 信息，重定向至客户端应用指定的回调地址，如：<br>`https://a.com/callback?ticket=xxxxxx` |
+| 票据授权 | `https://<externalUrl>/p3/serviceValidate` | GET  | `service`：客户端应用回调地址，必选。<br>`ticket`：登录成功后获取到的票据信息，必选。 | Query  | `XML` 编码后的用户信息。                                                                       |
 
 认证成功后返回的用户信息包含：`id`、`email`、`name`、`phone_number`和`username`。
 # OAuth2.0 客户端接入指南
 
-| 接口名称    | 接口地址                                              | 请求方法        | <div style="width:440px;">请求参数</div>                                                                                                                                                               | 请求参数类型 | 返回参数                                                                                                                                                                                                                              |
-|---------|---------------------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 登录地址    | `https://<externalUrl>/login`                     | GET         | response_type：授权类型，固定值 `code`，必选。<br>client_id：客户端ID，从 IDSphere 统一认证平台获取，必选。<br>redirect_uri：客户端应用回调地址，必选。<br>state：状态码，由客户端指定任意值，请求成功后原样返回，必选。<br>scope：授权范围，固定值 `openid`，必选。                     | Query  | 在URL中携带 `code` 和 `state` 信息，重定向至客户端应用指定的回调地址，如：<br>`https://a.com/callback?code=xxxxxx&state=xxxxxx`                                                                                                                              |
-| 获取Token | `https://<externalUrl>/api/v1/sso/oauth/token`    | POST        | grant_type：授权类型，固定值 `authorization_code`，必选。<br>client_id：客户端ID，从 IDSphere 统一认证平台获取，必选。<br>redirect_uri：授权成功后的回调地址，必选。<br>client_secret：客户端Secret，从 IDSphere 统一认证平台获取，必选。<br>code：登录成功后获取到的授权码，必选。 | Body   | 返回 `Token` 信息，如：<br><pre><code>{<br>  "id_token": "",<br>  "access_token": "",<br>  "token_type": "bearer",<br>  "expires_in": 3600,<br>  "scope": "openid"<br>}</code></pre>`id_token` 和 `access_token` 都是采用 `JWT` 格式生成的`Token`。 |
-| 获取用户信息  | `https://<externalUrl>/api/v1/sso/oauth/userinfo` | GET<br>POST | 在请求头中携带`Authorization`字段，值为`Bearer <access_token>`，必选。                                                                                                                                             | Header | JSON格式用户信息。                                                                                                                                                                                                                       |
+| 接口名称    | 接口地址                                              | 请求方法        | <div style="width:440px;">请求参数</div>                                                                                                                                                                         | 请求参数类型 | 返回参数                                                                                                                                                                                                                              |
+|---------|---------------------------------------------------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 登录地址    | `https://<externalUrl>/login`                     | GET         | `response_type`：授权类型，固定值 `code`，必选。<br>`client_id`：客户端ID，从 IDSphere 统一认证平台获取，必选。<br>`redirect_uri`：客户端应用回调地址，必选。<br>`state`：状态码，由客户端指定任意值，请求成功后原样返回，必选。<br>`scope`：授权范围，固定值 `openid`，必选。                     | Query  | 在 `URL` 中携带 `code` 和 `state` 信息，重定向至客户端应用指定的回调地址，如：<br>`https://a.com/callback?code=xxxxxx&state=xxxxxx`                                                                                                                          |
+| 获取Token | `https://<externalUrl>/api/v1/sso/oauth/token`    | POST        | `grant_type`：授权类型，固定值 `authorization_code`，必选。<br>`client_id`：客户端ID，从 IDSphere 统一认证平台获取，必选。<br>`redirect_uri`：授权成功后的回调地址，必选。<br>`client_secret`：客户端Secret，从 IDSphere 统一认证平台获取，必选。<br>`code`：登录成功后获取到的授权码，必选。 | Body   | 返回 `Token` 信息，如：<br><pre><code>{<br>  "id_token": "",<br>  "access_token": "",<br>  "token_type": "bearer",<br>  "expires_in": 3600,<br>  "scope": "openid"<br>}</code></pre>`id_token` 和 `access_token` 都是采用 `JWT` 格式生成的`Token`。 |
+| 获取用户信息  | `https://<externalUrl>/api/v1/sso/oauth/userinfo` | GET<br>POST | 在请求头中携带 `Authorization` 字段，值为`Bearer <access_token>`，必选。                                                                                                                                                     | Header | JSON格式用户信息。                                                                                                                                                                                                                       |
 
 认证成功后返回的用户信息包含：`id`、`email`、`name`、`phone_number`和`username`。
 # OIDC 客户端接入指南
 `OIDC` 客户端接入参考 `OAuth2.0` 接入指南即可，另 IDSphere 统一认证平台提供了专属 `OIDC` 配置信息接口，接口地址为：`https://<externalUrl>/.well-known/openid-configuration`。
 # SAML2 客户端接入指南
-`SAML2` 客户端接入所需要信息可以通过 `IDP` 元数据接口地址获取，接口地址为：`https://<externalUrl>/api/v1/sso/saml/metadata`。
+`SAML2` 客户端接入所需要信息可以通过 `IDP` 元数据接口地址获取，接口地址为：`https://<externalUrl>/api/v1/sso/saml/metadata`，认证成功后返回的用户信息包含：
+
+| 属于值                              | 属性名称                            |
+|----------------------------------|---------------------------------|
+| name                             | 姓名                              |
+| username                         | 用户名                             |
+| email                            | 邮箱地址                            |
+| phone_number                     | 电话号码                            |
+| IAM_SAML_Attributes_xUserId      | 华为云专属，对应用户名                     |
+| IAM_SAML_Attributes_redirect_url | 华为云专属，登录成功后的跳地址                 |
+| IAM_SAML_Attributes_domain_id    | 华为云专属，在华为云配置时，自动生成的 `domain_id` |
+| IAM_SAML_Attributes_idp_id       | 华为云专属，在华为云配置时指定的的身份提供商名称        |
+
 # Nginx 代理鉴权
 对于一些客户端可以在没有账号密码的情况下进行访问，如：Kibana、Consul Server UI等，为了实现这类客户端的认证，可以使用Nginx对这类客户端进行代理，跳转至本平台进行认证。
 <br>
