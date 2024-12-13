@@ -53,60 +53,16 @@
 | 钉钉扫码          | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
 | 企业微信扫码        | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
 | 飞书扫码          | ✅    | ❌     | ✅      | 🟡                                                                                                                            | 
-### 账号同步规则
-无论使用哪一种用户认证方式，都需要确保本地系统中用户存在，所以当配置好Windows AD或OpenLDAP后，需要登录平台点击【用户管理】-【分组管理】-【LDAP账号同步】执行一次用户同步，用户的同步规则如下：
-1. 如果本地系统中没有，LDAP中有，则创建。
-2. 如果本地系统有，LDAP中有，则更新（仅更新用户来源为LDAP且`username`相同，更新手机号、邮箱和密码过期时间字段）。
 
-同步用户时，本地数据库和目标用户字段映射规则如下：
-```shell
-# OpenLDAP
-{
-	"name": "cn",
-	"username": "uid",
-	"email": "mail",
-	"phone_number": "mobile"
-	"password_expired_at": "shadowMax"
-	"is_active": "shadowExpire"
-}
+关于 Windows AD 或 OpenLDAP 配置可以参考 [配置指南](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#ldap%E9%85%8D%E7%BD%AE "LDAP配置")，关于同步和登录策略可以参考 [注意事项](https://github.com/yuyan075500/ops-api/blob/main/deploy/ldap.md "注意事项")。
 
-# Windows AD
-{
-	"name": "cn",
-	"username": "sAMAccountName",
-	"email": "mail",
-	"phone_number": "mobile",
-	"is_active": "userAccountControl"
-}
-```
-以下是创建一个OpenLDAP用户的必要属性如下：
-
-| 属性名称             | 示例值                          | 描述                                       |
-|------------------|:-----------------------------|:-----------------------------------------|
-| objectClass      | inetOrgPerson                | 固定值，主要用于配置账号用户相关信息                       |
-| objectClass      | shadowAccount                | 固定值，主要用于配置账号密码相关信息                       |
-| uid              | lisi                         | 用户名                                      |
-| givenName        | 李                            | 姓                                        |
-| sn               | 四                            | 名                                        |
-| displayName      | 李四                           | 显示姓名                                     |
-| shadowMin        | 0                            | 从上次修改密码后，多久可再次修改密码，0表示不限制                |
-| shadowWarning    | 0                            | 密码过期前多久开始提示，0表示不提示                       |
-| shadowInactive   | 0                            | 密码过期后还可以登录的天数，0表示过期后不允许登录                |
-| cn               | 李四                           | 通常与`givenName`和`sn`组合而成                  |
-| shadowExpire     | 99999                        | 账号过期时间，该值表示距离1970-01-01的天数，其中99999表示永不过期 |
-| shadowMax        | 90                           | 密码过期最大天数                                 |
-| mail             | lisi@qq.com                  | 邮箱地址                                     |
-| mobile           | 153****1111                  | 手机号                                      |
-| userPassword     | {SHA512}5r0h********piEgNEu6 | 用户密码，使用`IDSphere`平台修改用户密码，默认采用`SHA512`加密 |
-| shadowLastChange | 20068                        | 最后一次更改密码的时间，该值表示距离1970-01-01的天数          |
-
+**注意：使用 Windows AD 或 OpenLDAP 登录需要确保在 IDSphere 统一认证平台中存在对应的用户，否则无法登录。**
 ## 企业级账号管理
 ## 域名及证书管理
 ## 其它
 * 支持`Swagger`接口文档：部署成功后访问地址为：`/swagger/index.html`，无需要登录。
 * 支持用户密码自助更改：部署成功后访问地址：`/reset_password`，无需要登录。
 * 支持企业网站导航：部署成功后访问地址：`/sites`，无需要登录。
-* 支持企业账号密码管理，登录后位于左侧【资产管理】-【账号管理】。
 # 项目部署
 参考 [Docker Compose部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#docker-compose%E9%83%A8%E7%BD%B2 "docker-compose部署") 和 [Kubernetes部署](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#kubernetes%E9%83%A8%E7%BD%B2 "Kubernetes部署")。
 # 开发环境搭建
