@@ -152,18 +152,17 @@ swagger: true
 * [ ] wechat：企业微信扫码登录相关配置，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
 * [ ] feishu：飞书扫码登录相关配置，参考 [飞书配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")。
 * [x] swagger：Swagger 接口配置，生产环境建议关闭。<br><br>
-**注意**： `externalUrl` 地址一经固定，切忽随意更改，更改后影响 SSO 的相关功能，如果更改后 SSO 客户端无法登录，那么你需要重置进行相关客户端配置。
+**注意：`externalUrl` 地址一经固定，切忽随意更改，更改后影响 SSO 的相关功能，如果更改后 SSO 客户端无法登录，那么你需要重置进行相关客户端配置。**
 ## LDAP配置
-支持与Windows AD或OpenLDAP进行对接，实现用户认证，使配置说明如下：
+该配置项支持与 Windows AD 或 OpenLDAP 进行对接，实现用户认证，使配置说明如下：
 * [x] host：服务器地址，格式为：`ldap[s]://<host>:<port>`。
-* [x] bindUserDN：绑定的用户DN，格式为：`cn=admin,dc=example,dc=cn`。
+* [x] bindUserDN：绑定的用户DN，格式为：`cn=admin,dc=idsphere,dc=cn`。
 * [x] bindUserPassword：绑定的用户密码。
-* [x] searchDN：搜索用户的DN，格式为：`ou=IT,dc=example,dc=cn`，支持配置多个DN，之间使用`&`分割，如：`ou=IT,dc=example,dc=cn&ou=HR,dc=example,dc=cn`。
-* [x] userAttribute：用户属性，如果是OpenLDAP则为`uid`，如果是Windows AD则为`sAMAccountName`。
-* [ ] maxPasswordAge：密码最大有效期，该参数仅针对 `Windows AD`，需要与实际的域控用户密码有效期保持一致。
-
-> 说明：如果需要更改Windows AD或OpenLDAP的用户密码，则需要绑定的用户有足够的权限。如果是Windows AD还要求使用`ldaps`协议进行连接，`ldaps`协议的默认端口为`636`。
-
+* [x] searchDN：允许登录用户的范围，格式为：`ou=IT,dc=idsphere,dc=cn`，支持配置多个，之间使用 `&` 分割，如：`ou=IT,dc=idsphere,dc=cn&ou=HR,dc=idsphere,dc=cn`。
+* [x] userAttribute：用户属性，如果是 OpenLDAP 则为 `uid`，如果是 Windows AD 则为 `sAMAccountName`。
+* [ ] maxPasswordAge：密码最大有效期，此参数仅针对 `Windows AD`，需要与实际的域控用户密码有效期保持一致。<br><br>
+配置完成后还需要将用户同步到本地数据库，否则用户无法登录。可以在系统中手动执行【用户同步】或通过【定时任务】功能创建自动同步任务。<br><br>
+**注意：如果需要更改 Windows AD 或 OpenLDAP 的用户密码功能，需要绑定的用户有足够的权限。如果是 Windows AD 还要求使用 `ldaps` 协议进行连接，`ldaps` 协议的默认端口为 `636`。**
 ## 短信配置
 目前短信支持华为云和阿里云，具体配置如下所示：
 * [x] provider：指定短信服务商，固定值，`aliyun`或`huawei`。
