@@ -446,6 +446,14 @@ func (u *user) DingTalkLogin(params *DingTalkLogin) (token, redirectUri, usernam
 		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
+	// 判断密码是否过期
+	if user.PasswordExpiredAt != nil {
+		now := time.Now()
+		if user.PasswordExpiredAt.Before(now) {
+			return "", "", "", "", errors.New("密码过期")
+		}
+	}
+
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
@@ -501,6 +509,14 @@ func (u *user) FeishuLogin(params *FeishuLogin) (token, redirectUri, username, a
 		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
+	// 判断密码是否过期
+	if user.PasswordExpiredAt != nil {
+		now := time.Now()
+		if user.PasswordExpiredAt.Before(now) {
+			return "", "", "", "", errors.New("密码过期")
+		}
+	}
+
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
@@ -550,6 +566,14 @@ func (u *user) WeChatLogin(params *WeChatLogin) (token, redirectUri, username, a
 		return "", "", "", "", errors.New("拒绝登录，请联系管理员")
 	}
 
+	// 判断密码是否过期
+	if user.PasswordExpiredAt != nil {
+		now := time.Now()
+		if user.PasswordExpiredAt.Before(now) {
+			return "", "", "", "", errors.New("密码过期")
+		}
+	}
+
 	// 生成用户Token
 	token, err = middleware.GenerateJWT(user.ID, user.Name, user.Username)
 	if err != nil {
@@ -582,6 +606,14 @@ func (u *user) Login(params *UserLogin) (token, redirectUri, application string,
 	// 判断用户是否禁用
 	if !user.IsActive {
 		return "", "", "", nil, errors.New("拒绝登录，请联系管理员")
+	}
+
+	// 判断密码是否过期
+	if user.PasswordExpiredAt != nil {
+		now := time.Now()
+		if user.PasswordExpiredAt.Before(now) {
+			return "", "", "", nil, errors.New("密码已过期")
+		}
 	}
 
 	// 判断系统是否启用MFA认证
