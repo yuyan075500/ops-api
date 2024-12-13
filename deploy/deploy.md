@@ -137,24 +137,22 @@ feishu:
    appSecret: ""
 swagger: true
 ```
-* [x] server：后端服务监听的地址和端口，保持默认。
-* [x] externalUrl：对台对外提供的访问地址，格式为：`http[s]://<address>[:<port>]`。
-* [x] secret: `CAS3.0`票据签名字符串，生产环境请务必进行修改。
-* [x] mysql：`MySQL`数据库相关配置。
-* [x] redis：`Redis`相关配置。
-* [x] jwt：`JWT`相关配置。
-* [x] mfa：双因素认证相关配置，`issuer`为APP扫码后显示的名称。
-* [x] oss：对象存储相关配置，支持MinIO和华为云OBS。
-* [ ] ldap：参考 [LDAP配置](#LDAP配置)，配置完成后需要将用户同步到本地后，用户方可登录。
+* [x] server：后端服务监听的地址和端口。
+* [x] externalUrl：IDSphere 统一认证平台对外提供的访问地址，格式为：`http[s]://<address>[:<port>]`。
+* [x] secret: 签名字符串，生产环境请务必修改。
+* [x] mysql：`MySQL` 数据库相关配置。
+* [x] redis：`Redis` 相关配置。
+* [x] jwt：`JWT` 相关配置。
+* [x] mfa：双因素认证相关配置，`issuer` 是 APP 扫码后显示的名称。
+* [x] oss：对象存储相关配置，支持 MinIO 和华为云 OBS。
+* [ ] ldap：参考 [LDAP配置](#LDAP配置)。
 * [ ] sms：参考 [短信配置](#短信配置)。
-* [ ] mail：邮件相关配置，目前系统中未使用。
-* [ ] dingTalk：钉钉自建应用配置，如果不需要钉钉扫码登录，可以忽略，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
-* [ ] wechat：企业微信自建应用配置，如果不需要企业微信扫码登录，可以忽略，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
-* [ ] feishu：飞书自建应用配置，如果不需要飞书扫码登录，可以忽略，参考 [飞书配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")。
-* [x] swagger：Swagger接口，生产环境不建议关闭。
-
-> **注意**： `externalUrl`地址一经固定，切忽随意更改，会影响SSO的相关功能，如果更改后SSO客户端无法登录，那么你需要重置进行客户端配置。
-
+* [ ] mail：邮件相关配置。
+* [ ] dingTalk：钉钉扫码登录相关配置，参考 [钉钉配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/dingtalk.md "钉钉配置")。
+* [ ] wechat：企业微信扫码登录相关配置，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
+* [ ] feishu：飞书扫码登录相关配置，参考 [飞书配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")。
+* [x] swagger：Swagger 接口配置，生产环境建议关闭。<br><br>
+**注意**： `externalUrl` 地址一经固定，切忽随意更改，更改后影响 SSO 的相关功能，如果更改后 SSO 客户端无法登录，那么你需要重置进行相关客户端配置。
 ## LDAP配置
 支持与Windows AD或OpenLDAP进行对接，实现用户认证，使配置说明如下：
 * [x] host：服务器地址，格式为：`ldap[s]://<host>:<port>`。
