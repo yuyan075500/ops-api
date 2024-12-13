@@ -1,43 +1,12 @@
-package utils
+package controller
 
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/wonderivan/logger"
+	"ops-api/utils"
 	"reflect"
 )
-
-// excludedFields 不记录日志的字段
-var excludedFields = map[string]struct{}{
-	"password":      {},
-	"re_password":   {},
-	"client_id":     {},
-	"client_secret": {},
-	"certificate":   {},
-	"mfa_code":      {},
-	"DeletedAt":     {},
-}
-
-// FilterFields 递归过滤敏感字段
-func FilterFields(data map[string]interface{}) {
-	for key, value := range data {
-		// 检查是否为敏感字段
-		if _, ok := excludedFields[key]; ok {
-			// 删除敏感字段
-			delete(data, key)
-		} else if nestedMap, ok := value.(map[string]interface{}); ok {
-			// 递归处理嵌套 map
-			FilterFields(nestedMap)
-		} else if nestedArray, ok := value.([]interface{}); ok {
-			// 递归处理数组中的map
-			for _, item := range nestedArray {
-				if itemMap, ok := item.(map[string]interface{}); ok {
-					FilterFields(itemMap)
-				}
-			}
-		}
-	}
-}
 
 // StructToMap 将结构体转换为：map[string]interface{}
 func StructToMap(data interface{}) (interface{}, error) {
@@ -70,8 +39,8 @@ func StructToMap(data interface{}) (interface{}, error) {
 	return result, nil
 }
 
-// SendResponse 普通请求响应
-func SendResponse(c *gin.Context, code int, msg string) {
+// Response 普通请求响应
+func Response(c *gin.Context, code int, msg string) {
 
 	// 打印错误日志
 	if code != 0 {
@@ -87,9 +56,8 @@ func SendResponse(c *gin.Context, code int, msg string) {
 	c.JSON(200, response)
 }
 
-// SendCreateOrUpdateResponse 创建或更新请求的响应
-// SendCreateOrUpdateResponse 创建或更新请求的响应
-func SendCreateOrUpdateResponse(c *gin.Context, code int, msg string, data interface{}) {
+// CreateOrUpdateResponse 创建或更新请求的响应
+func CreateOrUpdateResponse(c *gin.Context, code int, msg string, data interface{}) {
 
 	var responseData interface{}
 	if data != nil {
@@ -100,11 +68,11 @@ func SendCreateOrUpdateResponse(c *gin.Context, code int, msg string, data inter
 		switch v := responseData.(type) {
 		case map[string]interface{}:
 			// 如果是单个对象，直接过滤敏感信息
-			FilterFields(v)
+			utils.FilterFields(v)
 		case []map[string]interface{}:
 			// 如果是数组，遍历每个元素并过滤敏感信息
 			for _, item := range v {
-				FilterFields(item)
+				utils.FilterFields(item)
 			}
 		}
 	}

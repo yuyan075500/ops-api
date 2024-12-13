@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"ops-api/service"
-	"ops-api/utils"
 	"strconv"
 )
 
@@ -28,13 +27,13 @@ func (u *group) GetGroupList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Group.GetGroupList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -58,17 +57,17 @@ func (u *group) AddGroup(c *gin.Context) {
 	var group = &service.GroupCreate{}
 
 	if err := c.ShouldBind(group); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	authGroup, err := service.Group.AddGroup(group)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", authGroup)
+	CreateOrUpdateResponse(c, 0, "创建成功", authGroup)
 }
 
 // DeleteGroup 删除组
@@ -84,17 +83,17 @@ func (u *group) DeleteGroup(c *gin.Context) {
 	// 对ID进行类型转换
 	groupID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Group.DeleteGroup(groupID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // UpdateGroup 更新组信息
@@ -110,18 +109,18 @@ func (u *group) UpdateGroup(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	result, err := service.Group.UpdateGroup(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", result)
+	CreateOrUpdateResponse(c, 0, "更新成功", result)
 }
 
 // UpdateGroupUser 更新组用户
@@ -137,18 +136,18 @@ func (u *group) UpdateGroupUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	group, err := service.Group.UpdateGroupUser(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", group)
+	CreateOrUpdateResponse(c, 0, "更新成功", group)
 }
 
 // UpdateGroupPermission 更新组权限
@@ -164,15 +163,15 @@ func (u *group) UpdateGroupPermission(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	if err := service.Group.UpdateGroupPermission(data); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", nil)
+	CreateOrUpdateResponse(c, 0, "更新成功", nil)
 }

@@ -427,37 +427,12 @@ func (s *sso) GetIdPMetadata() (metadata string, err error) {
 		Location: config2.Conf.ExternalUrl + "/login", // 单点登录接口地址
 	})
 
-	// 添加单点登出接口信息（不支持：如果支持单点登出则可以添加此信息到元数据中）
-	//idp.AddSingleSignOutService(saml.MetadataBinding{
-	//	Binding:  saml.HTTPPostBinding,
-	//	Location: config2.Conf.AccessUrl + "/logout",
-	//}
-
 	// 添加IDP组件相关信息
 	idp.AddOrganization(saml.Organization{
-		OrganizationDisplayName: "统一认证平台", // 组织显示名称
-		OrganizationName:        "OAuth",  // 组织正式名称
+		OrganizationDisplayName: "IDSphere 统一认证平台", // 组织显示名称
+		OrganizationName:        "IDSphere",        // 组织正式名称
 		OrganizationURL:         config2.Conf.ExternalUrl,
 	})
-
-	// 添加主要联系人信息
-	idp.AddContactPerson(saml.ContactPerson{
-		ContactType:  "technical", // 联系人类型包含：technical（技术联系人）、support（支持联系人）、administrative（行政联系人）、billing（财务联系人）、other（其它）
-		EmailAddress: "zhangs@oauth.cn",
-		GivenName:    "三",
-		SurName:      "张",
-	})
-
-	// 添加其它联系人信息
-	//persons := []saml.ContactPerson{
-	//	{
-	//		ContactType:  "support",
-	//		EmailAddress: "support@ops.cn",
-	//		GivenName:    "四",
-	//		SurName:      "李",
-	//	},
-	//}
-	//idp.AddContactPersons(persons...)
 
 	// 生成metadata元数据
 	metadata, msg := idp.MetaDataResponse()

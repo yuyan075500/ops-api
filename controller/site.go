@@ -34,13 +34,13 @@ func (s *site) GetSiteList(c *gin.Context) {
 		Limit     int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Site.GetSiteList(params.GroupName, params.SiteName, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -62,13 +62,13 @@ func (s *site) GetSiteGuideList(c *gin.Context) {
 		Name string `form:"name"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Site.GetSiteGuideList(params.Name)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -92,17 +92,17 @@ func (s *site) AddGroup(c *gin.Context) {
 	var group = &service.SiteGroupCreate{}
 
 	if err := c.ShouldBind(group); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	siteGroup, err := service.Site.AddGroup(group)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", siteGroup)
+	CreateOrUpdateResponse(c, 0, "创建成功", siteGroup)
 }
 
 // AddSite 创建站点
@@ -119,17 +119,17 @@ func (s *site) AddSite(c *gin.Context) {
 	var data = &service.SiteCreate{}
 
 	if err := c.ShouldBind(data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	site, err := service.Site.AddSite(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", site)
+	CreateOrUpdateResponse(c, 0, "创建成功", site)
 }
 
 // DeleteGroup 删除站点分组
@@ -145,17 +145,17 @@ func (s *site) DeleteGroup(c *gin.Context) {
 	// 对ID进行类型转换
 	groupID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Site.DeleteGroup(groupID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // DeleteSite 删除站点
@@ -171,17 +171,17 @@ func (s *site) DeleteSite(c *gin.Context) {
 	// 对ID进行类型转换
 	siteID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Site.DeleteSite(siteID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // UpdateGroup 更新分组信息
@@ -197,18 +197,18 @@ func (s *site) UpdateGroup(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新站点分组信息
 	group, err := service.Site.UpdateGroup(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", group)
+	CreateOrUpdateResponse(c, 0, "更新成功", group)
 }
 
 // UpdateSite 更新站点信息
@@ -224,18 +224,18 @@ func (s *site) UpdateSite(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新站点信息
 	site, err := service.Site.UpdateSite(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
+	CreateOrUpdateResponse(c, 0, "更新成功", site)
 }
 
 // UploadLogo 站点图片上传
@@ -250,14 +250,14 @@ func (s *site) UploadLogo(c *gin.Context) {
 	// 获取上传的Logo
 	logo, err := c.FormFile("icon")
 	if err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 打开上传的图片
 	src, err := logo.Open()
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -276,7 +276,7 @@ func (s *site) UploadLogo(c *gin.Context) {
 
 	err = utils.FileUpload(logoPath, logo.Header.Get("Content-Type"), src, logo.Size)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -300,18 +300,18 @@ func (s *site) UpdateSiteUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	site, err := service.Site.UpdateSiteUser(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
+	CreateOrUpdateResponse(c, 0, "更新成功", site)
 }
 
 // UpdateSiteTag 更新站点标签
@@ -327,16 +327,16 @@ func (s *site) UpdateSiteTag(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	site, err := service.Site.UpdateSiteTag(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", site)
+	CreateOrUpdateResponse(c, 0, "更新成功", site)
 }

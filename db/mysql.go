@@ -67,7 +67,7 @@ func MySQLInit() error {
 	DB.SetConnMaxLifetime(time.Duration(config.Conf.MySQL.MaxLifeTime) * time.Second)
 
 	global.MySQLClient = client
-	logger.Info("MySQL数据库初始化成功.")
+	logger.Info("MySQL客户端初始化成功.")
 
 	// 创建超级用户
 	result := global.MySQLClient.FirstOrCreate(&user, model.AuthUser{

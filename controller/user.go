@@ -35,7 +35,7 @@ func (u *user) Login(c *gin.Context) {
 	var params = &service.UserLogin{}
 
 	if err := c.ShouldBind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -48,15 +48,15 @@ func (u *user) Login(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("账号密码", params.Username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 	// 记录登录成功信息
 	if err := service.User.RecordLoginInfo("账号密码", params.Username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -108,7 +108,7 @@ func (u *user) FeishuLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -122,15 +122,15 @@ func (u *user) FeishuLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("飞书扫码", username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 	// 记录登录成功信息
 	if err := service.User.RecordLoginInfo("飞书扫码", username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -154,7 +154,7 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -168,16 +168,16 @@ func (u *user) DingTalkLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("钉钉扫码", username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
 
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 	// 记录登录成功信息
 	if err := service.User.RecordLoginInfo("钉钉扫码", username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -201,7 +201,7 @@ func (u *user) WeChatLogin(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -215,16 +215,16 @@ func (u *user) WeChatLogin(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo("企业微信扫码", username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
 
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 	// 记录登录成功信息
 	if err := service.User.RecordLoginInfo("企业微信扫码", username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -250,7 +250,7 @@ func (u *user) Logout(c *gin.Context) {
 	// 将Token存入Redis缓存
 	err := global.RedisClient.Set(parts[1], true, time.Duration(config.Conf.JWT.Expires)*time.Hour).Err()
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -328,7 +328,7 @@ func (u *user) GetUser(c *gin.Context) {
 	// 获取用户信息
 	data, err := service.User.GetUser(c.GetUint("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -350,7 +350,7 @@ func (u *user) GetUserListAll(c *gin.Context) {
 
 	data, err := service.User.GetUserListAll()
 	if err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -377,13 +377,13 @@ func (u *user) GetUserList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.User.GetUserList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -407,17 +407,17 @@ func (u *user) AddUser(c *gin.Context) {
 	var user = &dao.UserCreate{}
 
 	if err := c.ShouldBind(user); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	authUser, err := service.User.AddUser(user)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", authUser)
+	CreateOrUpdateResponse(c, 0, "创建成功", authUser)
 }
 
 // DeleteUser 删除用户
@@ -433,17 +433,17 @@ func (u *user) DeleteUser(c *gin.Context) {
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.User.DeleteUser(userID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // UpdateUser 更新用户信息
@@ -459,18 +459,18 @@ func (u *user) UpdateUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	user, err := service.User.UpdateUser(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", user)
+	CreateOrUpdateResponse(c, 0, "更新成功", user)
 }
 
 // UpdateUserPassword 密码更新
@@ -486,17 +486,17 @@ func (u *user) UpdateUserPassword(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 密码更新
 	if err := service.User.UpdateUserPassword(data); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "重置成功", nil)
+	CreateOrUpdateResponse(c, 0, "重置成功", nil)
 }
 
 // ResetUserMFA MFA重置
@@ -512,17 +512,17 @@ func (u *user) ResetUserMFA(c *gin.Context) {
 	// 对ID进行类型转换
 	userID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	if err := service.User.ResetUserMFA(userID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "重置成功", nil)
+	CreateOrUpdateResponse(c, 0, "重置成功", nil)
 }
 
 // GetVerificationCode 获取验证码
@@ -543,13 +543,13 @@ func (u *user) GetVerificationCode(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 获取短信验证码
 	if err := service.User.GetVerificationCode(data, expirationTime); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -571,13 +571,13 @@ func (u *user) UpdateSelfPassword(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	if err := service.User.UpdateSelfPassword(data); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -598,7 +598,7 @@ func (u *user) UserSyncAd(c *gin.Context) {
 
 	// 同步用户
 	if err := service.User.UserSync(); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -620,14 +620,14 @@ func (u *user) GetGoogleQrcode(c *gin.Context) {
 		Token string `form:"token"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 获取二维码
 	qrcode, err := service.MFA.GetGoogleQrcode(params.Token)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -652,7 +652,7 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -666,16 +666,16 @@ func (u *user) GoogleQrcodeValidate(c *gin.Context) {
 	if err != nil {
 		// 记录登录信息
 		if err := service.User.RecordLoginInfo("双因子", params.Username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
 
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 	// 记录登录成功信息
 	if err := service.User.RecordLoginInfo("双因子", params.Username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 

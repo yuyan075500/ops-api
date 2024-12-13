@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"ops-api/dao"
 	"ops-api/service"
-	"ops-api/utils"
 	"strconv"
 )
 
@@ -26,18 +25,18 @@ func (a *account) AddAccount(c *gin.Context) {
 	var account = &service.AccountCreate{}
 
 	if err := c.ShouldBind(account); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
 	data, err := service.Account.AddAccount(account, userID)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", data)
+	CreateOrUpdateResponse(c, 0, "创建成功", data)
 }
 
 // AddAccounts 批量新增账号
@@ -54,18 +53,18 @@ func (a *account) AddAccounts(c *gin.Context) {
 	var account = &service.BatchAccountCreate{}
 
 	if err := c.ShouldBind(account); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
 	accounts, err := service.Account.AddAccounts(account.Accounts, userID)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", accounts)
+	CreateOrUpdateResponse(c, 0, "创建成功", accounts)
 }
 
 // DeleteAccount 删除账号
@@ -81,18 +80,18 @@ func (a *account) DeleteAccount(c *gin.Context) {
 	// 获取账号ID
 	accountId, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 获取用户ID
 	userID := c.GetUint("id")
 	if err := service.Account.DeleteAccount(accountId, int(userID)); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // UpdateAccount 更新账号信息
@@ -107,18 +106,18 @@ func (a *account) UpdateAccount(c *gin.Context) {
 	var data = &dao.AccountUpdate{}
 
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
 	account, err := service.Account.UpdateAccount(data, userID)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", account)
+	CreateOrUpdateResponse(c, 0, "更新成功", account)
 }
 
 // BatchUpdateAccountOwner 批量更新账号所有者
@@ -137,18 +136,18 @@ func (a *account) BatchUpdateAccountOwner(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	oldOwnerID := c.GetUint("id")
 	accounts, err := service.Account.BatchUpdateAccountOwner(data.Accounts, oldOwnerID, data.OwnerUserID)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", accounts)
+	CreateOrUpdateResponse(c, 0, "更新成功", accounts)
 }
 
 // UpdateAccountUser 用户分享
@@ -164,7 +163,7 @@ func (a *account) UpdateAccountUser(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -172,11 +171,11 @@ func (a *account) UpdateAccountUser(c *gin.Context) {
 	userId := c.GetUint("id")
 	account, err := service.Account.UpdateAccountUser(data, userId)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", account)
+	CreateOrUpdateResponse(c, 0, "更新成功", account)
 }
 
 // UpdatePassword 更改密码
@@ -192,18 +191,18 @@ func (a *account) UpdatePassword(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&account); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	userId := c.GetUint("id")
 	if err := service.Account.UpdatePassword(account, userId); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", nil)
+	CreateOrUpdateResponse(c, 0, "更新成功", nil)
 }
 
 // GetAccountList 获取账号列表
@@ -223,14 +222,14 @@ func (a *account) GetAccountList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	userID := c.GetUint("id")
 	data, err := service.Account.GetAccountList(params.Name, userID, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -253,7 +252,7 @@ func (a *account) GetAccountPassword(c *gin.Context) {
 	// 获取账号ID
 	accountID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -261,7 +260,7 @@ func (a *account) GetAccountPassword(c *gin.Context) {
 	userId := c.GetUint("id")
 	password, err := service.Account.GetAccountPassword(uint(accountID), username.(string), userId)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -286,7 +285,7 @@ func (a *account) GetSMSCode(c *gin.Context) {
 	// 获取短信验证码
 	userID := c.GetUint("id")
 	if err := service.Account.GetSMSCode(userID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -308,14 +307,14 @@ func (a *account) CodeVerification(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	userID := c.GetUint("id")
 	if err := service.Account.CodeVerification(userID, data); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 

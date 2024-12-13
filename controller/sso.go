@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"ops-api/middleware"
 	"ops-api/service"
-	"ops-api/utils"
 )
 
 var SSO sso
@@ -62,7 +61,7 @@ func (s *sso) OAuthAuthorize(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -75,7 +74,7 @@ func (s *sso) OAuthAuthorize(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
 	mc, err := middleware.ValidateJWT(token)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -84,16 +83,16 @@ func (s *sso) OAuthAuthorize(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("账号密码", mc.Username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 记录登录授权信息
 	if err := service.User.RecordLoginInfo("SSO授权", mc.Username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -118,20 +117,20 @@ func (s *sso) GetToken(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.Bind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 检查必需参数是否存在（要求客户端在获取Token时必须传入client_id和client_secret）
 	if data.ClientId == "" && data.ClientSecret == "" {
 		err := errors.New("missing required parameters")
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	token, err := service.SSO.GetToken(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -153,7 +152,7 @@ func (s *sso) GetUserInfo(c *gin.Context) {
 	// 获取用户信息
 	user, err := service.SSO.GetUserinfo(token)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -174,7 +173,7 @@ func (s *sso) CASAuthorize(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -187,7 +186,7 @@ func (s *sso) CASAuthorize(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
 	mc, err := middleware.ValidateJWT(token)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -196,16 +195,16 @@ func (s *sso) CASAuthorize(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("账号密码", mc.Username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 记录登录授权信息
 	if err := service.User.RecordLoginInfo("SSO授权", mc.Username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -231,14 +230,14 @@ func (s *sso) CASServiceValidate(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 获取票据
 	response, err := service.SSO.ServiceValidate(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -261,7 +260,7 @@ func (s *sso) GetOIDCConfig(c *gin.Context) {
 	// 获取票据
 	config, err := service.SSO.GetOIDCConfig()
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -279,7 +278,7 @@ func (s *sso) GetJwksConfig(c *gin.Context) {
 
 	jwks, err := service.SSO.GetJwks()
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -301,7 +300,7 @@ func (s *sso) GetIdPMetadata(c *gin.Context) {
 	// 获取票据
 	response, err := service.SSO.GetIdPMetadata()
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -324,7 +323,7 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 
 	// 请求参数绑定
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
@@ -337,7 +336,7 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
 	mc, err := middleware.ValidateJWT(token)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -346,16 +345,16 @@ func (s *sso) SPAuthorize(c *gin.Context) {
 	if err != nil {
 		// 记录登录失败信息
 		if err := service.User.RecordLoginInfo("账号密码", mc.Username, userAgent, clientIP, application, err); err != nil {
-			utils.SendResponse(c, 90500, err.Error())
+			Response(c, 90500, err.Error())
 			return
 		}
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 记录登录授权信息
 	if err := service.User.RecordLoginInfo("SSO授权", mc.Username, userAgent, clientIP, application, nil); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -380,14 +379,14 @@ func (s *site) ParseSPMetadata(c *gin.Context) {
 	var data = &service.ParseSPMetadata{}
 
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 获取SP Metadata信息
 	metadataInfo, err := service.SSO.ParseSPMetadata(data.SPMetadataURL)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 

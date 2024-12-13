@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"ops-api/dao"
 	"ops-api/service"
-	"ops-api/utils"
 	"strconv"
 )
 
@@ -26,17 +25,17 @@ func (t *task) AddTask(c *gin.Context) {
 	var task = &service.TaskCreate{}
 
 	if err := c.ShouldBind(task); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	job, err := service.Task.AddTask(task)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "创建成功", job)
+	CreateOrUpdateResponse(c, 0, "创建成功", job)
 }
 
 // DeleteTask 删除定时任务
@@ -52,17 +51,17 @@ func (t *task) DeleteTask(c *gin.Context) {
 	// 对ID进行类型转换
 	taskID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
 	// 执行删除
 	if err := service.Task.DeleteTask(taskID); err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendResponse(c, 0, "删除成功")
+	Response(c, 0, "删除成功")
 }
 
 // UpdateTask 更新定时任务信息
@@ -78,18 +77,18 @@ func (t *task) UpdateTask(c *gin.Context) {
 
 	// 解析请求参数
 	if err := c.ShouldBind(&data); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	// 更新用户信息
 	task, err := service.Task.UpdateTask(data)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
-	utils.SendCreateOrUpdateResponse(c, 0, "更新成功", task)
+	CreateOrUpdateResponse(c, 0, "更新成功", task)
 }
 
 // GetTaskList 获取定时任务列表
@@ -109,13 +108,13 @@ func (t *task) GetTaskList(c *gin.Context) {
 		Limit int    `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Task.GetTaskList(params.Name, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
@@ -142,13 +141,13 @@ func (t *task) GetTaskLogList(c *gin.Context) {
 		Limit int  `form:"limit" binding:"required"`
 	})
 	if err := c.Bind(params); err != nil {
-		utils.SendResponse(c, 90400, err.Error())
+		Response(c, 90400, err.Error())
 		return
 	}
 
 	data, err := service.Task.GetTaskLogList(params.Id, params.Page, params.Limit)
 	if err != nil {
-		utils.SendResponse(c, 90500, err.Error())
+		Response(c, 90500, err.Error())
 		return
 	}
 
