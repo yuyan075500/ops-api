@@ -152,6 +152,7 @@ swagger: true
 * [ ] wechat：企业微信扫码登录相关配置，参考 [企业微信配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/wechat.md "企业微信配置")。
 * [ ] feishu：飞书扫码登录相关配置，参考 [飞书配置](https://github.com/yuyan075500/ops-api/blob/main/deploy/feishu.md "飞书配置")。
 * [x] swagger：Swagger 接口配置，生产环境建议关闭。<br><br>
+
 **注意：`externalUrl` 地址一经固定，切忽随意更改，更改后影响 SSO 的相关功能，如果更改后 SSO 客户端无法登录，那么你需要重置进行相关客户端配置。**
 ## LDAP配置
 该配置项支持与 Windows AD 或 OpenLDAP 进行对接，实现用户认证，使配置说明如下：
@@ -161,27 +162,28 @@ swagger: true
 * [x] searchDN：允许登录用户的范围，格式为：`ou=IT,dc=idsphere,dc=cn`，支持配置多个，之间使用 `&` 分割，如：`ou=IT,dc=idsphere,dc=cn&ou=HR,dc=idsphere,dc=cn`。
 * [x] userAttribute：用户属性，如果是 OpenLDAP 则为 `uid`，如果是 Windows AD 则为 `sAMAccountName`。
 * [ ] maxPasswordAge：密码最大有效期，此参数仅针对 `Windows AD`，需要与实际的域控用户密码有效期保持一致。<br><br>
+
 配置完成后还需要将用户同步到本地数据库，否则用户无法登录。可以在系统中手动执行【用户同步】或通过【定时任务】功能创建自动同步任务。<br><br>
 **注意：如果需要更改 Windows AD 或 OpenLDAP 的用户密码功能，需要绑定的用户有足够的权限。如果是 Windows AD 还要求使用 `ldaps` 协议进行连接，`ldaps` 协议的默认端口为 `636`。**
 ## 短信配置
-目前短信支持华为云和阿里云，具体配置如下所示：
-* [x] provider：指定短信服务商，固定值，`aliyun`或`huawei`。
-* [x] url：短信服务地址，不同服务商的配置不同，阿里云参考[短信服务接入点](https://help.aliyun.com/zh/sms/developer-reference/api-dysmsapi-2017-05-25-endpoint "阿里云短信服务接入点")，华为云参考[API请求地址](https://support.huaweicloud.com/api-msgsms/sms_05_0000.html#section1 "API请求地址")。
-* [x] appKey: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
-* [x] appSecret: 华为云参考[开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考[创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
-* [x] callbackUrl：短信回调地址，用于接收短信发送状态，仅华为云需要配置，回调地址为`<externalUrl>/api/v1/sms/huawei/callback`，如果平台的访问地址为内网地址，则无法接收回调信息。
-* [x] resetPassword.sender：重置密码短信通道号，仅华为云需要配置。
-* [x] resetPassword.templateId：重置密码短信模板ID。
-* [x] resetPassword.signature：重置密码短信签名名称。
+如果有使用到短信功能则需要配置，如果没有则无需要配置,支持使用华为云和阿里云短信，具体配置如下所示：
+* [x] provider：指定短信服务商，固定值，`aliyun` 或 `huawei`。
+* [x] url：短信服务地址，不同服务商的地址不同，阿里云参考 [短信服务接入点](https://help.aliyun.com/zh/sms/developer-reference/api-dysmsapi-2017-05-25-endpoint "阿里云短信服务接入点")，华为云参考 [API请求地址](https://support.huaweicloud.com/api-msgsms/sms_05_0000.html#section1 "API请求地址")。
+* [x] appKey: 华为云参考 [开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考 [创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
+* [x] appSecret: 华为云参考 [开发数据准备](https://support.huaweicloud.com/devg-msgsms/sms_04_0006.html "开发数据准备")，阿里云参考 [创建AccessKey](https://help.aliyun.com/zh/ram/user-guide/create-an-accesskey-pair "创建AccessKey")。
+* [ ] callbackUrl：短信回调地址，用于接收短信发送状态，仅华为云需要配置，回调地址为 `<externalUrl>/api/v1/sms/huawei/callback`，请确保该地址公网可以访问到。
+* [ ] resetPassword.sender：短信通道号，仅华为云需要配置。
+* [x] resetPassword.templateId：短信模板ID。
+* [x] resetPassword.signature：短信签名名称。
 ### 短信模板
 阿里云模板如下所示：
 ```
-# 重置密码短信模板
+# 短信模板
 您的验证码为：${code}，验证码在5分钟内有效，请勿泄漏他人！
 ```
 华为云模板如下所示：
 ```
-# 重置密码短信模板
+# 短信模板
 您的验证码为：${1}，验证码在5分钟内有效，请勿泄漏他人！
 ```
 # 项目证书
@@ -200,4 +202,4 @@ openssl req -new -x509 -key private.key -out certificate.crt -days 3650
 openssl rsa -in private.key -pubout -out public.key
 ```
 # IP地址库
-记录用户登录信息中的源IP来源于离线库文件，该文件位于项目`config/GeoLite2-City.mmdb`目录，最后更新日志为`2024-11-8`，最新库文件可从官方获取并替换即可。
+记录用户登录信息中的源IP来源于离线库文件，该文件位于项目 `config/GeoLite2-City.mmdb` 目录，最后更新日志为 `2024-11-8`，最新库文件可从官方获取并替换即可。

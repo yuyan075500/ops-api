@@ -66,13 +66,13 @@ server {
 		proxy_set_header Content-Length "";
 		proxy_set_header X-Original-URI $request_uri;
 		proxy_set_header Cookie $http_cookie;
-		proxy_pass https://<externalUrl>/api/v1/sso/cookie/auth;
+		proxy_pass <externalUrl>/api/v1/sso/cookie/auth;
 	}
 
 	# 认证失败后的处理
 	location @error401 {
 		# 跳转至登录页
-		return 302 https://<externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
+		return 302 <externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
 	}
 }
 ```
@@ -85,12 +85,12 @@ apiVersion: networking.k8s.io/v1
 metadata:
   name: my-app
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: https://<externalUrl>/api/v1/sso/cookie/auth
+    nginx.ingress.kubernetes.io/auth-url: <externalUrl>/api/v1/sso/cookie/auth
     nginx.ingress.kubernetes.io/server-snippet: |
       error_page 401 500 = @login;
       proxy_set_header Cookie $http_cookie;
       location @login {
-        return 302 https://<externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
+        return 302 <externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
       }
 spec:
   ingressClassName: nginx
