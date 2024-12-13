@@ -26,7 +26,7 @@ IDSphere 统一认证平台支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`S
 # SAML2 客户端接入指南
 `SAML2` 客户端接入所需要信息可以通过 `IDP` 元数据接口地址获取，接口地址为：`/api/v1/sso/saml/metadata`，认证成功后返回的用户信息包含：
 
-| 属于值                              | 属性名称                            |
+| 属性值                              | 属性名称                            |
 |----------------------------------|---------------------------------|
 | name                             | 姓名                              |
 | username                         | 用户名                             |
@@ -38,20 +38,20 @@ IDSphere 统一认证平台支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`S
 | IAM_SAML_Attributes_idp_id       | 华为云专属，在华为云配置时指定的的身份提供商名称        |
 
 # Nginx 代理鉴权
-对于一些客户端可以在没有账号密码的情况下进行访问，如：Kibana、Consul Server UI等，为了实现这类客户端的认证，可以使用Nginx对这类客户端进行代理，跳转至本平台进行认证。
+此功能可以针对 `Nginx` 代理的路径进行鉴权，以实现基于 `Cookie` 的单点登录。如：Kibana Dashboard、Consul Server UI等其它所有不需要鉴权就能访问的页面，为了确保安全性，那么可以使用Nginx作为代理，使其需要认证才能访问。
 <br>
-因为是基于Cookie实现，对于这类客户端也有一定使用，要求如下：
-1. 客户端的所在域必须与SSO平台所在的二级域一致，假如平台的访问域名为：`test.ops.cn`，则客户端的所在域必须为`xxx.ops.cn`。
-2. 不支持非域名访问的客户端。如：`127.0.0.1`、`localhost`、`192.168.1.10`等。 
+由于该功能是基=于基于 `Cookie` 实现，所以在使用上有一定限制，要求如下：
+1. 客户端的所在域必须与 IDSphere 统一认证平台域一致，假如IDSphere 统一认证平台的访问域为：`test.idsphere.cn`，则客户端的所在域必须为`xxx.idsphere.cn`。
+2. 不支持使用 `IP` 访问的客户端。如：`127.0.0.1`、`localhost`、`192.168.1.10`。 
 3. 不支持非HTTPS应用。
 ## 认证流程
 ![img.png](sso_example/img/nginx.jpg)
 ## 认证规则
 假设有A、B、C三个客户端应用都使用Nginx进行代理鉴权，鉴权规则如下：
-* 如果用户未登录平台，当访问A、B、C三个客户端应用中的任何一个都将跳转至登录界面。
-* 如果用户已经登录平台，当访问A、B、C三个客户端应用中的任何一个都能直接访问应用。
+* 如果用户未登录，当访问A、B、C三个客户端应用中的任何一个都将跳转至IDSphere 统一认证平台登录界面。
+* 如果用户已经登录，当访问A、B、C三个客户端应用中的任何一个都能直接访问应用。
 ## Nginx 配置
-在开始配置前请确保Nginx支持auth_request模块，可以使用命令`nginx -V`查看，具体配置如下：
+在开始配置前请确保 `Nginx` 支持 `auth_request` 模块，可以使用命令 `nginx -V` 查看，具体配置如下：
 ```nginx
 server {
 	listen 80;
@@ -59,7 +59,7 @@ server {
 	location / {
 		auth_request /auth;
 		error_page 401 500 = @error401;
-		# 下面是被代理应用的相关配置
+		# 后面是被代理应用的相关配置
 	}
 	
 	location = /auth {
@@ -68,39 +68,40 @@ server {
 		proxy_set_header Content-Length "";
 		proxy_set_header X-Original-URI $request_uri;
 		proxy_set_header Cookie $http_cookie;
-		proxy_pass https://<平台域名>/api/v1/sso/cookie/auth;
+		proxy_pass https://<externalUrl>/api/v1/sso/cookie/auth;
 	}
 
 	# 认证失败后的处理
 	location @error401 {
 		# 跳转至登录页
-		return 302 https://<平台域名>/login?nginx_redirect_uri=$scheme://$host$request_uri;
+		return 302 https://<externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
 	}
 }
 ```
-在上面的示例中对`/`根路径进行了鉴权，如果需要对其它路径进行鉴权可以添加其它location，并配置`auth_request`和`error_page`。
+在上面的示例中对 `/` 根路径进行了代理鉴权，如果需要对其它路径进行鉴权可以添加其它 `location`，在 `location` 里面添加对应的 `auth_request` 和 `error_page`。
 ## Kubernetes Ingress 配置
+此功能同样支持在 `Kubernetes` 中使用 `Ingress` 进行配置，示例如下：
 ```yaml
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
   name: my-app
   annotations:
-    nginx.ingress.kubernetes.io/auth-url: https://<平台域名>/api/v1/sso/cookie/auth
+    nginx.ingress.kubernetes.io/auth-url: https://<externalUrl>/api/v1/sso/cookie/auth
     nginx.ingress.kubernetes.io/server-snippet: |
       error_page 401 500 = @login;
       proxy_set_header Cookie $http_cookie;
       location @login {
-        return 302 https://<平台域名>/login?nginx_redirect_uri=$scheme://$host$request_uri;
+        return 302 https://<externalUrl>/login?nginx_redirect_uri=$scheme://$host$request_uri;
       }
 spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - my-app.test.cn
-      secretName: test.cn
+        - my-app.idsphere.cn
+      secretName: idsphere.cn
   rules:
-    - host: my-app.test.cn
+    - host: my-app.idsphere.cn
       http:
         paths:
           - path: /
@@ -133,4 +134,4 @@ spec:
 | 禅道         |          | 待测试                                                                                                |
 | AWS        |          | 待测试                                                                                                |
 
-PS：如果你有其它第三方系统需要对接可以提交 `Issues` 请求。
+PS：如果你有其它第三方系统需要对接可以提交 `Issue` 请求。
