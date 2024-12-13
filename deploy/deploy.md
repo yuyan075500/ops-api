@@ -2,11 +2,11 @@
 支持使用 [Docker Compose一键部署](#docker-compose部署) 和 [Kubernetes部署](#Kubernetes部署)，生产环境推荐使用 Kubernetes 部署。
 ## Docker Compose部署
 如果你想快速拥有一个简易的环境用于测试、演示，且对性能、稳定性和安全性没有任何求的，那么推荐使用该部署方式。  
-1. **部署环境准备**：你需要准备一台 Linux 服务器，并安装以下组件。
+1. **部署环境准备**：<br><br>
+   你需要准备一台 Linux 服务器，并安装以下组件。
    * [x] Docker。
    * [x] Docker Compose。
-
-    `Docker`和`Docker Compose`是部署毅必须准备的，其它组件在 `docker-compose.yaml` 配置清单中已指定。
+   `Docker`和`Docker Compose`是部署毅必须准备的，其它组件在 `docker-compose.yaml` 配置清单中已指定。
 2. **克隆项目**：
     ```shell
     git clone https://github.com/yuyan075500/ops-api.git
@@ -17,14 +17,14 @@
     ```shell
     cd ops-api/deploy/docker-compose
     ```
-4. **配置环境变量**：修改 `.env` 文件中环境变量。<br>
+4. **配置环境变量**：修改 `.env` 文件中环境变量。<br><br>
    此配置文件中主要指定了数据库、缓存、MinIO 等组件的初始化以及项目启动的系统版本，该步骤可以跳过，也可以按需要修改。
-5. **修改项目配置**：修改`conf/config.yaml`文件中相关配置。<br>
+5. **修改项目配置**：修改`conf/config.yaml`文件中相关配置。<br><br>
    参考 [配置文件说明](#配置文件说明)，以下配置必须修改：
    * `externalUrl` 需要更改为 IDSphere 统一认证平台在浏览器实际的访问地址，否则导致单点功能等相关功能无法正常使用。
    * `oss.accessKey` 和 `oss.secretKey` 中指定的 `AK` 和 `SK` 需要在 Minio 启动完成后登录到后台手动创建。
    * `oss.endpoint` 配置的地址必须确保使用 IDSphere 统一认证平台的客户端电脑可以访问，如果实际的地址协议为 `HTTPS` 则需要将 `oss.ssl` 更改为 `true`。
-6. **创建证书**。<br>
+6. **创建证书**。<br><br>
    参考 [创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件，测试环境可以跳过此步骤。
 7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
     ```shell
