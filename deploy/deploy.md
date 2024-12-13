@@ -17,29 +17,29 @@
     ```shell
     cd ops-api/deploy/docker-compose
     ```
-4. **配置环境变量**：修改 `.env` 文件中环境变量。<br><br>
-   此配置文件中主要指定了数据库、缓存、MinIO 等组件的初始化以及项目启动的系统版本，该步骤可以跳过，也可以按需要修改。
-5. **修改项目配置**：修改`conf/config.yaml`文件中相关配置。<br><br>
-   参考 [配置文件说明](#配置文件说明)，以下配置必须修改：
+4. **配置环境变量**：<br><br>
+   配置文件位于项目根目录下的 `.env`，此配置文件中主要指定了 MySQL 数据库、Redis 缓存、MinIO 的初始化配置和项目启动的版本，该步骤可以跳过。
+5. **修改项目配置**：<br><br>
+   配置文件位于项目根目录下的 `conf/config.yaml`，修改方法参考 [配置文件说明](#配置文件说明)，以下配置必修改项：
    * `externalUrl` 需要更改为 IDSphere 统一认证平台在浏览器实际的访问地址，否则导致单点功能等相关功能无法正常使用。
    * `oss.accessKey` 和 `oss.secretKey` 中指定的 `AK` 和 `SK` 需要在 Minio 启动完成后登录到后台手动创建。
    * `oss.endpoint` 配置的地址必须确保使用 IDSphere 统一认证平台的客户端电脑可以访问，如果实际的地址协议为 `HTTPS` 则需要将 `oss.ssl` 更改为 `true`。
-6. **创建证书**。<br><br>
+6. **创建证书**：<br><br>
    参考 [创建项目证书](#项目证书)，将生成的新证书保存至`certs`目录中并覆盖目标文件，测试环境可以跳过此步骤。
-7. **创建Minio数据目录**：需要手动创建Minio数据目录，并更改权限为`1001:1001`。
-    ```shell
-    mkdir -p data/minio
-    chown -R 1001:1001 data/minio
-    ```
+7. **创建 Minio 数据目录**：<br><br>
+   需要手动创建 Minio 数据目录，并更改权限为 `1001:1001`。
+   ```shell
+   mkdir -p data/minio
+   chown -R 1001:1001 data/minio
+   ```
 8. **执行部署**：
     ```shell
     docker-compose up -d
     ```
-9. **数据初始化**：将`deploy/data.sql`SQL中的数据导入到数据库中。
-
-   > **注意**：如果使用的外部数据库，请确保数据库使用的字符集为`utf8mb4`，排序规则为`utf8mb4_general_ci`。如果你使用的默认数据库，`data.sql`文件已经打包进容器`ops-mysql`的`/root/data.sql`路径，可以直接导入。
-
-   1. **系统登录**：部署完成后，系统会自动创建一个超级用户，此用户不受Casbin权限控制。用户名为：`admin`，密码为：`admin@123...`。
+9. **数据初始化**：<br><br>
+   需要将 `deploy/data.sql` 文件中的SQL导入到 MySQL 数据库中，默认已经将 SQL 文件 `data.sql` 已经打包进 `ops-mysql` 容器的 `/root/data.sql` 路径，可以直接导入。
+10. **系统登录**：<br><br>
+   部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
 你需要自行准备以下相关资源：
 * [x] [Kubernetes](https://kubernetes.io "Kubernetes") 运行环境。
