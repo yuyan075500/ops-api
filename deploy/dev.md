@@ -128,4 +128,4 @@ server {
     }
 }
 ```
-**注意**：如果需要用于 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请使用域名+证书的访问方式作为 IDSphere 统一认证平台代理。**
+**注意**：如果需要用于 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请使用域名+证书的访问方式作为 IDSphere 统一认证平台代理。
