@@ -19,4 +19,4 @@ Jenkins 支持的单点登录方式：CAS3.0
    * CAS Protocol：选择 `CAS 3.0`。
    * Full Name Attribute：更改为 `name`。
    * Email Attribute：更改为 `email`。<br><br>
-   **注意**：请注意图中红色框中的配置项，确保配置正确。
+**注意**：请注意红色框中的配置项，确保配置正确。
