@@ -8,7 +8,7 @@ Jira 支持的单点登录方式：OAuth2。
    * SSO认证：启用。
    * 认证类型：选择 `OAuth2`。
    * 站点描述：描述信息。
-   * 回调地址：Jira 的回调地址，务必填写正确，默认为：`http[s]://<address>[:<port>]/plugins/servlet/oauth/callback`。<br><br>
+   * 回调地址：Jira 的回调地址，默认为：`http[s]://<address>[:<port>]/plugins/servlet/oauth/callback`。<br><br>
 2. **应用安装**：登录到 Jira 并点击右上角齿轮进入【管理应用】，在应用商店搜索 `OIDC SSO`，找到如下图所示的插件并安装。<br><br>
 ![img.png](img/jira-marketplace.jpg)<br><br>
 应用安装完成后根据提示申请1个30天免费适用的 License，并激活。Licence 过期后，无法使用单点登录，可以注册一个 Atlassian 账号，每月都可以申请一个30天的免费 License。<br><br>
