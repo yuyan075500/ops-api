@@ -14,9 +14,9 @@ Jenkins 支持的单点登录方式：CAS3.0
 选中箭头指示的 `CAS` 插件，点击右上角的【安装】，安装完成重启 Jenkins 即可。<br><br>
 3. **插件配置**：登录到 Jenkins 并进入【系统管理】-【全局安全配置】，如下图所示：<br><br>
 ![img.png](img/jenins-cas.jpg)<br><br>
-请注意图中红色框，框中的配置项，必须填写正确。<br><br>
    * 安全域：选择 `CAS`。
-   * CAS Server URL：CAS认证地址 `<externalUrl>`。
+   * CAS Server URL：CAS认证地址： `<externalUrl>`。
    * CAS Protocol：选择 `CAS 3.0`。
    * Full Name Attribute：更改为 `name`。
-   * Email Attribute：更改为 `email`。
+   * Email Attribute：更改为 `email`。<br><br>
+   **注意**：请注意图中红色框中的配置项，确保配置正确。
