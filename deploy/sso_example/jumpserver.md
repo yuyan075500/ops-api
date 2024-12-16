@@ -9,7 +9,7 @@ JumpServer 持的单点登录方式：OAuth2.0
     * 认证类型：选择 `OAuth2`。
     * 站点描述：描述信息。
     * 回调地址：JumpServer 的回调地址，默认为：`http[s]://<address>[:<port>]/core/auth/oauth2/callback/`。<br><br>
-2. **JumpServer配置**：登录到 JumpServer 并进入【认证设置】，如下图所示：
+2. **JumpServer配置**：登录到 JumpServer 并进入【认证设置】，如下图所示：<br><br>
 ![img.png](img/jumpserver-config1.jpg)<br><br>
 ![img.png](img/jumpserver-config2.jpg)<br><br>
    * 启用 OAuth2 认证：启用。
@@ -22,7 +22,7 @@ JumpServer 持的单点登录方式：OAuth2.0
    * 授权端点地址：`<externalUrl>/login`。
    * token 端点地址：`<externalUrl>/v1/sso/oauth/token`。
    * 用户信息端点地址：`<externalUrl>/v1/sso/oauth/userinfo`。
-   * 注销会话端点地址：`<externalUrl>/logout`，由于IDSphere 统一认证平台不支持单点注销，这是一个伪地址。
+   * 注销会话端点地址：`<externalUrl>/logout`，由于 IDSphere 统一认证平台不支持单点注销，这是一个伪地址。
    * 同步注销：不启用。
    * 总是更新用户信息：启用。
    * 用户属于映射：平台返回的字段有：`name`、`email`、`username`、`phone_number` 可根据实际需要填写。
