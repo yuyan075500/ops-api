@@ -9,8 +9,8 @@ Zabbix 支持的单点登录方式：SAML2
 4. **Zabbix 单点登录配置**：登录到 Zabbix，进入【认证】配置界面，如下图所示：<br><br>
 ![img.png](img/zabbix-config.jpg)<br><br>
    * 启用 SAML 身份验证：选中复选框以启用 SAML 身份验证。
-   * IDP 实体 ID：IDP 的唯一标识符，此处为 `http[s]://<address>[:<port>]`。
-   * SSO 服务 URL：用户登录时被重定向到的 URL，此处为：`http[s]://<address>[:<port>]/login`。
+   * IDP 实体 ID：IDP 的唯一标识符，此处为 `<externalUrl>`。
+   * SSO 服务 URL：用户登录时被重定向到的 URL，此处为：`<externalUrl>/login`。
    * Username attribute：固定值 `username`。
    * SP entity ID：通常为 Zabbix 的访问地址，如：`http[s]://<address>[:<port>]`。
    * SP name ID format：固定值 `urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified`。<br><br>
