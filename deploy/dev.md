@@ -1,20 +1,20 @@
 # 开发环境搭建
-# 开发工具准备
-以下非必须的工具为推荐使用，如果有可代替的，可自行选择。另外本指南不提供工具的使用教程，请自行阅读相关文档。
-| 工具名称   | 用途 | 必须 | 版本 |
-|:------|:-----|:-----|:-----|
-| VS Code   | 前端辅助开发工具    | ❌ | 推荐最新版本 |                                                                                                              |
-| Goland    | 后端辅助开发工具    | ❌ | 推荐最新版本 |
-| Nginx     | 前后端代理程序      | ✅ | 推荐最新版本 |
-| Golang    | 后端运行环境        | ✅ | 1.23.1 |
-| Node.js   | 前端运行环境        | ✅ | v20.12.0 |
-| 域名   | [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") 需要        | ❌  | 无要求 |
-| 域名证书   | [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") 需要        | ❌  | 无要求 |
-# 前端项目配置
+## 准备开发工具
+非必须的工具为推荐使用，如果有可代替的可自行选择，本指南不提供工具的使用教程，需要自行查找相关文档。
+
+| 工具名称    | 用途                                                                                                                               | 必须  | 版本       |
+|:--------|:---------------------------------------------------------------------------------------------------------------------------------|:----|:---------|
+| VS Code | 前端辅助开发工具                                                                                                                         | ❌   | 推荐最新版本   |                                                                                                              |
+| Goland  | 后端辅助开发工具                                                                                                                         | ❌   | 推荐最新版本   |
+| Nginx   | 前后端代理程序                                                                                                                          | ✅   | 推荐最新版本   |
+| Golang  | 后端运行环境                                                                                                                           | ✅   | 1.23.1   |
+| Node.js | 前端运行环境                                                                                                                           | ✅   | v20.12.0 |
+| 域名      | [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") 必须 | ❌   | 无要求      |
+| 域名证书    | [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") 必须 | ❌   | 无要求      |
+## 前端项目配置
 前端项目开发环境配置可以参考 [前端项目开发调试](https://github.com/yuyan075500/ops-web?tab=readme-ov-file#%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95 "前端项目开发调试") 文档。
-# 后端项目配置
-推荐使用 Golang 工具进行后端项目开发。
-1. **创建项目配置文件**：需要在项目的 `config` 目录下创建 `config.yaml` 项目配置文件，配置文件内容为：
+## 后端项目配置
+1. **创建项目配置文件**：需要在项目的 `config` 目录下创建 `config.yaml` 配置文件，配置文件内容为：
    ```yaml
    server: "0.0.0.0:8000"
    externalUrl: "http://192.168.200.21"
@@ -36,7 +36,7 @@
      expires: 6
    mfa:
      enable: false
-     issuer: "统一认证中心"
+     issuer: "IDSphere 统一认证中心"
    oss:
      endpoint: "minio:9000"
      accessKey: "mXBbXV8nhjmLs8Ho"
@@ -49,6 +49,7 @@
      bindUserPassword: ""
      searchDN: ""
      userAttribute: "uid"
+     maxPasswordAge: 90
    sms:
      provider: ""
      url: ""
@@ -76,7 +77,7 @@
      appSecret: ""
    swagger: true
    ```
-   关于配置项，请参考 [项目配置说明](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E "项目配置说明")。
+   配置项修改请参考 [项目配置说明](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E "项目配置说明")。
 2. **安装项目依赖包**：
    ```shell
    go mod tidy
@@ -89,9 +90,9 @@
    ```shell
    ./ops-api
    ```
-   项目运行成功后默认监听 `8000` 端口，如果需要更换端口请修改配置文件中 `server` 项即可。
-# 代理配置
-由于项目使用前后端分离开发，为适配单点登录（SSO）相关协议，所以需要使用代理进行前后端分离部署，Nginx的配置文件内容如下：
+   项目默认监听 `8000` 端口，更换端口请修改配置文件中 `server` 项即可。
+## 代理配置
+由于项目使用前后端分离开发，为适配单点登录（SSO）相关协议以需要使用代理进行前后端分离部署，Nginx的配置文件内容如下：
 ```shell
 server {
     listen       80;
@@ -127,4 +128,4 @@ server {
     }
 }
 ```
-> **注意**：如果需要使用 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请务在Nginx虚拟主机中配置域名和证书。
+> **注意**：如果需要用于 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请使用域名+证书的访问方式作为 IDSphere 统一认证平台代理。
