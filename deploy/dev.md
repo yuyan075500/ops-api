@@ -14,7 +14,7 @@
 ## 前端项目配置
 前端项目开发环境配置可以参考 [前端项目开发调试](https://github.com/yuyan075500/ops-web?tab=readme-ov-file#%E5%BC%80%E5%8F%91%E8%B0%83%E8%AF%95 "前端项目开发调试") 文档。
 ## 后端项目配置
-1. **创建项目配置文件**：需要在项目的 `config` 目录下创建 `config.yaml` 配置文件，配置文件内容为：
+1. **创建项目配置文件**：需要在项目的 `config` 目录下创建 `config.yaml` 配置文件，配置文件内容为：<br><br>
    ```yaml
    server: "0.0.0.0:8000"
    externalUrl: "http://192.168.200.21"
@@ -77,16 +77,16 @@
      appSecret: ""
    swagger: true
    ```
-   配置项修改请参考 [项目配置说明](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E "项目配置说明")。
-2. **安装项目依赖包**：
+   配置项修改请参考 [项目配置说明](https://github.com/yuyan075500/ops-api/blob/main/deploy/deploy.md#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E "项目配置说明")。<br><br>
+2. **安装项目依赖包**：<br><br>
    ```shell
    go mod tidy
    ```
-3. 构建项目：
+3. 构建项目：<br><br>
    ```shell
    go build
    ```
-4. 运行项目：
+4. 运行项目：<br><br>
    ```shell
    ./ops-api
    ```
@@ -128,4 +128,4 @@ server {
     }
 }
 ```
-> **注意**：如果需要用于 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请使用域名+证书的访问方式作为 IDSphere 统一认证平台代理。
+**注意**：如果需要用于 [Nginx鉴权](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso.md#nginx%E4%BB%A3%E7%90%86%E9%89%B4%E6%9D%83 "Nginx鉴权") ，请使用域名+证书的访问方式作为 IDSphere 统一认证平台代理。**
