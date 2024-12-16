@@ -5,7 +5,7 @@ Jira 支持的单点登录方式：OAuth2。
 ![img.png](img/jira-site.jpg)<br><br>
    * 站点名称：指定一个名称，便于用户区分。
    * 登录地址：Jira 的登录地址。
-   * SSO认证：启用。
+   * SSO 认证：启用。
    * 认证类型：选择 `OAuth2`。
    * 站点描述：描述信息。
    * 回调地址：Jira 的回调地址，默认为：`http[s]://<address>[:<port>]/plugins/servlet/oauth/callback`。<br><br>

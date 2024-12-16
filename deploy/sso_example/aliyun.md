@@ -6,7 +6,7 @@
 保存 SAML 服务提供商元数据 URL 地址，后续在 IDSphere 统一认证平台注册站点时需要使用。<br><br>
 2. **创建身份提供商**：点击SSO登录设置右边的【编辑】按钮，如下图所示：<br><br>
 ![img.png](img/aliyun-sso-config.jpg)<br><br>
-   * SSO功能状态：开启。
+   * SSO 功能状态：开启。
    * 元数据文件：这里需要上传 IDP元数据文件， IDP 的元数据文件可以访问 IDSphere 统一认证平台获取，地址为：`<externalUrl>/api/v1/sso/saml/metadata`。
    * 辅助域名：建议关闭。<br><br>
 3. **获取登录地址**：点击【概览】，如下图所示：<br><br>
@@ -20,7 +20,7 @@
 ![img.png](img/aliyun-site.jpg)<br><br>
    * 站点名称：指定一个名称，便于用户区分。
    * 登录地址：填写从`第3步`中获取的登录地址。
-   * SSO认证：启用。
+   * SSO 认证：启用。
    * 认证类型：选择 `SAML2`。
    * 站点描述：描述信息。
    * SP Metadata URL：填写从`第1步`中获取的地址，点击【获取】可以自动从阿里云元数据中加载 `SP EntityID` 和 `SP 证书` 相关信息。<br><br>

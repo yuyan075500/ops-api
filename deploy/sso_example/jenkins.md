@@ -5,7 +5,7 @@ Jenkins 支持的单点登录方式：CAS3.0
 ![img.png](img/jenkins-site.jpg)
    * 站点名称：指定一个名称，便于用户区分。
    * 登录地址：Jenkins 的登录地址。
-   * SSO认证：启用。
+   * SSO 认证：启用。
    * 认证类型：选择 `CAS3.0`。
    * 站点描述：描述信息。
    * 回调地址：Jenkins 的回调地址，默认为：`http[s]://<address>[:<port>]/securityRealm/finishLogin`。<br><br>

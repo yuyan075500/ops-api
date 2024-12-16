@@ -9,7 +9,7 @@ Grafana 支持的单点登录方式：OAuth2.0
     * 认证类型：选择 `OAuth2`。
     * 站点描述：描述信息。
     * 回调地址：Grafana 的回调地址，默认为：`http[s]://<address>[:<port>]/login/generic_oauth`。<br><br>
-2. **Grafana配置修改**：编辑 `grafana.ini` 配置文件，修改的配置项如下所示：<br><br>
+2. **Grafana 配置修改**：编辑 `grafana.ini` 配置文件，修改的配置项如下所示：<br><br>
     ```shell
     [server]
     # Grafana登录相关配置

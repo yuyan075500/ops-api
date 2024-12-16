@@ -5,11 +5,11 @@ JumpServer 持的单点登录方式：OAuth2.0
 ![img.png](img/jumpserver-site.jpg)<br><br>
     * 站点名称：指定一个名称，便于用户区分。
     * 登录地址：JumpServer 的登录地址。
-    * SSO认证：启用。
+    * SSO 认证：启用。
     * 认证类型：选择 `OAuth2`。
     * 站点描述：描述信息。
     * 回调地址：JumpServer 的回调地址，默认为：`http[s]://<address>[:<port>]/core/auth/oauth2/callback/`。<br><br>
-2. **JumpServer配置**：登录到 JumpServer 并进入【认证设置】，如下图所示：<br><br>
+2. **JumpServer 配置**：登录到 JumpServer 并进入【认证设置】，如下图所示：<br><br>
 ![img.png](img/jumpserver-config1.jpg)<br><br>
 ![img.png](img/jumpserver-config2.jpg)<br><br>
    * 启用 OAuth2 认证：启用。
