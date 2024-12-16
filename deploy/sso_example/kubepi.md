@@ -8,11 +8,11 @@ Kubepi 支持的单点登录方式：OIDC
     * SSO认证：启用。
     * 认证类型：选择 `OAuth2`。
     * 站点描述：描述信息。
-    * 回调地址：单点登录的回调地址，务必填写正确，默认为：`http[s]://<address>[:<port>]/kubepi/api/v1/sso/callback`。<br><br>
+    * 回调地址：Kubepi 的回调地址，默认为：`http[s]://<address>[:<port>]/kubepi/api/v1/sso/callback`。<br><br>
 2. **Kubepi OIDC配置**：登录进 Kubepi 控制台，点击左侧【用户管理】-【SSO】如下图所示：<br><br>
 ![img.png](img/kubepi-config.jpg)<br><br>
     * 协议：选择 `OpenID Connect`。
     * 接口地址：指定 OIDC 提供商（平台）的配置地址，默认 `<externalUrl>`，Kubepi 会默认在此路径后面加上`/.well-known/openid-configuration`
-    * 客户端 ID：在平台站点详情中获取。
-    * 客户端密钥：在平台站点详情中获取。<br><br>
+    * 客户端 ID：在 IDSphere 统一认证平台站点详情中获取。
+    * 客户端密钥：在 IDSphere 统一认证平台站点详情中获取。<br><br>
     填写完成后点击【Save】并重启 Kubepi。
