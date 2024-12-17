@@ -226,7 +226,7 @@ func InitializeScheduledTask(client *gorm.DB) error {
 		{
 			Name:          "用户同步",
 			Type:          2,
-			CronExpr:      "0 */30 * * * *",
+			CronExpr:      "0 */30 * * *",
 			BuiltInMethod: "user_sync",
 			Enabled:       false,
 		},
