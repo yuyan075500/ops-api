@@ -36,9 +36,7 @@
     ```shell
     docker-compose up -d
     ```
-9. **数据初始化**：<br><br>
-   需要将 `deploy/data.sql` 文件中的 SQL 导入到 MySQL 数据库中，默认已经将 SQL 文件 `data.sql` 已经打包进 `ops-mysql` 容器的 `/root/data.sql` 路径，可以直接导入。<br><br>
-10. **系统登录**：<br><br>
+9. **系统登录**：<br><br>
    部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。
 ## Kubernetes部署
 生产环境推荐使用此种部署方法，你需要准备以下相关资源：
@@ -66,9 +64,7 @@
    ```shell
    helm install <APP_NAME> --namespace <NAMESPACE_NAME> .
    ```
-6. **数据初始化**：<br><br>
-   需要将 `deploy/data.sql` 文件中的 SQL 导入到 MySQL 数据库中，请确保数据库使用的字符集为 `utf8mb4`，排序规则为 `utf8mb4_general_ci`。<br><br>
-7. **系统登录**：<br><br>
+6. **系统登录**：<br><br>
    部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。<br><br>
 
    **PS：如果需要高可以自行调整应用的副本数。**
