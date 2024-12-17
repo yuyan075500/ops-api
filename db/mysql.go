@@ -61,7 +61,6 @@ func MySQLInit() error {
 	DB.SetConnMaxLifetime(time.Duration(config.Conf.MySQL.MaxLifeTime) * time.Second)
 
 	global.MySQLClient = client
-	logger.Info("MySQL客户端初始化成功.")
 
 	// 创建超级用户
 	if err := createSuperUser(client); err != nil {
@@ -77,6 +76,13 @@ func MySQLInit() error {
 	if err := initializeSQL(client); err != nil {
 		return err
 	}
+
+	// 初始化定时任务
+	if err := InitializeScheduledTask(client); err != nil {
+		return err
+	}
+
+	logger.Info("MySQL客户端及数据初始化成功.")
 
 	return nil
 }
@@ -111,7 +117,7 @@ func initializeSites(client *gorm.DB) error {
 	}
 
 	var siteGroup model.SiteGroup
-	if err := client.FirstOrCreate(&siteGroup, model.SiteGroup{Name: "信息化公用"}).Error; err != nil {
+	if err := client.FirstOrCreate(&siteGroup, model.SiteGroup{Name: "系统默认（可以删除，删除前请确保存在至少1个分组，否则系统启用时又将自动创建）"}).Error; err != nil {
 		return err
 	}
 
@@ -189,9 +195,45 @@ func initializeSQL(client *gorm.DB) error {
 		}
 
 		// 执行SQL语句
-		if err := global.MySQLClient.Exec(query).Error; err != nil {
+		if err := client.Exec(query).Error; err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// InitializeScheduledTask 初始化定时任务
+func InitializeScheduledTask(client *gorm.DB) error {
+
+	var count int64
+	if err := client.Model(&model.ScheduledTask{}).Count(&count).Error; err != nil {
+		return err
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	tasks := []model.ScheduledTask{
+		{
+			Name:          "密码过期通知",
+			Type:          2,
+			CronExpr:      "0 8 * * *",
+			BuiltInMethod: "password_expire_notify",
+			Enabled:       false,
+		},
+		{
+			Name:          "用户同步",
+			Type:          2,
+			CronExpr:      "0 */30 * * * *",
+			BuiltInMethod: "user_sync",
+			Enabled:       false,
+		},
+	}
+
+	for _, task := range tasks {
+		client.FirstOrCreate(&task, model.ScheduledTask{BuiltInMethod: task.BuiltInMethod})
 	}
 
 	return nil
