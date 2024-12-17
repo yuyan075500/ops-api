@@ -291,13 +291,14 @@ func (u *user) ResetUserMFA(data *model.AuthUser) (err error) {
 // GetPasswordExpiredUserList 获取密码过期用户列表
 func (u *user) GetPasswordExpiredUserList() (userList []*PasswordExpiredUserList, err error) {
 	var (
-		results []*PasswordExpiredUserList
-		now     = time.Now()
+		results        []*PasswordExpiredUserList
+		now            = time.Now()
+		sevenDaysLater = now.Add(7 * 24 * time.Hour)
 	)
 
 	if err := global.MySQLClient.Model(&model.AuthUser{}).Select("name, username, email, password_expired_at").
 		Where("is_active = ?", true).
-		Where("password_expired_at IS NOT NULL AND password_expired_at < ?", now).
+		Where("password_expired_at IS NOT NULL AND (password_expired_at < ? OR password_expired_at BETWEEN ? AND ?)", now, now, sevenDaysLater).
 		Where("email IS NOT NULL").
 		Find(&results).
 		Error; err != nil {

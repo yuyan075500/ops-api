@@ -803,8 +803,8 @@ func PasswordExpiredNoticeHTML(name, username, expiredAt string) string {
 		</head>
 		<body>
 			<p>亲爱的同事：</p>
-			<p>您好，目前检测到您的账户（<strong>%s</strong>）将于<strong>%s</strong>过期。</p>
-			<p>为了保护您的账号安全，请在此日期前登录【<a href="%s" target="_blank">密码修改自助平台</a>】修改密码，若逾期未修改则会导致您的账户无法登录到相关的平台。</p>
+			<p>您好，目前检测到您的账户密码（<strong>%s</strong>）在 <strong>%s</strong> 过期。</p>
+			<p>为了保护您的账号安全，请及时登录【<a href="%s" target="_blank">密码修改自助平台</a>】修改密码，逾期未修改则会导致您的账户无法登录到相关的平台。</p>
 			<br>
 			<p>此致，<br>%s</p>
 			<p style="color: red">此邮件为系统自动发送，请不要回复此邮件。</p>
