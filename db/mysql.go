@@ -117,42 +117,42 @@ func initializeSites(client *gorm.DB) error {
 	}
 
 	var siteGroup model.SiteGroup
-	if err := client.FirstOrCreate(&siteGroup, model.SiteGroup{Name: "系统默认（可以删除，删除前请确保存在至少1个分组，否则系统启用时又将自动创建）"}).Error; err != nil {
+	if err := client.FirstOrCreate(&siteGroup, model.SiteGroup{Name: "系统默认（可以删除，删除前请确保存在至少1个分组，否则系统在下次重启时又将自动创建）"}).Error; err != nil {
 		return err
 	}
 
 	sites := []model.Site{
 		{
 			Name:        "密码重置",
-			Description: "统一认证平台密码自助更改平台，支持本地、Windows AD和OpenLDAP用户密码修改",
+			Description: "密码自助更改平台，支持本地、Windows AD 和 OpenLDAP 用户密码修改",
 			Address:     fmt.Sprintf("%s/reset_password", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		},
 		{
 			Name:        "接口文档",
-			Description: "统一认证平台Swagger接口文档，生产环境建议关闭",
+			Description: "IDSphere 统一认证平台 Swagger 接口文档",
 			Address:     fmt.Sprintf("%s/swagger/index.html", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		},
 		{
 			Name:        "站点导航",
-			Description: "统一认证平台站点导航，无需认证，可在后台进行编辑",
+			Description: "IDSphere 统一认证平台站点导航页",
 			Address:     fmt.Sprintf("%s/sites", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		},
 		{
-			Name:        "SAML2 IDP 元数据",
-			Description: "SAML2 IDP 元数据配置文件接口",
+			Name:        "IDP 元数据",
+			Description: "IDP 元数据配置文件接口，接入 SAML2 SP 使用",
 			Address:     fmt.Sprintf("%s/api/v1/sso/saml/metadata", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,
 		},
 		{
-			Name:        "OIDC 配置信息",
-			Description: "OIDC 配置信息接口",
+			Name:        "OIDC 配置",
+			Description: "OIDC 配置信息接口，接入 OIDC 客户端使用",
 			Address:     fmt.Sprintf("%s/.well-known/openid-configuration", config.Conf.ExternalUrl),
 			SSO:         false,
 			SiteGroupID: siteGroup.ID,

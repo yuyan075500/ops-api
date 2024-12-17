@@ -56,6 +56,7 @@ type SiteItem struct {
 	Certificate  string           `json:"certificate"`
 	DomainId     string           `json:"domain_id"`
 	RedirectUrl  string           `json:"redirect_url"`
+	HelperUrl    string           `json:"helper_url"`
 	IDPName      string           `json:"idp_name"`
 	Users        []*UserBasicInfo `json:"users"`
 	Tags         []*string        `json:"tags"`
@@ -68,6 +69,7 @@ type SiteGuideItem struct {
 	Icon        string    `json:"icon"`
 	Address     string    `json:"address"`
 	Description string    `json:"description"`
+	HelperUrl   string    `json:"helper_url"`
 	Tags        []*string `json:"tags"`
 }
 
@@ -82,6 +84,7 @@ type UpdateSite struct {
 	Icon        string  `json:"icon"`
 	EntityId    *string `json:"entity_id"` // 指针类型，可以确保使用Updates方法更新时，如果值为空时也能更新成功
 	CallbackUrl *string `json:"callback_url"`
+	HelperUrl   string  `json:"helper_url"`
 	Certificate *string `json:"certificate"`
 	Description string  `json:"description"`
 }
@@ -129,6 +132,7 @@ func (s *site) GetSiteGuideList(name string) (data *SiteGuideList, err error) {
 				Name:        s.Name,
 				Address:     s.Address,
 				Description: s.Description,
+				HelperUrl:   s.HelperUrl,
 			}
 
 			// 对站点图标进行特殊处理，返回一个Minio中的临时URL链接
@@ -213,6 +217,7 @@ func (s *site) GetSiteList(groupName, siteName string, page, limit int) (data *S
 				DomainId:     s.DomainId,
 				RedirectUrl:  s.RedirectUrl,
 				IDPName:      s.IDPName,
+				HelperUrl:    s.HelperUrl,
 			}
 
 			// 对站点图标进行特殊处理，返回一个Minio中的临时URL链接

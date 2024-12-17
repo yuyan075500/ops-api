@@ -24,6 +24,7 @@ type Site struct {
 	Address      string      `json:"address"`
 	AllOpen      bool        `json:"all_open" gorm:"default:false"`
 	Description  string      `json:"description"`
+	HelperUrl    string      `json:"helper_url"`
 	SSO          bool        `json:"sso"`
 	SSOType      uint        `json:"sso_type" gorm:"default:null"`
 	ClientId     string      `json:"client_id"`                                    // OAuth2.0 ClientID

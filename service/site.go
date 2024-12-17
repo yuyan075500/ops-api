@@ -30,6 +30,7 @@ type SiteCreate struct {
 	DomainId    string `json:"domain_id"`
 	RedirectUrl string `json:"redirect_url"`
 	IDPName     string `json:"idp_name"`
+	HelperUrl   string `json:"helper_url"`
 }
 
 // SiteGroupUpdate 更新分组名称构体
@@ -97,6 +98,7 @@ func (s *site) AddSite(data *SiteCreate) (site *model.Site, err error) {
 		DomainId:    data.DomainId,
 		RedirectUrl: data.RedirectUrl,
 		IDPName:     data.IDPName,
+		HelperUrl:   data.HelperUrl,
 	}
 
 	// 创建数据库数据
