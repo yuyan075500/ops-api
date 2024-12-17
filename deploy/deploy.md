@@ -37,7 +37,9 @@
     docker-compose up -d
     ```
 9. **系统登录**：<br><br>
-   部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。
+   部署完成后，会自动创建一个超级用户，此用户不受 Casbin 权限控制，默认用户名为：`admin`，密码为：`admin@123...`。<br><br>
+10. **密码更改**：<br><br>
+   为确保系统安全请务必更改 `admin` 账号的初始密码。
 ## Kubernetes部署
 生产环境推荐使用此种部署方法，你需要准备以下相关资源：
 * [x] [Kubernetes](https://kubernetes.io "Kubernetes") 软件运行必要环境。
