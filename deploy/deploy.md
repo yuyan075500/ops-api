@@ -46,7 +46,8 @@
 * [x] [Helm](https://helm.sh "Helm") 部署客户端工具，此工具需要能访问到 Kubernetes 集群。
 * [x] MySQL 8.0。
 * [x] Redis 5.x。
-* [x] MinIO 或华为云 OBS 对象存储。
+* [x] MinIO 或华为云 OBS 对象存储。<br><br>
+**注意**：需要确保 Minio API 地址使用的 `scheme` 和 IDSphere 统一认证平台使用的 `scheme` 一致，否则有可能导致上传到 Minio 的图片无法展示。
 ### 部署
 1. **克隆项目**：
     ```shell
