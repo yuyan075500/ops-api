@@ -96,7 +96,8 @@ func createSuperUser(client *gorm.DB) error {
 		Password: "admin@123...",
 	}
 
-	result := client.FirstOrCreate(&user)
+	result := client.FirstOrCreate(&user, model.AuthUser{Username: "admin"})
+
 	if result.RowsAffected == 0 {
 		logger.Warn("admin用户已存在.")
 	} else {
