@@ -24,7 +24,7 @@ INSERT INTO `system_path` VALUES (3, 'UpdateUserPassword', '/api/v1/user/reset_p
 INSERT INTO `system_path` VALUES (4, 'ResetUserMFA', '/api/v1/user/reset_mfa/:id', 'PUT', 'UserManagement', 'MAF重置');
 INSERT INTO `system_path` VALUES (5, 'DeleteUser', '/api/v1/user/:id', 'DELETE', 'UserManagement', '删除用户');
 INSERT INTO `system_path` VALUES (6, 'GetUserList', '/api/v1/users', 'GET', 'UserManagement', '获取用户列表（表格）');
-INSERT INTO `system_path` VALUES (7, 'UserSyncAd', '/api/v1/user/sync/ad', 'post', 'UserManagement', '用户同步');
+INSERT INTO `system_path` VALUES (7, 'UserSyncAd', '/api/v1/user/sync/ad', 'POST', 'UserManagement', '用户同步');
 INSERT INTO `system_path` VALUES (8, 'GetUserListAll', '/api/v1/user/list', 'GET', 'UserManagement', '获取用户列表（所有）');
 INSERT INTO `system_path` VALUES (9, 'AddGroup', '/api/v1/group', 'POST', 'GroupManagement', '新增分组');
 INSERT INTO `system_path` VALUES (10, 'UpdateGroup', '/api/v1/group', 'PUT', 'GroupManagement', '修改分组');
@@ -49,7 +49,7 @@ INSERT INTO `system_path` VALUES (28, 'GetOplogList', '/api/v1/audit/oplog', 'GE
 INSERT INTO `system_path` VALUES (29, 'GetMenuList', '/api/v1/menus', 'GET', 'MenuManagement', '获取菜单列表');
 INSERT INTO `system_path` VALUES (30, 'GetPathList', '/api/v1/paths', 'GET', 'MenuManagement', '获取菜单接口');
 INSERT INTO `system_path` VALUES (31, 'GetTaskList', '/api/v1/tasks', 'GET', 'CornManagement', '获取定时任务列表');
-INSERT INTO `system_path` VALUES (32, 'AddTask', '/api/v1/site', 'POST', 'CornManagement', '新增定时任务');
-INSERT INTO `system_path` VALUES (33, 'UpdateTask', '/api/v1/site', 'PUT', 'CornManagement', '修改定时任务');
-INSERT INTO `system_path` VALUES (34, 'DeleteTask', '/api/v1/site/:id', 'DELETE', 'CornManagement', '删除定时任务');
+INSERT INTO `system_path` VALUES (32, 'AddTask', '/api/v1/task', 'POST', 'CornManagement', '新增定时任务');
+INSERT INTO `system_path` VALUES (33, 'UpdateTask', '/api/v1/task', 'PUT', 'CornManagement', '修改定时任务');
+INSERT INTO `system_path` VALUES (34, 'DeleteTask', '/api/v1/task/:id', 'DELETE', 'CornManagement', '删除定时任务');
 INSERT INTO `system_path` VALUES (35, 'GetTaskLogList', '/api/v1/task/logs', 'GET', 'CornManagement', '获取定时任务执行日志列表');
