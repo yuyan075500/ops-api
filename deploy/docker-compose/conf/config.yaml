@@ -18,7 +18,7 @@ jwt:
   expires: 6
 mfa:
   enable: false
-  issuer: "统一认证中心"
+  issuer: "IDSphere 统一认证中心"
 oss:
   endpoint: "192.168.200.21:9000"
   accessKey: "mXBbXV8nhjmLs8Ho"
