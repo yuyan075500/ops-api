@@ -504,15 +504,21 @@ func (s *sso) GetSPAuthorize(samlRequest *SAMLRequest, userId uint) (html, siteN
 	}
 
 	// 获取IDP私钥
-	IDPKey, err := utils.ReadFileString("config/certs/private.key")
+	IDPKey, err := utils.ReadFileString("/data/certs/private.key")
 	if err != nil {
-		return "", site.Name, err
+		IDPKey, err = utils.ReadFileString("config/certs/private.key")
+		if err != nil {
+			return "", site.Name, err
+		}
 	}
 
 	// 获取IDP证书
-	IDPCert, err := utils.ReadFileString("config/certs/certificate.crt")
+	IDPCert, err := utils.ReadFileString("/data/certs/certificate.crt")
 	if err != nil {
-		return "", site.Name, err
+		IDPCert, err = utils.ReadFileString("config/certs/certificate.crt")
+		if err != nil {
+			return "", site.Name, err
+		}
 	}
 
 	// 获取SP证书（给证书加上头尾）

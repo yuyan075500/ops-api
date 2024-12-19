@@ -31,13 +31,13 @@ spec:
               mountPath: /app/config/config.yaml
               subPath: config.yaml
             - name: config
-              mountPath: /app/config/certs/private.key
+              mountPath: /data/certs/private.key
               subPath: private.key
             - name: config
-              mountPath: /app/config/certs/public.key
+              mountPath: /data/certs/public.key
               subPath: public.key
             - name: config
-              mountPath: /app/config/certs/certificate.crt
+              mountPath: /data/certs/certificate.crt
               subPath: certificate.crt
           imagePullPolicy: Always
       restartPolicy: Always

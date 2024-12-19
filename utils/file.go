@@ -33,9 +33,12 @@ func ReadFileString(file string) (string, error) {
 // LoadPublicKey 读取公钥
 func LoadPublicKey() (interface{}, error) {
 	// 读取公钥文件
-	pubKeyPEM, err := os.ReadFile("config/certs/public.key")
+	pubKeyPEM, err := os.ReadFile("/data/certs/public.key")
 	if err != nil {
-		return nil, err
+		pubKeyPEM, err = os.ReadFile("config/certs/public.key")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 解析PEM块

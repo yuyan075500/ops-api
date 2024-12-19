@@ -133,9 +133,12 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 	// 读取私钥
-	privateKeyData, err := os.ReadFile("config/certs/private.key")
+	privateKeyData, err := os.ReadFile("/data/certs/private.key")
 	if err != nil {
-		return "", err
+		privateKeyData, err = os.ReadFile("config/certs/private.key")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	// 解析私钥
@@ -171,9 +174,12 @@ func GenerateOAuthToken(id uint, name, username, clientId, policy string) (strin
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
 	// 读取私钥
-	privateKeyData, err := os.ReadFile("config/certs/private.key")
+	privateKeyData, err := os.ReadFile("/data/certs/private.key")
 	if err != nil {
-		return "", err
+		privateKeyData, err = os.ReadFile("config/certs/private.key")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	// 解析私钥
@@ -210,9 +216,12 @@ func ParseToken(tokenString string) (*UserClaims, error) {
 	var mc = new(UserClaims)
 
 	// 读取公钥
-	publicKeyData, err := os.ReadFile("config/certs/public.key")
+	publicKeyData, err := os.ReadFile("/data/certs/public.key")
 	if err != nil {
-		return nil, err
+		publicKeyData, err = os.ReadFile("config/certs/public.key")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 解析公钥

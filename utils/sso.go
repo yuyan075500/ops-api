@@ -110,9 +110,12 @@ func GenerateSAMLResponsePostForm() *template.Template {
 func LoadIdpCertificate() (*x509.Certificate, error) {
 
 	// 读取证书
-	certData, err := os.ReadFile("config/certs/certificate.crt")
+	certData, err := os.ReadFile("/data/certs/certificate.crt")
 	if err != nil {
-		return nil, err
+		certData, err = os.ReadFile("config/certs/certificate.crt")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 解码PEM格式证书
