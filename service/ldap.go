@@ -169,10 +169,7 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 
 	// 密码认证
 	userDN := searchResult.Entries[0].DN
-	fmt.Println(userDN)
-	fmt.Println(password)
 	err = l.Conn.Bind(userDN, password)
-	fmt.Println(err)
 	if err != nil {
 		return nil, errors.New("用户或密码错误")
 	}
