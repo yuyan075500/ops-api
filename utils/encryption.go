@@ -8,18 +8,18 @@ import (
 	"encoding/pem"
 )
 
-var publicKey []byte
-
-func readPublicKeyFile(file string) {
-	publicKey, _ = ReadFile(file)
-}
-
 // Encrypt 字符串加密
 func Encrypt(str string) (string, error) {
-	readPublicKeyFile("config/certs/public.key")
+	file, err := ReadFile("/data/certs/public.key")
+	if err != nil {
+		file, err = ReadFile("config/certs/public.pem")
+		if err != nil {
+			return "", err
+		}
+	}
 
 	// 解析公钥数据
-	block, _ := pem.Decode(publicKey)
+	block, _ := pem.Decode(file)
 
 	// 解析PEM格式的公钥
 	publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)

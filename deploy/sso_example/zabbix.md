@@ -4,7 +4,7 @@ Zabbix 支持的单点登录方式：SAML2
 1. **创建密钥和证书**：可以使用 [在线生成工具](https://www.qvdv.net/tools/qvdv-csrpfx.html "在线生成工具")。建议证书有效期设置为10年，不设置密码，生成完成后需要下载 CRT 证书和私钥并按以下名称命名：<br><br>
    * sp.key：私钥。
    * sp.crt：证书。<br><br>
-2. **获取 IDP 证书**：IDP 的证书的存放路径为项目的 `config/certs/certificate.crt`，需要将此证书下载并保存为 `idp.crt`。<br><br>
+2. **获取 IDP 证书**：IDP 的证书默认为为项目的 `config/certs/certificate.crt`，需要将此证书下载并保存为 `idp.crt`，如果你使用了自定义证书请使用自己的证书。<br><br>
 3. **上传密钥和证书**：将 `sp.key`、`sp.crt`、`idp.crt` 上传到 Zabbix 站点部署的 `ui/conf/certs/` 目录下，除非 `zabbix.conf.php` 中提供了自定义路径，否则 Zabbix 默认在 `ui/conf/certs/` 路径中查找文件。<br><br>
 4. **Zabbix 单点登录配置**：登录到 Zabbix，进入【认证】配置界面，如下图所示：<br><br>
 ![img.png](img/zabbix-config.jpg)<br><br>
