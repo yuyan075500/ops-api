@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/sha512"
+	"crypto/sha1"
 	"crypto/tls"
 	"encoding/base64"
 	"errors"
@@ -169,7 +169,10 @@ func (a *ad) LDAPUserAuthentication(username, password string) (result *ldap.Sea
 
 	// 密码认证
 	userDN := searchResult.Entries[0].DN
+	fmt.Println(userDN)
+	fmt.Println(password)
 	err = l.Conn.Bind(userDN, password)
+	fmt.Println(err)
 	if err != nil {
 		return nil, errors.New("用户或密码错误")
 	}
@@ -199,8 +202,8 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 	// 密码修改
 	var passwordExpiredAt *time.Time
 	if config.Conf.LDAP.UserAttribute == "uid" {
-		// 使用 SHA-512 算法对密码进行哈希处理
-		hash := sha512.New()
+		// 使用 SHA1 算法对密码进行哈希处理
+		hash := sha1.New()
 		hash.Write([]byte(password))
 		digest := hash.Sum(nil)
 
@@ -208,7 +211,7 @@ func (a *ad) LDAPUserResetPassword(username, password string) (err error) {
 		encoded := base64.StdEncoding.EncodeToString(digest)
 
 		// LDAP 用户修改密码
-		req.Replace("userPassword", []string{fmt.Sprintf("{SHA512}%s", encoded)})
+		req.Replace("userPassword", []string{fmt.Sprintf("{SHA}%s", encoded)})
 
 		// 获取当前日期距离1970年1月1日之间的天数
 		shadowLastChange := daysSinceEpoch()

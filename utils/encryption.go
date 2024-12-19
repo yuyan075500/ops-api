@@ -12,7 +12,7 @@ import (
 func Encrypt(str string) (string, error) {
 	file, err := ReadFile("/data/certs/public.key")
 	if err != nil {
-		file, err = ReadFile("config/certs/public.pem")
+		file, err = ReadFile("config/certs/public.key")
 		if err != nil {
 			return "", err
 		}

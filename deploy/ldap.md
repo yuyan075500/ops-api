@@ -30,7 +30,7 @@ shadowLastChange: 20068
 * shadowMax：密码过期最大天数，如：90。
 * mail：邮箱地址，如：`lisi@idsphere.cn`。
 * mobile：手机号，如：`132****8888`。
-* userPassword：用户密码，使用`IDSphere`平台修改用户密码，默认采用`SHA512`加密。
+* userPassword：用户密码，使用`IDSphere`平台修改用户密码，默认采用`SHA1`加密。
 * shadowLastChange：最后一次更改密码的时间，该值表示距离 1970-01-01 的天数。<br><br>
 
 将 OpenLDAP 用户同步到 IDSphere 统一认证平台，用户映射规则如下：
