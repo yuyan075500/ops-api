@@ -21,7 +21,26 @@ IDSphere 统一认证平台支持与使用 `CAS 3.0`、`OAuth 2.0`、`OIDC`和`S
 
 认证成功后返回的用户信息包含：`id`、`email`、`name`、`phone_number`和`username`。
 # OIDC 客户端接入指南
-`OIDC` 客户端接入参考 `OAuth2.0` 接入指南即可，另 IDSphere 统一认证平台提供了专属 `OIDC` 配置信息接口，接口地址为：`/.well-known/openid-configuration`。
+`OIDC` 客户端接入参考 `OAuth2.0` 接入指南即可，另 IDSphere 统一认证平台提供了专属 `OIDC` 配置信息接口，接口地址为：`/.well-known/openid-configuration`。<br><br>
+使用 `OIDC` 获取的 JWT Token 的 Claims 信息如下：
+```shell
+{
+    "id": <用户ID>,
+    "name": "<用户姓名>",
+    "username": "<用户名>",
+    "azp": "<ClientID>",
+    "policy": "readwrite",
+    "nonce": "<授权时传入的nonce参数>",
+    "iss": "<externalUrl>",
+    "sub": "user-<用户ID>",
+    "aud": [
+        "<ClientID>"
+    ],
+    "exp": <过期时间>,
+    "nbf": <生效时间>,
+    "iat": <签发时间>
+}
+```
 # SAML2 客户端接入指南
 `SAML2` 客户端接入所需要信息可以通过 `IDP` 元数据接口地址获取，接口地址为：`/api/v1/sso/saml/metadata`，认证成功后返回的用户信息包含：
 
