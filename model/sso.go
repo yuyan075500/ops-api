@@ -13,6 +13,7 @@ type SsoOAuthTicket struct {
 	RedirectURI string     `json:"redirect_uri"`
 	ConsumedAt  *time.Time `json:"consumed_at"`
 	UserID      uint       `json:"user_id"`
+	Nonce       *string    `json:"nonce"`
 }
 
 func (*SsoOAuthTicket) TableName() (name string) {

@@ -34,6 +34,7 @@ type AuthorizeParam interface {
 	GetSignature() string
 	GetScope() string
 	GetState() string
+	GetNonce() string
 }
 
 // UserLogin 用户登录结构体（支持CAS3.0、OAuth2.0、OIDC和SAML2）
@@ -45,6 +46,7 @@ type UserLogin struct {
 	RedirectURI      string `json:"redirect_uri"`       // OAuth2.0客户端：重定向URL
 	State            string `json:"state"`              // OAuth2.0客户端：客户端状态码
 	Scope            string `json:"scope"`              // OAuth2.0客户端：申请权限范围
+	Nonce            string `json:"nonce"`              // OIDC客户端：随机码
 	Service          string `json:"service"`            // CAS3.0客户端：回调地址
 	SAMLRequest      string `json:"SAMLRequest"`        // SAML2客户端：SAMLRequest
 	RelayState       string `json:"RelayState"`         // SAML2客户端：客户端状态码
@@ -61,6 +63,7 @@ type DingTalkLogin struct {
 	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
 	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
 	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
+	Nonce        string `json:"nonce"`         // OIDC客户端：随机码
 	Service      string `json:"service"`       // CAS3.0客户端：回调地址
 	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
 	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
@@ -77,6 +80,7 @@ type WeChatLogin struct {
 	RedirectURI  string `json:"redirect_uri"`  // OAuth2.0客户端：重定向URL
 	State        string `json:"state"`         // OAuth2.0客户端：客户端状态码
 	Scope        string `json:"scope"`         // OAuth2.0客户端：申请权限范围
+	Nonce        string `json:"nonce"`         // OIDC客户端：随机码
 	Service      string `json:"service"`       // CAS3.0客户端：回调地址
 	SAMLRequest  string `json:"SAMLRequest"`   // SAML2客户端：SAMLRequest
 	RelayState   string `json:"RelayState"`    // SAML2客户端：客户端状态码
@@ -93,6 +97,7 @@ type FeishuLogin struct {
 	RedirectURI  string `json:"redirect_uri"`            // OAuth2.0客户端：重定向URL
 	State        string `json:"state"`                   // OAuth2.0客户端：客户端状态码
 	Scope        string `json:"scope"`                   // OAuth2.0客户端：申请权限范围
+	Nonce        string `json:"nonce"`                   // OIDC客户端：随机码
 	Service      string `json:"service"`                 // CAS3.0客户端：回调地址
 	SAMLRequest  string `json:"SAMLRequest"`             // SAML2客户端：SAMLRequest
 	RelayState   string `json:"RelayState"`              // SAML2客户端：客户端状态码
@@ -110,6 +115,7 @@ func (f FeishuLogin) GetSigAlg() string       { return f.SigAlg }
 func (f FeishuLogin) GetSignature() string    { return f.Signature }
 func (f FeishuLogin) GetScope() string        { return f.Scope }
 func (f FeishuLogin) GetState() string        { return f.State }
+func (f FeishuLogin) GetNonce() string        { return f.Nonce }
 
 func (d DingTalkLogin) GetResponseType() string { return d.ResponseType }
 func (d DingTalkLogin) GetClientId() string     { return d.ClientId }
@@ -121,6 +127,7 @@ func (d DingTalkLogin) GetSigAlg() string       { return d.SigAlg }
 func (d DingTalkLogin) GetSignature() string    { return d.Signature }
 func (d DingTalkLogin) GetScope() string        { return d.Scope }
 func (d DingTalkLogin) GetState() string        { return d.State }
+func (d DingTalkLogin) GetNonce() string        { return d.Nonce }
 
 func (w WeChatLogin) GetResponseType() string { return w.ResponseType }
 func (w WeChatLogin) GetClientId() string     { return w.ClientId }
@@ -132,6 +139,7 @@ func (w WeChatLogin) GetSigAlg() string       { return w.SigAlg }
 func (w WeChatLogin) GetSignature() string    { return w.Signature }
 func (w WeChatLogin) GetScope() string        { return w.Scope }
 func (w WeChatLogin) GetState() string        { return w.State }
+func (w WeChatLogin) GetNonce() string        { return w.Nonce }
 
 func (u UserLogin) GetResponseType() string { return u.ResponseType }
 func (u UserLogin) GetClientId() string     { return u.ClientId }
@@ -143,6 +151,7 @@ func (u UserLogin) GetSigAlg() string       { return u.SigAlg }
 func (u UserLogin) GetSignature() string    { return u.Signature }
 func (u UserLogin) GetScope() string        { return u.Scope }
 func (u UserLogin) GetState() string        { return u.State }
+func (u UserLogin) GetNonce() string        { return u.Nonce }
 
 // RestPassword 重置密码时用户信息绑定的结构体
 type RestPassword struct {

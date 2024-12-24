@@ -126,7 +126,7 @@ spec:
 | 阿里云        | SAML2    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/aliyun.md "参考文档")       |
 | 腾讯云        | SAML2    | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/tencent.md "参考文档")      |
 | Minio      | OIDC     | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/minio.md "参考文档")        |
-| GitLab     |          | 待测试                                                                                                |
+| GitLab     | CAS3.0   | [参考文档](https://github.com/yuyan075500/ops-api/blob/main/deploy/sso_example/gitlab.md "参考文档")       |
 | 天翼云        |          | 待测试                                                                                                |
 | Rancher    |          | 待测试                                                                                                |
 | 禅道         |          | 待测试                                                                                                |

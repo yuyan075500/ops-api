@@ -37,6 +37,7 @@ type OAuthAuthorize struct {
 	RedirectURI  string `json:"redirect_uri"`
 	State        string `json:"state"`
 	Scope        string `json:"scope"`
+	Nonce        string `json:"nonce"`
 }
 
 // CASAuthorize CAS3.0客户端获取授权请求参数
@@ -289,6 +290,7 @@ func (s *sso) GetOAuthAuthorize(data *OAuthAuthorize, userId uint) (callbackUrl,
 		RedirectURI: site.CallbackUrl,                 // 回调地址
 		UserID:      userId,                           // 用户ID
 		ExpiresAt:   time.Now().Add(10 * time.Second), // 票据的有效期为10秒
+		Nonce:       &data.Nonce,
 	}
 	if err = dao.SSO.CreateAuthorizeCode(ticket); err != nil {
 		return "", site.Name, err
@@ -322,7 +324,7 @@ func (s *sso) GetToken(param *Token) (token *ResponseToken, err error) {
 
 	// 生成token供access_token和id_token使用（OIDC认证使用的id_token，OAuth认证使用的access_token）
 	user, err = dao.User.GetUserInfo(ticket.UserID)
-	idToken, err := middleware.GenerateOAuthToken(uint(user.ID), user.Name, user.Username, site.ClientId, "readwrite")
+	idToken, err := middleware.GenerateOAuthToken(uint(user.ID), user.Name, user.Username, site.ClientId, "readwrite", *ticket.Nonce)
 	if err != nil {
 		return nil, err
 	}
@@ -609,6 +611,7 @@ func (s *sso) Login(queryParams AuthorizeParam, user model.AuthUser) (callbackDa
 			ResponseType: queryParams.GetResponseType(),
 			Scope:        queryParams.GetScope(),
 			State:        queryParams.GetState(),
+			Nonce:        queryParams.GetNonce(),
 		}
 		callbackUrl, siteName, err := s.GetOAuthAuthorize(params, user.ID)
 		if err != nil {

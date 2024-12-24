@@ -38,6 +38,7 @@ type OAuthClaims struct {
 	Username string `json:"username"`
 	Azp      string `json:"azp"`
 	Policy   string `json:"policy"`
+	Nonce    string `json:"nonce"`
 	jwt.RegisteredClaims
 }
 
@@ -152,7 +153,7 @@ func GenerateJWT(id uint, name, username string) (string, error) {
 }
 
 // GenerateOAuthToken 生成GenerateOAuthToken
-func GenerateOAuthToken(id uint, name, username, clientId, policy string) (string, error) {
+func GenerateOAuthToken(id uint, name, username, clientId, policy, nonce string) (string, error) {
 
 	claims := OAuthClaims{
 		id,
@@ -160,12 +161,13 @@ func GenerateOAuthToken(id uint, name, username, clientId, policy string) (strin
 		username,
 		clientId, // 授权谁给，通常是客户端ID
 		policy,   // 授权的策略，具体看客户端定义
+		nonce,
 		jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(config.Conf.JWT.Expires) * time.Hour)), // 过期时间
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                                                         // 签发时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                                                         // 生效时间
 			Issuer:    config.Conf.ExternalUrl,                                                                // 签发者
-			Audience:  []string{"all"},                                                                        // 令牌的受众，服务端未对此进行校验，所以可以填写任意字符串
+			Audience:  []string{clientId},                                                                     // 令牌的受众，这里返回客户端 ID
 			Subject:   fmt.Sprintf("user-%d", id),                                                             // 令牌主题，通常是用户的唯一标识符
 		},
 	}
